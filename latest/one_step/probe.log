@@ -1,11 +1,11 @@
-COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '215', '--out', '<GAME>/build/ymir-evidence-zeso3cvw/one_step/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-zeso3cvw/one_step/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-zeso3cvw/one_step/wram-high.bin', '--screenshot', '189:<GAME>/build/ymir-evidence-zeso3cvw/one_step/frame-0189.png', '--screenshot', '205:<GAME>/build/ymir-evidence-zeso3cvw/one_step/frame-0205.png', '--screenshot', '214:<GAME>/build/ymir-evidence-zeso3cvw/one_step/frame-0214.png']
-[probe] loaded 11 pad script entries from <GAME>/build/ymir-evidence-zeso3cvw/one_step/input.pad
-[probe] frame 189 -> <GAME>/build/ymir-evidence-zeso3cvw/one_step/frame-0189.png (320x224) audio 0
-[probe] frame 205 -> <GAME>/build/ymir-evidence-zeso3cvw/one_step/frame-0205.png (320x224) audio 0
-[probe] frame 214 -> <GAME>/build/ymir-evidence-zeso3cvw/one_step/frame-0214.png (320x224) audio 0
-wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-zeso3cvw/one_step/wram-high.bin
+COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '215', '--out', '<GAME>/build/ymir-evidence-573c7lz6/one_step/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-573c7lz6/one_step/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-573c7lz6/one_step/wram-high.bin', '--screenshot', '189:<GAME>/build/ymir-evidence-573c7lz6/one_step/frame-0189.png', '--screenshot', '205:<GAME>/build/ymir-evidence-573c7lz6/one_step/frame-0205.png', '--screenshot', '214:<GAME>/build/ymir-evidence-573c7lz6/one_step/frame-0214.png']
+[probe] loaded 11 pad script entries from <GAME>/build/ymir-evidence-573c7lz6/one_step/input.pad
+[probe] frame 189 -> <GAME>/build/ymir-evidence-573c7lz6/one_step/frame-0189.png (320x224) audio 0
+[probe] frame 205 -> <GAME>/build/ymir-evidence-573c7lz6/one_step/frame-0205.png (320x224) audio 0
+[probe] frame 214 -> <GAME>/build/ymir-evidence-573c7lz6/one_step/frame-0214.png (320x224) audio 0
+wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-573c7lz6/one_step/wram-high.bin
 misaligned data accesses: master 0, slave 0
-probe: wrote <GAME>/build/ymir-evidence-zeso3cvw/one_step/probe.json after 215 frames
+probe: wrote <GAME>/build/ymir-evidence-573c7lz6/one_step/probe.json after 215 frames
 info  | VDP-Config       | Switched to Software VDP renderer
 debug | SWRender-VDP1    | Enabling threaded VDP1 rendering
 debug | SWRender-VDP2    | Enabling threaded VDP2 rendering

@@ -1,6 +1,6 @@
 COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 [xtreme] SDK source: <DEV>/lib-saturn
-184076b854949af0aa63e8ef11f8ef66b8b2dea2
+08ad63b5923c97e498078628192a64ad66ce50a2
 .....
 ----------------------------------------------------------------------
 Ran 5 tests in 0.001s
@@ -230,12 +230,12 @@ ninja: no work to do.
 [4/6] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
 [5/6] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 83860 initialized bytes match ELF
+-- [boot-memory] _start=0x06004000, 89684 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 83860, 'flags': 0, 'record_offset': 37092} IP observations=[]
--- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 240 MODE1/2352 sectors
--- [check] disc image OK: 240 MODE1/2352 sectors
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 89684, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 243 MODE1/2352 sectors
+-- [check] disc image OK: 243 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
 [xtreme] Disc: <GAME>/build/game/disc/xtreme.cue
 [xtreme] Blender: <GAME>/build/jade-gully/jade_gully.blend
