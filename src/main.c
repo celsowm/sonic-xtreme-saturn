@@ -80,6 +80,27 @@ volatile struct {
     uint32_t magic,version,stage,error,main_entries,frames;
 } xtreme_boot_debug = {0x58425431u,1u,0u,0u,0u,0u};
 
+/* XFP1: last 64 completed scene submissions, 1s+ at 30 Hz. Read from WRAM-H
+ * with the map symbol; fixed size and no per-frame allocations. Timings are
+ * millisecond counters, not independent TV/display frame measurements. */
+#define FRAME_SAMPLES 64u
+volatile struct {
+    uint32_t magic,version,count,next;
+    struct {
+        uint32_t frame_ms,sim_ms,scene_ms,flush_ms;
+    } samples[FRAME_SAMPLES];
+} xtreme_frame_history = { .magic=0x58465031u, .version=1u };
+
+static void record_frame_sample(void) {
+    const uint32_t slot=xtreme_frame_history.next%FRAME_SAMPLES;
+    xtreme_frame_history.samples[slot].frame_ms=xtreme_debug.frame_ms;
+    xtreme_frame_history.samples[slot].sim_ms=xtreme_debug.sim_ms;
+    xtreme_frame_history.samples[slot].scene_ms=xtreme_debug.scene_ms;
+    xtreme_frame_history.samples[slot].flush_ms=xtreme_debug.flush_ms;
+    xtreme_frame_history.next++;
+    if(xtreme_frame_history.count<FRAME_SAMPLES)xtreme_frame_history.count++;
+}
+
 static uint32_t rate_start,rate_frames;
 static void debug_vec(volatile int32_t d[3],const sat_vec3_t* v){
     d[0]=v->x;d[1]=v->y;d[2]=v->z;
@@ -586,6 +607,7 @@ int main(void) {
         rc = sat_app_frame_end();
         if (rc != SAT_OK) return fail(rc);
         ++xtreme_frames;
+        record_frame_sample();
         xtreme_debug.frames=xtreme_frames;
         xtreme_boot_debug.frames=xtreme_frames;
         publish_debug(xtreme_frames);
