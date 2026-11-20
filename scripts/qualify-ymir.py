@@ -108,7 +108,7 @@ CASES=[
     ("idle",130,[],[40,90,129]),
     ("idle_long",280,[],[130,279]),
     ("jump_in_place",200,[(65,"A",6)],[64,72,84,105,150,199]),
-    ("curve_route",200,[(65,"UP",28),(95,"UP+RIGHT",22),(119,"UP",20),(141,"UP+RIGHT",18)],[64,95,125,150,199]),
+    ("curve_route",145,[(65,"UP",28),(95,"UP+RIGHT",12),(109,"UP",28)],[64,95,108,125,144]),
     ("paused",180,BASE,[90,118,165,179]),
     ("one_step",215,STEP,[189,205,214]),
     ("jump_resume",365,JUMP,[239,255,275,305,340,364]),
@@ -126,7 +126,7 @@ def checks(name,t):
     if name=="jump_in_place":
         out.update(jump_observed=t["jumps"]>=1,landed=t["landings"]>=2 and t["grounded"]==1,no_respawn=t["respawns"]==0)
     if name=="fall_reset":out.update(respawn_observed=t["respawns"]>=2)
-    if name=="curve_route":out.update(progress=t["pos_z"]<-24*65536,no_respawn=t["respawns"]==0,grounded=t["grounded"]==1)
+    if name=="curve_route":out.update(progress=t["pos_z"]<-24*65536,steered=t["pos_x"]>2*65536,no_respawn=t["respawns"]==0,grounded=t["grounded"]==1)
     return out
 
 
@@ -243,6 +243,7 @@ def main():
              "game_dirty":git(ROOT,"status","--porcelain","--untracked-files=no"),"sdk_dirty":git(sdk,"status","--porcelain","--untracked-files=no"),
              "boot":"Ymir injection via CUE + app.bin, not optical boot","cases":{},"comparisons":{}}
     failures=[]
+    publish_failed=False
     try:
         if not probe.is_file() or not os.access(probe,os.X_OK):raise ValueError(f"Ymir probe missing: {probe}; set YMIR_PROBE")
         if not bios.is_file() or bios.stat().st_size!=524288:raise ValueError(f"512 KiB BIOS missing: {bios}; set LIBSATURN_BIOS")
@@ -319,7 +320,8 @@ def main():
                 publish(archive,work,summary)
             except (OSError,RuntimeError,subprocess.CalledProcessError) as exc:
                 print(f"[xtreme] GitHub publish failed: {type(exc).__name__}. ZIP retained: {archive}",file=sys.stderr,flush=True)
-                return 2
+                publish_failed=True
+    if publish_failed:return 2
     return 0 if summary["status"]=="pass" else 1
 
 if __name__=="__main__":
