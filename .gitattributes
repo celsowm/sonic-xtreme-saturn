@@ -1,0 +1,5 @@
+# Keep the model, supplementary textures and baked SKA1 as binary Git assets.
+# Generated C/H and JSON remain diffable text.
+assets/sonic-r/**/*.glb binary
+assets/sonic-r/**/*.png binary
+assets/sonic-r/**/*.ska binary
