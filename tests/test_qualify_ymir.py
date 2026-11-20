@@ -42,6 +42,24 @@ class YmirTelemetryContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ymir.locate_sonic(raw, [])
 
+    def test_recent_frame_history_reports_tail_percentiles(self):
+        # A 4-frame synthetic ring after wraparound: only the final four
+        # entries count. Slow tail must be visible even at nominal 30 Hz.
+        samples=[(0,0,0,0)]*ymir.FRAME_CAPACITY
+        samples[62]=(30,1,14,3)
+        samples[63]=(33,1,16,3)
+        samples[0]=(33,1,16,4)
+        samples[1]=(45,2,24,5)
+        data=(struct.pack(">4I",0x58465031,1,4,66) +
+              b"".join(struct.pack(">4I",*s) for s in samples))
+        result=ymir.decode_frame_history(data,0)
+        self.assertEqual(result["count"],4)
+        self.assertEqual(result["total_frames_recorded"],66)
+        self.assertEqual(result["frame_ms_p50"],33)
+        self.assertEqual(result["frame_ms_p95"],45)
+        self.assertEqual(result["frame_ms_max"],45)
+        self.assertEqual(result["scene_ms_p95"],24)
+
     def test_all_eleven_scenarios_have_replay_and_screenshots(self):
         self.assertEqual(len(ymir.CASES), 11)
         self.assertEqual(len({case[0] for case in ymir.CASES}), 11)
