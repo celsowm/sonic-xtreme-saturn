@@ -51,3 +51,9 @@ cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/qualify-sonic
 ```
 
 Compare the variant `sonic.faces`, `sonic.textures`, `sonic.skin_ms`, `sonic.draw_ms`, `telemetry.scene_ms`, `telemetry.flush_ms`, `telemetry.submission_rate_hz` and `telemetry.vram_free` with the 286-face baseline, plus the actual screenshot silhouette. The triangle cap can be supplied as an argument (80..285), e.g. `bash scripts/qualify-sonic-lod-mac.sh 120`. **The LOD variant has not been run on the user's Mac yet.** A lower triangle count alone is not proof of higher frame rate or acceptable visual quality. Use a separately verified new Ymir evidence commit for acceptance.
+
+### 20 Nov 2026: LOD importer face-size fix
+
+The first 160-triangle attempt stopped before any CMake/Ymir execution:
+`Face (material 'sonic_add_signed', OBJ line 1) needs 72x64 but the limit is 64x64`.
+Decimation with surface transfer changes the UV footprint for the newly expanded faces. The local LOD script now permits **96x96** as the maximum per-face texture (both dimensions legal under the Saturn VDP1 limits), begins at the original 0.25 texture scale, and only retries at 0.1875, 0.125, 0.09375, 0.0625, or 0.03125 when the importer specifically reports a texture-dimension or resource-budget failure. Any other import failure stops immediately. It removes only failed generated files inside the separate private LOD directory, retains the original mesh and captures the attempt-specific failure in `import-attempt.log`, the full history in `import.log` and the accepted value in `selected-texture-scale.txt`. The importer itself still enforces its command/VRAM gates. This fix has **not** yet been tested on the user's Mac.
