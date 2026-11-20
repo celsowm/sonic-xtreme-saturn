@@ -35,7 +35,8 @@ SIGNED = {"error", "hud_error", "input_x", "input_z", "ray_length", "ray_distanc
 SIZE = len(NAMES)*4
 
 SONIC_NAMES = ("magic version enabled ready error vertices faces textures joints "
-               "clip ticks draws animation_ms skin_ms draw_ms pos_x pos_y pos_z").split()
+               "clip ticks draws animation_ms skin_ms draw_ms pos_x pos_y pos_z "
+               "registry_capacity init_stage vram_free").split()
 SONIC_SIZE = len(SONIC_NAMES) * 4
 
 BOOT_NAMES=("magic version stage error main_entries frames").split()
@@ -70,8 +71,8 @@ def decode_sonic(raw, offset):
     if offset < 0 or offset + SONIC_SIZE > len(raw):
         raise ValueError("Sonic telemetry outside WRAM-H")
     values = dict(zip(SONIC_NAMES, struct.unpack_from(">"+str(len(SONIC_NAMES))+"I",raw,offset)))
-    if values["magic"] != 0x53584143 or values["version"] != 1 or not values["enabled"]:
-        raise ValueError("invalid SXAC v1 character telemetry")
+    if values["magic"] != 0x53584143 or values["version"] != 2 or not values["enabled"]:
+        raise ValueError("invalid SXAC v2 character telemetry")
     for k in ("pos_x","pos_y","pos_z"):
         if values[k] >= 2**31: values[k] -= 2**32
     values["position_m"] = [values["pos_"+a]/65536 for a in "xyz"]
@@ -381,7 +382,8 @@ def main():
                     result["checks"]["sonic_rendered"]=(sonic is not None and
                         sonic["ready"]==1 and sonic["error"]==0 and
                         sonic["faces"]>0 and sonic["vertices"]>0 and
-                        sonic["ticks"]>0 and sonic["draws"]>0)
+                        sonic["ticks"]>0 and sonic["draws"]>0 and
+                        sonic["registry_capacity"]>=sonic["textures"] and sonic["init_stage"]==7)
                 (d/"telemetry.json").write_text(json.dumps(t,indent=2)+"\n")
                 off=addr-0x06000000
                 (d/"telemetry.bin").write_bytes(raw[off:off+SIZE])
