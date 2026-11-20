@@ -1,59 +1,49 @@
-# Sonic R — local character build (private-source gate)
+# Sonic R — versioned repository asset pipeline
 
-This is a purely local integration experiment. The user-supplied character model and derivative generated assets are **not part of the repository**. Sonic and other Sega assets may have restrictive redistribution terms; the script never uploads source GLB, PNG, SKA1, generated C/H, ELF, ISO, BIN or BIOS to GitHub. The existing public Ymir evidence branch **does contain screenshots** and should only be used if publishing those images is authorized.
+The Sonic character is a **repository asset** as requested, not a dependency on `assets/private/`. The original user-supplied files are stored under:
 
-The [LibSaturn skeletal importer](https://github.com/celsowm/libsaturn) generates `sonic.c`, `sonic.h`, `sonic.ska` and `report.json` in `assets/private/sonic-r/saturn/`. The CMake build detects local `sonic.c` and `sonic.h`, compiles them together with `src/sonic_actor.c`, and sets `XTREME_HAS_SONIC`. No assets present means the original blue collision proxy is compiled, keeping public CI independent. To use another private path configure `-DXTREME_SONIC_DIR=<dir>`.
+- `assets/sonic-r/source/sonic.glb` (skeletal source, 11 joints, 17 source animations)
+- `assets/sonic-r/textures/sonic_add_signed_2.png`
+- `assets/sonic-r/lod-160/sonic.c`, `sonic.h`, `sonic.ska`, `report.json` (generated and versioned)
 
-The prototype maps generated `sonic_clip_idle`, `sonic_clip_highspeed`, `sonic_clip_jump`, `sonic_clip_falling`, `sonic_clip_landing`, `sonic_clip_brake` and turning clips to the fixed-tick controller. It uses `sat_skeleton3d` playback, `sat_skin_update_mesh` and `sat_scene_submit_instance` in the existing world painter. Character meshes and materials are allocated before rendering, submitted after the stage, and sorted together with scenery. Root motion is intentionally ignored so physics remains authoritative. Standing height is based on generated `sonic_bind_min.y`; heading, speed warping, camera occlusion and transitions are still pending. This first pass compiles all animation and texture tables into the ELF. If the Saturn boot-image RAM budget is exceeded, move the SKA1 archive to the disc and use the existing asset/CDFS loader in a follow-up. Do not disable linker checks.
+See `assets/sonic-r/ATTRIBUTION.md` for original source URL, SHA-256 values, processing notes, and unverified licensing status. The Sketchfab archive had no license file. Public redistribution rights must be checked; this document is **not** permission to redistribute third-party characters.
 
-Mac automated qualification (run exactly once after code pull):
+## Initial import into main
 
-```sh
-cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && python3 scripts/qualify-ymir.py --require-sonic
-```
-
-The runner recompiles the game, runs 11 independent Ymir replay cases, checks XTDB physics telemetry and now also reads the `xtreme_sonic_debug` symbol from WRAM-H (`SXAC` v2). It requires `ready=1`, `error=0`, nonzero geometry, animation ticks and actual scene draw submissions in every case. The output includes `sonic-telemetry.json` for each case and only hashes for private generated sources; raw asset bytes are never packaged. As with other runs, the log and ZIP are automatically pushed to the `ymir-evidence` branch. The game itself must compile and run on the user's Mac before this can be claimed to work.
-
-Error gates: malformed generated asset, unsupported texture, lack of palette or VDP1 memory, SH-2 linker overrun, animation mismatch and scene capacity are real failures. Do not silently fall back to the blue proxy when the private files are present. Inspect `latest/summary.json` and `latest/build.log` on GitHub to diagnose. The HUD displays generic movement state; character telemetry is machine-readable separately.
-
-The first local importer output produced 281 baked face textures for 286 faces, exceeding LibSaturn's default managed texture registry (64) and causing `SAT_ERR_CAPACITY (-3)` during actor initialization. The optional character module now supplies 297 texture handles via `SAT_TEXTURE_MEMORY`, with slots, regions and hash buckets placed in WRAM-L. This does not alter the SDK default or change any other project's registry. The SXAC v2 block reports the configured capacity, actor initialization stage (1=start, 2=model validated, 3=skeleton validated, 4=mesh setup, 5=upload started, 6=upload complete, 7=ready) and remaining VDP1 VRAM. It has not yet been re-qualified in the emulator.
-
-The initial character size is set by the local importer `--scale 0.03265`. Actual height and on-screen appearance must be verified visually in the Ymir screenshots. No stock-Saturn performance claim is established yet.
-
-## Early boot diagnostics
-
-If the Ymir screen is black, the game can return from `main` and loop in LibSaturn CRT0. That is **not** an XTDB parser bug by itself. The headless harness now extracts a separate initialized `xtreme_boot_debug` (`XBT1`) word record with `stage`, `error`, `main_entries`, and `frames` **before** attempting to decode normal frame telemetry. The game's `fail` path also commits XTDB even if no frame was rendered. The harness reads the independent `SXAC` character error state from the same WRAM dump, including on normal XTDB decode failure.
-
-Stages: 0 = entry into `main` not recorded, 1 = calling `sat_app_init_default`, 2 = Saturn runtime initialized, 3 = debug HUD initialized, 4 = scene allocated, 5 = Sonic initialized (or absent), 6 = frame loop entered, 7 = loop executing. A failure stores its `sat_result_t` numeric code in the record, with the raw emulator PC in the case summary.
-
-Diagnose a black frame with a **single** lightweight replay first:
+On the Mac with the previously downloaded model and already generated 160-triangle variant, run:
 
 ```sh
-cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && python3 scripts/qualify-ymir.py --require-sonic --case idle
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/vendor-sonic-r-mac.sh
 ```
 
-The result in `latest/idle/boot-telemetry.json`, `latest/idle/sonic-telemetry.json` and `latest/summary.json` distinguishes a startup, asset, texture, or renderer failure without exposing any private source data. Fix that concrete failure before rerunning all eleven replays.
+The script uses the existing `assets/private/sonic-r/` conversion or the downloaded ZIP, verifies that both original files match the supplied archive SHA-256 values, copies only the known model/texture and generated 160-triangle variant into `assets/sonic-r/`, stages only those files, commits to `main`, and performs a normal (non-force) Git push. It then runs the single `idle` Ymir case and pushes the usual diagnostics to `ymir-evidence`. No ROM, BIOS, disc image or full RAM dump is committed.
 
-## First working Sonic probe and frame-time baseline
+## Reproducible build from clone
 
-The first private-asset idle Ymir qualification at game commit `44bc3bf`, SDK `08ad63b`, returned PASS with `SAT_OK`, 189 skinned vertices, 286 source faces, 281 material textures, 11 joints, 61 scene submissions and 122 animation ticks, at 320x224. It observed ~30.0 scene submissions/s (33 ms/frame), scene preparation 18 ms, instance submission 7 ms, skinning 1 ms, animation 1 ms, painter flush 4 ms, and 249,504 free VDP1 VRAM bytes. The remaining ten Ymir cases were **not** run with the skinned character yet. Screenshots prove a visible Sonic and Jade Gully but not 60 FPS, gameplay animation transitions, or full-course compatibility.
+`CMakeLists.txt` uses `assets/sonic-r/lod-160` by default. Its generated `sonic.c`/`sonic.h` are compiled with `src/sonic_actor.c`, using native LibSaturn skeletal sampling, CPU skinning, immutable indexed8 material bindings and depth-sorted scene submission. GLB and supplemental texture remain available for reimport or offline tooling.
 
-A small, no-asset-rebake runtime optimization now prevalidates the immutable Sonic face/material binding once at initialization with `sat_scene3d_instance_binding_init`. It is still pending a new measured Ymir replay; never claim an improvement until telemetry confirms it. The Mac harness also accepts `XTREME_SONIC_DIR=/absolute/local/asset/dir` to compare alternative private generated LODs without overwriting the original GLB or C files. The compiler propagates that path into the fresh CMake configuration. Candidate tests must use `--require-sonic` and verify the private source hashes in their summary.
+Once the asset commit is pushed, `bash scripts/run-mac.sh --build-only` compiles the character from the tracked files; it does **not** require previous local conversions. The `--require-sonic` flag in `scripts/qualify-ymir.py` fails rather than silently accepting the blue debug proxy if generated files are absent.
 
-## Measured immutable binding result and LOD experiment
-
-The `c5be6d2` Ymir run with original 286 faces passed `idle`: 61 completed frames, 120 physics ticks, 122 animation ticks, 281 texture materials, 249,504 bytes free VDP1 VRAM, 30.0 submissions/s and 33 ms terminal frame duration. Character submission went from 7 to 6 ms, scene preparation from 18 to 17 ms; **frame rate did not improve**. 17 ms spent in scene preparation alone is above the 60 Hz 16.67 ms budget, so binding validation by itself cannot achieve 60 FPS.
-
-The importer supports skeletal `--max-triangles` with joint/weight preservation and `--skeletal-surface-bake` to transfer original surface detail after decimation. The local-only experiment script `scripts/qualify-sonic-lod-mac.sh` regenerates a separate private variant (default 160 triangles), checks exported face count, selects the variant via `XTREME_SONIC_DIR`, builds and runs only the `idle` Ymir case. It **never replaces the original 286-face generated asset**. It also leaves the original `source/sonic.glb` intact. All generated variant bytes remain below ignored `assets/private/`.
+For an alternate generated LOD:
 
 ```sh
-cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/qualify-sonic-lod-mac.sh
+XTREME_SONIC_DIR="$PWD/assets/sonic-r/lod-120" python3 scripts/qualify-ymir.py --require-sonic --case idle
 ```
 
-Compare the variant `sonic.faces`, `sonic.textures`, `sonic.skin_ms`, `sonic.draw_ms`, `telemetry.scene_ms`, `telemetry.flush_ms`, `telemetry.submission_rate_hz` and `telemetry.vram_free` with the 286-face baseline, plus the actual screenshot silhouette. The triangle cap can be supplied as an argument (80..285), e.g. `bash scripts/qualify-sonic-lod-mac.sh 120`. **The LOD variant has not been run on the user's Mac yet.** A lower triangle count alone is not proof of higher frame rate or acceptable visual quality. Use a separately verified new Ymir evidence commit for acceptance.
+Generated paths are versioned: `bash scripts/qualify-sonic-lod-mac.sh 120` reads `assets/sonic-r/source/sonic.glb` and writes `assets/sonic-r/lod-120/`; subsequent commits can add newly qualified variants. The importer may retry smaller texture scales when simplified UV faces exceed the per-face 96x96 default. Resource/texture gates remain mandatory.
 
-### 20 Nov 2026: LOD importer face-size fix
+## Observed performance and acceptance
 
-The first 160-triangle attempt stopped before any CMake/Ymir execution:
-`Face (material 'sonic_add_signed', OBJ line 1) needs 72x64 but the limit is 64x64`.
-Decimation with surface transfer changes the UV footprint for the newly expanded faces. The local LOD script now permits **96x96** as the maximum per-face texture (both dimensions legal under the Saturn VDP1 limits), begins at the original 0.25 texture scale, and only retries at 0.1875, 0.125, 0.09375, 0.0625, or 0.03125 when the importer specifically reports a texture-dimension or resource-budget failure. Any other import failure stops immediately. It removes only failed generated files inside the separate private LOD directory, retains the original mesh and captures the attempt-specific failure in `import-attempt.log`, the full history in `import.log` and the accepted value in `selected-texture-scale.txt`. The importer itself still enforces its command/VRAM gates. This fix has **not** yet been tested on the user's Mac.
+The original 286-face variant passed the idle Ymir probe at approximately 30.0 scene submissions/s, 189 skinned vertices, 281 baked textures, scene preparation 17 ms and character submission 6 ms. The 159-face LOD test from 20 November 2026 passed its single `idle` Ymir case with 125 vertices, 148 textures, 11 joints, 264,232 VDP1 VRAM bytes free and 30 scene submissions/s. It **did not** increase frame rate to 60 FPS. This is a submission-rate metric, not an independent LCD/display FPS measurement.
+
+The whole 11-scenario gameplay suite was last completed without the Sonic actor; after repository vendoring, rerun the full suite and inspect actual character screenshots, movement animations, VRAM and scene timings:
+
+```sh
+python3 scripts/qualify-ymir.py --require-sonic
+```
+
+The `SXAC` v2 character telemetry records state, error, texture registry count, clip, animation/skin/draw times, remaining VRAM and successful draws. The `XBT1` boot telemetry detects early initialization errors independently of `XTDB` v3. The full source asset is versioned in `main` only; `ymir-evidence` stores sanitized logs, screenshots, SHA-256 hashes and JSON but no additional GLB, SKA, ELF, ISO or BIOS copies.
+
+## Remaining technical work
+
+Character direction relative to input, cross-fading clips, animation speed matching, near-plane/occlusion handling, draw-time optimization, derived texture budget, full route qualification, and actual Saturn hardware validation remain open. The original Sony/Sega asset permissions and exact contributor license are not yet verified.
