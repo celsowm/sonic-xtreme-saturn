@@ -19,6 +19,7 @@ jobs:
           persist-credentials: false
           submodules: false
       - run: python -m unittest discover -s tests
+      - run: cc -std=c11 -Wall -Wextra -Werror -I sdk-source/include -I src src/controller.c tests/test_controller.c -o /tmp/controller-test && /tmp/controller-test
       - run: sudo apt-get update && sudo apt-get install -y blender
       - run: blender --version
       - run: |
@@ -29,9 +30,10 @@ jobs:
           done
           python toolkit/tools/validate_scene.py build/jade-gully/jade_gully.json
           for dir in build/jade-gully build/repeat; do
-            python tools/bake_greybox.py "$dir/jade_gully.render.obj" "$dir/jade_gully.json" "$dir/greybox.h"
+            python tools/bake_greybox.py "$dir/jade_gully.render.obj" "$dir/jade_gully.json" "$dir/greybox.h" --collision "$dir/jade_gully.collision.obj" --collision-output "$dir/collision.h"
           done
           cmp build/jade-gully/greybox.h build/repeat/greybox.h
+          cmp build/jade-gully/collision.h build/repeat/collision.h
           cc -std=c11 -Wall -Wextra -Werror -fsyntax-only -I sdk-source/include -I build/jade-gully src/main.c
       - uses: actions/upload-artifact@v4
         with:

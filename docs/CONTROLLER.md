@@ -1,0 +1,9 @@
+# Player controller P2a — ground and jump prototype
+
+60 Hz fixed world-space simulation; integer Q16.16, held input sampled once per frame, edge jump buffered until a tick, bounded catch-up (100 ms), dropped time telemetry. Digital and analog pad input, acceleration, braking, downhill term from support normal, jump, gravity and fall/reset. No general-purpose physics duplicated: SDK sat_raycast_mesh queries the separately baked authoring collision mesh. The feet probe supports shallow slopes only; it is not a sphere sweep or wall solver. No full loops, ceilings, homing attack, rolling, camera occlusion, collisions with scenery or ring collection. No hardware timing evidence yet. Third-person camera follows along world -Z; smooth velocity-based lookahead is future work. Player rendered as blue crossed diamonds, not a Sonic model.
+
+Controls: D-pad/analog move, A/C jump, B respawn, X toggle camera inspection, START exit. Viewer mode: D-pad pan, L/R altitude, A overview, B initial view. 
+
+Mac: run scripts/run-mac.sh with bash from the checkout; --build-only skips Mednafen. Script uses ~/dev/lib-saturn or ~/dev/libsaturn, does not pull or reset SDK. Uses pinned toolkit worktree, separate SDK build/install and generated disc. Existing local SDK must expose documented APIs and have toolchain, Blender, Python, CMake, Ninja, ISO writer and Mednafen/BIOS. LIBSATURN_SOURCE, LIBSATURN_TOOLCHAIN_ROOT, BLENDER, LIBSATURN_BIOS, MEDNAFEN can be set explicitly. SDK revision and dependency paths logged. Use the existing LibSaturn emulator launcher; BIOS never distributed.
+
+Acceptance: host controller tests with flat ground callback (not SDK integration), generated collision syntax CI, SH-2 build, manual route, jump, fall/reset, screenshots and telemetry in Mednafen and Ymir. Check slope seams, fork gaps, dropped time; do not infer displayed FPS from submitted frame counts.

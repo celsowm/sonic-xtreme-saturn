@@ -118,16 +118,39 @@ def emit(obj_raw, json_raw):
     lines += ["};", "#endif", ""]
     return "\n".join(lines).encode("ascii")
 
+def emit_collision(raw):
+    vertices, faces = parse_obj(raw.decode("utf-8"))
+    lines = ["/* Generated collision mesh; SDK winding. */",
+             "/* OBJ sha256: " + hashlib.sha256(raw).hexdigest() + " */",
+             "#ifndef XTREME_COLLISION_H", "#define XTREME_COLLISION_H",
+             "#include <saturn/collide3d.h>",
+             f"#define COLLISION_VERTEX_COUNT {len(vertices)}u",
+             f"#define COLLISION_FACE_COUNT {len(faces)}u",
+             "static sat_vec3_t collision_vertices[] = {"]
+    lines += ["    {" + ", ".join(map(str, v)) + "}," for v in vertices]
+    lines += ["};", "static uint16_t collision_indices[] = {"]
+    lines += ["    " + ", ".join(map(str, f[:4])) + "," for f in faces]
+    lines += ["};", "#endif", ""]
+    return "\n".join(lines).encode("ascii")
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("obj", type=Path)
     parser.add_argument("scene", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--collision", type=Path)
+    parser.add_argument("--collision-output", type=Path)
     args = parser.parse_args()
     try:
         data = emit(args.obj.read_bytes(), args.scene.read_bytes())
+        if bool(args.collision) != bool(args.collision_output):
+            raise ValueError("both collision paths are required")
+        collision = emit_collision(args.collision.read_bytes()) if args.collision else None
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_bytes(data)
+        if collision is not None:
+            args.collision_output.parent.mkdir(parents=True, exist_ok=True)
+            args.collision_output.write_bytes(collision)
     except (OSError, ValueError, TypeError) as exc:
         parser.error(str(exc))
 

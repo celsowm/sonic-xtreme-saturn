@@ -1,12 +1,15 @@
-/* Jade Gully authoring viewer, not gameplay. SDK owns the painter and VDP1. */
+/* Jade Gully movement prototype. SDK owns the painter and VDP1. */
 #include <saturn/app.h>
 #include <saturn/color.h>
 #include <saturn/scene.h>
 #include "greybox.h"
+#include "collision.h"
+#include "controller.h"
+#include <saturn/time.h>
 
 #define WIDTH 320u
 #define HEIGHT 224u
-#define CAPACITY (STAGE_FACE_COUNT + 2u * STAGE_ENTITY_COUNT)
+#define CAPACITY (STAGE_FACE_COUNT + 2u * STAGE_ENTITY_COUNT + 2u)
 #define FX(n) ((sat_fx16_t)((n) * 65536))
 _Static_assert(CAPACITY <= 384u, "greybox face budget exceeded");
 
@@ -15,6 +18,51 @@ static sat_scene3d_face_t faces[CAPACITY];
 static uint32_t keys[CAPACITY];
 static uint16_t order[CAPACITY];
 static sat_camera3d_t camera;
+static xtreme_player_t player;
+static sat_mesh_t ground = {
+    collision_vertices, collision_indices,
+    COLLISION_VERTEX_COUNT, COLLISION_VERTEX_COUNT,
+    COLLISION_FACE_COUNT, COLLISION_FACE_COUNT
+};
+static uint8_t viewer;
+volatile uint32_t xtreme_ticks;
+volatile uint32_t xtreme_dropped_ms;
+volatile uint32_t xtreme_grounded;
+volatile int32_t xtreme_player_x,xtreme_player_y,xtreme_player_z;
+static int ground_query(void* ctx,const sat_vec3_t* origin,sat_fx16_t length,
+                        sat_vec3_t* point,sat_vec3_t* normal) {
+    sat_mesh_t* mesh=ctx;
+    sat_ray3_t ray={*origin,{0,-SAT_FX16_ONE,0},length};
+    sat_hit3_t hit;
+    if (!sat_raycast_mesh(mesh,&ray,&hit)) return 0;
+    *point=hit.point;
+    *normal=hit.normal;
+    if (normal->y<0) {
+        normal->x=-normal->x; normal->y=-normal->y; normal->z=-normal->z;
+    }
+    return 1;
+}
+static sat_result_t follow_player(void) {
+    const sat_vec3_t p=player.feet;
+    const sat_vec3_t eye={p.x,p.y+FX(5),p.z+FX(10)};
+    const sat_vec3_t target={p.x,p.y+FX(1),p.z-FX(4)};
+    const sat_vec3_t up={0,FX(1),0};
+    return sat_camera3d_init(&camera,&eye,&target,&up,FX(65),
+        sat_fx16_div(FX(WIDTH),FX(HEIGHT)),FX(1),FX(240));
+}
+static xtreme_input_t sample_input(const sat_pad_state_t* pad) {
+    xtreme_input_t in={0,0,0};
+    in.x=127*(!!(pad->held&SAT_PAD_RIGHT)-!!(pad->held&SAT_PAD_LEFT));
+    in.z=127*(!!(pad->held&SAT_PAD_DOWN)-!!(pad->held&SAT_PAD_UP));
+    sat_analog_state_t analog={0};
+    if (sat_pad_analog(0,0,&analog)==SAT_OK && analog.axis_count>=2) {
+        int x=(int)analog.x-128,z=(int)analog.y-128;
+        if (x>12 || x<-12 || z>12 || z<-12) {
+            in.x=(int16_t)x; in.z=(int16_t)z;
+        }
+    }
+    return in;
+}
 /* Inspectable, not a frame-rate claim. */
 volatile uint32_t xtreme_frames;
 volatile int32_t xtreme_error;
@@ -90,6 +138,17 @@ static sat_result_t draw_stage(void) {
     }
     return SAT_OK;
 }
+static sat_result_t draw_player(void) {
+    const sat_vec3_t p={player.feet.x,player.feet.y+FX(1),player.feet.z};
+    const sat_fx16_t r=FX(1)/2;
+    sat_quad3_t q={{{p.x,p.y+r,p.z},{p.x+r,p.y,p.z},
+                    {p.x,p.y-r,p.z},{p.x-r,p.y,p.z}}};
+    sat_result_t rc=submit(&q,SAT_RGB555(3,10,31));
+    if (rc!=SAT_OK) return rc;
+    q.v[1]=(sat_vec3_t){p.x,p.y,p.z+r};
+    q.v[3]=(sat_vec3_t){p.x,p.y,p.z-r};
+    return submit(&q,SAT_RGB555(5,18,31));
+}
 static int fail(sat_result_t status) {
     xtreme_error = (int32_t)status;
     return 1;
@@ -99,8 +158,12 @@ int main(void) {
     if (rc != SAT_OK) return fail(rc);
     rc = sat_scene_init(&scene,faces,keys,order,CAPACITY);
     if (rc != SAT_OK) return fail(rc);
-    rc = set_view(0);
-    if (rc != SAT_OK) return fail(rc);
+    for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i)
+        if (stage_entities[i].kind==0) xtreme_reset(&player,&stage_entities[i].pos);
+    rc=follow_player();
+    if (rc!=SAT_OK) return fail(rc);
+    uint32_t last=sat_time_ms(), accumulator=0;
+    uint8_t jump_pending=0;
     for (;;) {
         sat_pad_state_t pad = {0};
         rc = sat_app_frame_begin(SAT_RGB555(10,19,27),SAT_RGB555(10,19,27),&pad);
@@ -110,12 +173,42 @@ int main(void) {
             if (rc != SAT_OK) return fail(rc);
             break;
         }
-        rc = navigate(&pad);
+        const uint32_t now=sat_time_ms();
+        uint32_t elapsed=now-last;
+        last=now;
+        if (pad.pressed&SAT_PAD_X) {
+            viewer^=1;
+            accumulator=0; jump_pending=0; elapsed=0;
+            if (viewer) { rc=set_view(1); if(rc!=SAT_OK) return fail(rc); }
+        }
+        if (viewer) rc=navigate(&pad);
+        else {
+            if (pad.pressed&SAT_PAD_B) {
+                xtreme_reset(&player,&player.spawn);
+                accumulator=0; jump_pending=0; elapsed=0;
+            }
+            if (pad.pressed&(SAT_PAD_A|SAT_PAD_C)) jump_pending=1;
+            if (elapsed>100u) { xtreme_dropped_ms+=elapsed-100u; elapsed=100u; }
+            accumulator+=elapsed*60u;
+            xtreme_input_t in=sample_input(&pad);
+            while(accumulator>=1000u) {
+                in.jump=jump_pending;
+                jump_pending=0;
+                xtreme_tick(&player,in,ground_query,&ground);
+                accumulator-=1000u;
+                ++xtreme_ticks;
+            }
+            xtreme_grounded=player.grounded;
+            xtreme_player_x=player.feet.x;xtreme_player_y=player.feet.y;xtreme_player_z=player.feet.z;
+            rc=follow_player();
+        }
         if (rc != SAT_OK) return fail(rc);
         rc = sat_scene_begin(&scene,&camera,camera.near_z,WIDTH,HEIGHT,0u);
         if (rc != SAT_OK) return fail(rc);
         rc = draw_stage();
         if (rc != SAT_OK) return fail(rc);
+        rc=draw_player();
+        if (rc!=SAT_OK) return fail(rc);
         rc = sat_scene_flush(&scene);
         if (rc != SAT_OK) return fail(rc);
         xtreme_world_commands = scene.world_commands;
