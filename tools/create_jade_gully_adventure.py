@@ -116,6 +116,29 @@ def cliff_skirt(route,mat,depth=5.0):
     return base.mesh_prop(f'{route["id"]}_cliff_rock',verts,faces,mat)
 
 
+def clearing_pad(pad,materials):
+    """Broad *walkable* open area connected to a route station, with cliff skirt."""
+    x,y,z=pad["center"]
+    wx,wy=pad["half_extents"]
+    corners=[
+        (x-wx,y-wy,z), (x+wx,y-wy,z),
+        (x+wx,y+wy,z), (x-wx,y+wy,z)
+    ]
+    top=base.mesh_prop(f'{pad["id"]}_{pad["theme"]}_route',corners,
+                       ((0,1,2,3),),materials[pad["theme"]])
+    base.collision_copy(top)
+    vertices=[]
+    quads=[]
+    for i in range(4):
+        a=corners[i]; b=corners[(i+1)%4]
+        n=len(vertices)
+        d=pad["depth_m"]
+        vertices.extend((a,b,(b[0],b[1],b[2]-d),(a[0],a[1],a[2]-d)))
+        quads.append((n,n+1,n+2,n+3))
+    base.mesh_prop(f'{pad["id"]}_skirt_rock',vertices,quads,materials["rock"])
+    return top
+
+
 def main():
     data=json.loads(DEFAULT.read_text())
     report=validate(data)
@@ -137,6 +160,8 @@ def main():
         top=base.ribbon(route["id"]+"_route",route["stations"],materials[route["id"]])
         base.collision_copy(top)
         cliff_skirt(route,materials["rock"],depth=5.0)
+    for pad in data.get("clearings",[]):
+        clearing_pad(pad,materials)
     for entity in data["entities"]:
         base.marker(entity["id"],entity["kind"],tuple(entity["position"]))
     for prop in data["set_dressing"]:
