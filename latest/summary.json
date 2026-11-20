@@ -1,9 +1,9 @@
 {
   "status": "pass",
-  "game_commit": "44bc3bf9a48bea2c85d3a4179b791f291819af85",
+  "game_commit": "c5be6d27109ce9feeb39e35a93c93b885a2b8e35",
   "sdk_commit": "08ad63b5923c97e498078628192a64ad66ce50a2",
   "game_dirty": "",
-  "sdk_dirty": "",
+  "sdk_dirty": "M examples/water_lab/benchmark.c\n M src/core/math3d/logic.hpp\n M src/hal/vdp1/vdp1.cpp\n M tests/host/test_math3d_logic.cpp",
   "boot": "Ymir injection via CUE + app.bin, not optical boot",
   "cases": {
     "idle": {
@@ -23,7 +23,7 @@
         "main_entries": 1,
         "frames": 61
       },
-      "boot_address": "0x6041d78",
+      "boot_address": "0x60418e8",
       "boot_method": "map",
       "sonic": {
         "magic": 1398292803,
@@ -40,7 +40,7 @@
         "draws": 61,
         "animation_ms": 1,
         "skin_ms": 1,
-        "draw_ms": 7,
+        "draw_ms": 6,
         "pos_x": 0,
         "pos_y": 727569,
         "pos_z": -131072,
@@ -53,9 +53,9 @@
           -2.0
         ]
       },
-      "sonic_address": "0x604e088",
+      "sonic_address": "0x604dbf8",
       "sonic_method": "map",
-      "pc_after_run": "0x600810a",
+      "pc_after_run": "0x60100fe",
       "telemetry": {
         "magic": 1481917506,
         "version": 3,
@@ -112,7 +112,7 @@
         "submit_x10": 300,
         "sim_ms": 1,
         "camera_ms": 0,
-        "scene_ms": 18,
+        "scene_ms": 17,
         "flush_ms": 4,
         "hud_ms": 1,
         "submitted": 254,
@@ -153,7 +153,7 @@
         ],
         "submission_rate_hz": 30.0
       },
-      "telemetry_address": "0x6042350",
+      "telemetry_address": "0x6041ec0",
       "address_method": "map",
       "checks": {
         "guest_running": true,
@@ -172,9 +172,9 @@
   "probe_sha256": "d0c29fe9865aeae642fd3d6040dfefd41c47fb30d5c7af39d592423098513391",
   "bios_sha256": "96e106f740ab448cf89f0dd49dfbac7fe5391cb6bd6e14ad5e3061c13330266f",
   "build_exit": 0,
-  "app_sha256": "087a8f543b6878357e79ae70b25b5cdeb054c5ff6a07ed80ab97aedc8c70da6c",
+  "app_sha256": "9ebd5d50fe4fff6d4a57a371c5b38d191ed9e264717b1e22f2ad1623280008c3",
   "cue_sha256": "1fc5c7464c17d92e90f8fb1f302ad5c9aa6639c23d04c2b674ac8f9d1e08bdba",
-  "bin_sha256": "32f729813542f7f04f59dcb29e7ac6f9c238381fc49b1a534f58b99beb927f4b",
-  "iso_sha256": "abdc88e10d7685f64e9ab95b11bfa3c4a6a7405ed851995677ec02a4df242326",
+  "bin_sha256": "cd70c987e0629a20c3e5a7ec80d892fe03136039c8efa3c59b2e78b68998c178",
+  "iso_sha256": "916eec0671da89a284d5c5e99eafec5824d1d2f36a43b4a3f33bcacf2a959206",
   "failures": []
 }
