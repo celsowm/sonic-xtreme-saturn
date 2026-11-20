@@ -36,7 +36,8 @@ SIZE = len(NAMES)*4
 
 SONIC_NAMES = ("magic version enabled ready error vertices faces textures joints "
                "clip ticks draws animation_ms skin_ms draw_ms pos_x pos_y pos_z "
-               "registry_capacity init_stage vram_free").split()
+               "registry_capacity init_stage vram_free "
+               "clip_mask clip_changes takeoffs landings ground_ticks air_ticks").split()
 SONIC_SIZE = len(SONIC_NAMES) * 4
 
 BOOT_NAMES=("magic version stage error main_entries frames").split()
@@ -71,8 +72,8 @@ def decode_sonic(raw, offset):
     if offset < 0 or offset + SONIC_SIZE > len(raw):
         raise ValueError("Sonic telemetry outside WRAM-H")
     values = dict(zip(SONIC_NAMES, struct.unpack_from(">"+str(len(SONIC_NAMES))+"I",raw,offset)))
-    if values["magic"] != 0x53584143 or values["version"] != 2 or not values["enabled"]:
-        raise ValueError("invalid SXAC v2 character telemetry")
+    if values["magic"] != 0x53584143 or values["version"] != 3 or not values["enabled"]:
+        raise ValueError("invalid SXAC v3 character telemetry")
     for k in ("pos_x","pos_y","pos_z"):
         if values[k] >= 2**31: values[k] -= 2**32
     values["position_m"] = [values["pos_"+a]/65536 for a in "xyz"]
@@ -84,7 +85,7 @@ def locate_sonic(raw, maps):
         if m:
             addr = int(m[1],16)
             return decode_sonic(raw,addr-0x06000000),addr,"map"
-    header = struct.pack(">II",0x53584143,1)
+    header = struct.pack(">II",0x53584143,3)
     found = []
     for m in re.finditer(re.escape(header),raw):
         if m.start()%4:continue
@@ -311,6 +312,11 @@ def main():
     if sonic_present:
         summary["sonic_asset_sha256"]=hash_file(sonic_assets/"sonic.ska")
         summary["sonic_asset_source_sha256"]=hash_file(sonic_assets/"sonic.c")
+    summary["performance_policy"]={
+        "display_target_fps":30,"physics_target_hz":60,
+        "min_measured_submission_rate_hz":29.0,"max_terminal_frame_ms":40,
+        "display_cadence_independently_verified":False,
+        "note":"A 1s submission-rate sample and terminal frame time are diagnostic gates, not display FPS or p95."}
     failures=[]
     publish_failed=False
     try:
@@ -385,6 +391,37 @@ def main():
                         sonic["faces"]>0 and sonic["vertices"]>0 and
                         sonic["ticks"]>0 and sonic["draws"]>0 and
                         sonic["registry_capacity"]>=sonic["textures"] and sonic["init_stage"]==7)
+                    if sonic is not None:
+                        mask=sonic["clip_mask"]
+                        result["checks"]["actor_sim_sync"]=abs(sonic["ticks"]-t["ticks"])<=3
+                        result["checks"]["actor_position_sync"]=(abs(sonic["pos_x"]-t["pos_x"])<=65536 and
+                            abs(sonic["pos_z"]-t["pos_z"])<=65536)
+                        if name in ("idle","idle_long"):
+                            result["checks"]["idle_clip_visited"]=bool(mask & (1<<0))
+                        if name=="curve_route":
+                            result["checks"]["run_clip_visited"]=bool(mask & (1<<1))
+                            result["checks"]["animation_transitions"]=sonic["clip_changes"]>=2
+                        if name=="jump_in_place":
+                            result["checks"]["jump_clip_visited"]=bool(mask & (1<<2))
+                            result["checks"]["falling_clip_visited"]=bool(mask & (1<<3))
+                            result["checks"]["landing_clip_visited"]=bool(mask & (1<<4))
+                            result["checks"]["takeoff_observed"]=sonic["takeoffs"]>=1
+                            result["checks"]["landing_observed"]=sonic["landings"]>=2
+                        if name=="fall_reset":
+                            result["checks"]["falling_clip_visited"]=bool(mask & (1<<3))
+                        result["performance"]={
+                            "target_display_fps":30,
+                            "measured_submission_rate_hz":t["submission_rate_hz"],
+                            "terminal_frame_ms":t["frame_ms"],
+                            "simulated_physics_hz":60,
+                            "display_cadence_independently_verified":False}
+                        result["checks"]["submission_rate_30_target"]=t["submission_rate_hz"]>=29.0
+                        result["checks"]["terminal_frame_budget"]=t["frame_ms"]<=40
+                        result["checks"]["no_draw_timeout"]=t["draw_timeouts"]==0
+                        result["checks"]["no_late_swap"]=t["late_swaps"]==0
+                        result["checks"]["no_dropped_physics_time"]=t["dropped_ms"]==0
+                        result["checks"]["command_headroom"]=t["world_commands"]+t["hud_reserved"]<=t["command_capacity"]
+
                 (d/"telemetry.json").write_text(json.dumps(t,indent=2)+"\n")
                 off=addr-0x06000000
                 (d/"telemetry.bin").write_bytes(raw[off:off+SIZE])
@@ -404,6 +441,18 @@ def main():
         compare("idle_no_drift",["idle","idle_long"],lambda x,y:all(x[k]==y[k] for k in ("pos_x","pos_y","pos_z","vel_x","vel_y","vel_z","grounded")))
         compare("paused_to_one_step",["paused","one_step"],lambda x,y:y["ticks"]-x["ticks"]==1 and y["steps"]-x["steps"]==1)
         compare("hud_on_off_terminal_state",["hud_on_route","hud_off_route"],lambda x,y:y["page"]==0 and x["page"]!=0 and all(x[k]==y[k] for k in ("ticks","pos_x","pos_y","pos_z","vel_x","vel_y","vel_z","grounded")))
+        if sonic_present and all("sonic" in cases.get(k,{}) for k in ("paused","one_step")):
+            p_actor=cases["paused"]["sonic"];s_actor=cases["one_step"]["sonic"]
+            outcome=s_actor["ticks"]-p_actor["ticks"]==1
+            summary["comparisons"]["sonic_paused_to_one_step"]=outcome
+            if not outcome:failures.append("sonic_paused_to_one_step")
+        if sonic_present and all("sonic" in cases.get(k,{}) for k in ("hud_on_route","hud_off_route")):
+            a_actor=cases["hud_on_route"]["sonic"];b_actor=cases["hud_off_route"]["sonic"]
+            fields=("ticks","clip","clip_mask","clip_changes","takeoffs","landings","pos_x","pos_z")
+            outcome=all(a_actor[k]==b_actor[k] for k in fields)
+            summary["comparisons"]["sonic_hud_on_off_deterministic"]=outcome
+            if not outcome:failures.append("sonic_hud_on_off_deterministic")
+
         # Different observed field cadence can invalidate HUD equivalence; report, don't hide it.
         summary["status"]="pass" if not failures else "review"
     except (OSError,ValueError,RuntimeError) as exc:
