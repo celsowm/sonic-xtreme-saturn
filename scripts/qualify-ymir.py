@@ -304,7 +304,7 @@ def main():
     summary={"status":"incomplete","game_commit":git(ROOT,"rev-parse","HEAD"),"sdk_commit":git(sdk,"rev-parse","HEAD"),
              "game_dirty":git(ROOT,"status","--porcelain","--untracked-files=no"),"sdk_dirty":git(sdk,"status","--porcelain","--untracked-files=no"),
              "boot":"Ymir injection via CUE + app.bin, not optical boot","cases":{},"comparisons":{}}
-    sonic_assets=ROOT/"assets/private/sonic-r/saturn"
+    sonic_assets=Path(os.environ.get("XTREME_SONIC_DIR",str(ROOT/"assets/private/sonic-r/saturn"))).expanduser().resolve()
     sonic_present=all((sonic_assets/f).is_file() for f in ("sonic.c","sonic.h","sonic.ska"))
     summary["private_sonic_present"]=sonic_present
     if sonic_present:
