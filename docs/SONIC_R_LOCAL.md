@@ -42,7 +42,7 @@ The whole 11-scenario gameplay suite was last completed without the Sonic actor;
 python3 scripts/qualify-ymir.py --require-sonic
 ```
 
-The `SXAC` v2 character telemetry records state, error, texture registry count, clip, animation/skin/draw times, remaining VRAM and successful draws. The `XBT1` boot telemetry detects early initialization errors independently of `XTDB` v3. The full source asset is versioned in `main` only; `ymir-evidence` stores sanitized logs, screenshots, SHA-256 hashes and JSON but no additional GLB, SKA, ELF, ISO or BIOS copies.
+The `SXAC` v3 character telemetry records state, error, texture registry count, clip history/transitions, takeoffs/landings, animation/skin/draw times, remaining VRAM and successful draws. The `XBT1` boot telemetry detects early initialization errors independently of `XTDB` v3. The full source asset is versioned in `main` only; `ymir-evidence` stores sanitized logs, screenshots, SHA-256 hashes and JSON but no additional GLB, SKA, ELF, ISO or BIOS copies.
 
 ## Remaining technical work
 
@@ -50,7 +50,7 @@ Character direction relative to input, cross-fading clips, animation speed match
 
 ## Movement and pacing qualification (candidate)
 
-The actor telemetry is now `SXAC v3` and records a bitmask of animation clips visited, total transitions, physical takeoff/landing events and grounded/airborne simulation ticks. Clip mask bits: 0=idle, 1=highspeed, 2=jump, 3=falling, 4=landing, 5=brake, 6=turn_left, 7=turn_right. This proves a clip *was entered*, not that it looked correct in the screenshot; visual inspection remains necessary.
+The actor telemetry is now `SXAC` v3 and records a bitmask of animation clips visited, total transitions, physical takeoff/landing events and grounded/airborne simulation ticks. Clip mask bits: 0=idle, 1=highspeed, 2=jump, 3=falling, 4=landing, 5=brake, 6=turn_left, 7=turn_right. This proves a clip *was entered*, not that it looked correct in the screenshot; visual inspection remains necessary.
 
 The 11 Ymir replays now check that `jump_in_place` visits jump/fall/landing with physical takeoff/landing, `curve_route` visits running, and `fall_reset` visits falling. Actor tick/position agreement with the controller, paused/single-step actor determinism and HUD-on/off actor equivalence are also checked. Runtime acceptance demands no world/HUD errors, late swaps, draw timeouts, dropped simulated time or budget overruns.
 
