@@ -10,7 +10,21 @@
 #include <saturn/skin3d.h>
 #include <saturn/skeleton3d.h>
 #include <saturn/time.h>
+#include <saturn/texture_memory.h>
 #include <stdint.h>
+
+/* The stock texture registry has 64 handles; this imported model bakes
+ * one indexed texture per triangle (281 unique textures for 286 faces).
+ * Override the SDK's weak/default table ONLY in the private-character
+ * build. Keep storage in WRAM-L and use a power-of-two hash table. */
+#define SONIC_TEXTURE_SLOTS (SONIC_TEXTURE_COUNT + 16u)
+static sat_texture_slot_t sonic_texture_slots[SONIC_TEXTURE_SLOTS]
+    __attribute__((section(".wram_l")));
+static sat_texture_region_slot_t sonic_region_slots[16]
+    __attribute__((section(".wram_l")));
+static uint16_t sonic_texture_buckets[512]
+    __attribute__((section(".wram_l")));
+SAT_TEXTURE_MEMORY(sonic_texture_slots,sonic_region_slots,sonic_texture_buckets);
 
 #define SONIC_MAX_JOINTS 32u
 #define SONIC_DELTA (SAT_FX16_ONE/60)
@@ -66,6 +80,10 @@ sat_result_t xtreme_sonic_init(void) {
     xtreme_sonic_debug.faces=SONIC_FACE_COUNT;
     xtreme_sonic_debug.textures=SONIC_TEXTURE_COUNT;
     xtreme_sonic_debug.joints=sonic_skeleton.joint_count;
+    /* Fail with an explicit capacity result before uploading anything.
+     * No hidden temporary upload or texture table expansion at runtime. */
+    if(sat_texture_capacity()<SONIC_TEXTURE_COUNT)
+        return fail(SAT_ERR_CAPACITY);
     if(sonic_skeleton.joint_count==0 ||
        sonic_skeleton.joint_count>SONIC_MAX_JOINTS ||
        sat_skin_vertex_count(&sonic_skin)!=SONIC_VERTEX_COUNT)
