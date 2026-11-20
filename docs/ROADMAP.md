@@ -56,6 +56,13 @@ The project owner selected **30 FPS** as the definitive visual target on the sto
 - **Current evidence:** the repository's Sonic R LOD-160 single-case Ymir idle probe passed at about 30 scene submissions/s, with 159 faces, 125 skinned vertices and 148 textures, but this is *not* a stress test of a finished level. The earlier greybox/proxy rendering at 60 submissions/s is historical headroom evidence, **not a target**.
 - Prioritize stable gameplay and better visuals over speculative simplification. Only create or select more aggressive LODs when worst-case scene measurements or VRAM constraints show they are needed.
 
+## Current acceptance candidate — animated Sonic + Jade Gully visual pass
+
+- All 11 previously developed physics/replay cases are now re-gated with the **tracked 159-face Sonic R LOD**, not only with the proxy; the actor records SXAC v3 clip history (idle/run/takeoff/fall/landing), actor/physics state synchronization, HUD determinism and single-step animation.
+- XFP1 adds a bounded 64-frame timing window for p50/p95/p99 and phase timings. The acceptance candidate requires at least 29 scene submissions/s, terminal frame <=40 ms, recent p95 <=38 ms, no dropped physics time and zero draw timeouts/late swaps. These are conservative emulator probes for the definitive 30 displayed FPS goal; only hardware/video observation can verify actual display FPS.
+- Jade Gully now has a first render-only authored dressing layer: palm silhouettes, off-track rocks and a waterfall. Its collision ribbons have not changed. Do not count this as a textured, visually finished stage.
+- **Status:** code and host tests published; full 11-case Sonic + scenic Ymir results, Mednafen comparison, performance under many actors and physical-Saturn acceptance are still pending. Do not claim P3/P4 complete from an idle PASS.
+
 ## P5: production
 Use HLOD and sector residency, VDP2 sky/ground/water where appropriate, audio/music through existing music.h and disc scheduler, prefetch around camera routes. Measure contention during transitions; no required cart. Maintain per-pool memory ledger (WRAM-H/L, VDP1, VDP2, SCSP). Compare overdraw, command count, frame-time percentiles, audio underruns and dropped frames at repeatable route checkpoints. Validate hardware timing independently.
 
