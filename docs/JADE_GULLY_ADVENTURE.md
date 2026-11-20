@@ -52,7 +52,7 @@ The first artifact is deliberately a small, bounded scenic geometry proof with w
 
 ## Performance and quality gates
 
-Stock NTSC Saturn, 320×224, **30 displayed FPS target** with independent **60 Hz deterministic physics**. In current classic-stage evidence, Ymir reported 30 scene submissions/s and 34 ms p95 with the animated Sonic, without late swaps/timeouts. It is **not** a new-stage result and display cadence was not independently measured. The initial adventure candidate must be qualified separately:
+Stock NTSC Saturn, 320×224, **30 displayed FPS target** with independent **60 Hz deterministic physics**. In the post-fix Adventure smoke evidence (game `042c228`, Ymir evidence `668b5a0`), four focused cases passed at 30 scene submissions/s and 34 ms p95, with zero draw timeouts, dropped simulation time or late swaps. The classic 11-case suite also passed earlier but is not the Adventure branch qualification. Display cadence was not independently measured, and the game is still visibly a sparse greybox. The initial adventure candidate must be qualified separately:
 
 1. Validate manifest, connectivity, CC0 files and face budgets with host Python tests.
 2. Blender export twice, compare deterministic scene/render/collision outputs and bake stage headers.
