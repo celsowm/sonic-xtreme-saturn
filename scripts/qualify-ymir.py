@@ -304,17 +304,18 @@ def main():
     summary={"status":"incomplete","game_commit":git(ROOT,"rev-parse","HEAD"),"sdk_commit":git(sdk,"rev-parse","HEAD"),
              "game_dirty":git(ROOT,"status","--porcelain","--untracked-files=no"),"sdk_dirty":git(sdk,"status","--porcelain","--untracked-files=no"),
              "boot":"Ymir injection via CUE + app.bin, not optical boot","cases":{},"comparisons":{}}
-    sonic_assets=Path(os.environ.get("XTREME_SONIC_DIR",str(ROOT/"assets/private/sonic-r/saturn"))).expanduser().resolve()
+    sonic_assets=Path(os.environ.get("XTREME_SONIC_DIR",str(ROOT/"assets/sonic-r/lod-160"))).expanduser().resolve()
     sonic_present=all((sonic_assets/f).is_file() for f in ("sonic.c","sonic.h","sonic.ska"))
-    summary["private_sonic_present"]=sonic_present
+    summary["sonic_asset_present"]=sonic_present
+    summary["sonic_asset_dir"]=str(sonic_assets.relative_to(ROOT)) if sonic_assets.is_relative_to(ROOT) else "<external>"
     if sonic_present:
-        summary["private_sonic_sha256"]=hash_file(sonic_assets/"sonic.ska")
-        summary["private_sonic_source_sha256"]=hash_file(sonic_assets/"sonic.c")
+        summary["sonic_asset_sha256"]=hash_file(sonic_assets/"sonic.ska")
+        summary["sonic_asset_source_sha256"]=hash_file(sonic_assets/"sonic.c")
     failures=[]
     publish_failed=False
     try:
         if a.require_sonic and not sonic_present:
-            raise ValueError("Sonic R generated C/H/SKA not found under assets/private/sonic-r/saturn")
+            raise ValueError(f"Sonic R generated C/H/SKA not found under {sonic_assets}; run scripts/vendor-sonic-r-mac.sh")
         if not probe.is_file() or not os.access(probe,os.X_OK):raise ValueError(f"Ymir probe missing: {probe}; set YMIR_PROBE")
         if not bios.is_file() or bios.stat().st_size!=524288:raise ValueError(f"512 KiB BIOS missing: {bios}; set LIBSATURN_BIOS")
         summary.update(probe_sha256=hash_file(probe),bios_sha256=hash_file(bios))
