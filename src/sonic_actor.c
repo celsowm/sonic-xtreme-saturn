@@ -1,0 +1,176 @@
+/* Native, local-only Sonic R presentation using the generated LibSaturn
+ * skeletal C asset. All buffers are caller-owned, no allocations in frames.
+ * Motion is gameplay-controller driven; clip root motion is intentionally
+ * ignored. No file copying or asset publication in this module. */
+#include "sonic_actor.h"
+#include "sonic.h"
+#include <saturn/character3d.h>
+#include <saturn/mesh3d.h>
+#include <saturn/model3d.h>
+#include <saturn/skin3d.h>
+#include <saturn/skeleton3d.h>
+#include <saturn/time.h>
+#include <stdint.h>
+
+#define SONIC_MAX_JOINTS 32u
+#define SONIC_DELTA (SAT_FX16_ONE/60)
+#define SONIC_MARGIN (SAT_FX16_ONE/32)
+enum {
+    SONIC_IDLE, SONIC_RUN, SONIC_JUMP, SONIC_FALLING,
+    SONIC_LANDING, SONIC_BRAKE, SONIC_LEFT, SONIC_RIGHT
+};
+static const sat_skeleton_clip_t* const clips[] = {
+    &sonic_clip_idle, &sonic_clip_highspeed, &sonic_clip_jump,
+    &sonic_clip_falling, &sonic_clip_landing, &sonic_clip_brake,
+    &sonic_clip_turn_left, &sonic_clip_turn_right
+};
+
+typedef struct {
+    sat_skeleton_instance_t skeleton;
+    sat_transform3d_node_t nodes[SONIC_MAX_JOINTS];
+    uint16_t scratch[SONIC_MAX_JOINTS];
+    sat_skeleton_pose_joint_t pose[SONIC_MAX_JOINTS];
+    sat_mat4_t joint_world[SONIC_MAX_JOINTS],world;
+    sat_skel_clip_player_t animation;
+    sat_mesh_t mesh;
+    sat_vec3_t vertices[SONIC_VERTEX_COUNT], world_vertices[SONIC_VERTEX_COUNT];
+    sat_projected_vertex_t projected[SONIC_VERTEX_COUNT];
+    uint16_t indices[SONIC_FACE_COUNT*4u];
+    sat_texture_t textures[SONIC_TEXTURE_COUNT];
+    sat_vdp1_texture_t native_textures[SONIC_TEXTURE_COUNT];
+    sat_scene3d_material_t materials[SONIC_TEXTURE_COUNT];
+    sat_scene3d_instance_t instance;
+    sat_aabb3_t bounds;
+    uint8_t current_clip,ready,was_grounded,landing_ticks;
+} sonic_actor_t;
+static sonic_actor_t actor;
+
+/* Stable, source-independent WRAM symbol readable by the Ymir probe.
+ * magic = 'SXAC', v1. Independent of the game's XTDB v3 layout. */
+volatile struct {
+    uint32_t magic,version,enabled,ready,error;
+    uint32_t vertices,faces,textures,joints,clip,ticks,draws;
+    uint32_t animation_ms,skin_ms,draw_ms;
+    int32_t pos_x,pos_y,pos_z;
+} xtreme_sonic_debug;
+
+static sat_result_t fail(sat_result_t rc) {
+    xtreme_sonic_debug.error=(uint32_t)rc;
+    return rc;
+}
+sat_result_t xtreme_sonic_init(void) {
+    xtreme_sonic_debug.magic=0x53584143u; /* SXAC */
+    xtreme_sonic_debug.version=1u;
+    xtreme_sonic_debug.enabled=1u;
+    xtreme_sonic_debug.vertices=SONIC_VERTEX_COUNT;
+    xtreme_sonic_debug.faces=SONIC_FACE_COUNT;
+    xtreme_sonic_debug.textures=SONIC_TEXTURE_COUNT;
+    xtreme_sonic_debug.joints=sonic_skeleton.joint_count;
+    if(sonic_skeleton.joint_count==0 ||
+       sonic_skeleton.joint_count>SONIC_MAX_JOINTS ||
+       sat_skin_vertex_count(&sonic_skin)!=SONIC_VERTEX_COUNT)
+        return fail(SAT_ERR_CAPACITY);
+    sat_result_t rc=sat_model_validate(&sonic_asset);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_skeleton_validate(&sonic_skeleton);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_skin_validate(&sonic_skin);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_skeleton_instance_init(&actor.skeleton,&sonic_skeleton,
+                                  actor.nodes,SONIC_MAX_JOINTS,
+                                  actor.scratch,SONIC_MAX_JOINTS);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_skeleton_rest_pose(&sonic_skeleton,actor.pose,SONIC_MAX_JOINTS);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_skel_clip_player_init(&actor.animation,&sonic_clip_idle);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_mesh_init(&actor.mesh,actor.vertices,SONIC_VERTEX_COUNT,
+                     actor.indices,SONIC_FACE_COUNT);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_model_copy_to_mesh(&sonic_asset,&actor.mesh);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_skin_validate_mesh(&sonic_skin,&actor.mesh);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_character_materials_upload(&sonic_asset,actor.textures,
+                                      actor.native_textures,actor.materials,
+                                      SONIC_TEXTURE_COUNT);
+    if(rc!=SAT_OK)return fail(rc);
+    actor.instance=(sat_scene3d_instance_t){0};
+    actor.instance.mesh=&actor.mesh;
+    actor.instance.materials=actor.materials;
+    actor.instance.material_count=SONIC_TEXTURE_COUNT;
+    actor.instance.face_materials=sonic_asset.face_texture_indices;
+    actor.instance.cull_backfaces=1u;
+    actor.instance.world=&actor.world;
+    actor.instance.bounds=&actor.bounds;
+    actor.ready=1u;
+    xtreme_sonic_debug.ready=1u;
+    return SAT_OK;
+}
+
+sat_result_t xtreme_sonic_tick(const xtreme_player_t* player) {
+    if(!player||!actor.ready)return fail(SAT_ERR_INVALID_ARG);
+    uint8_t next=SONIC_IDLE;
+    if(!player->grounded)next=player->velocity.y>0?SONIC_JUMP:SONIC_FALLING;
+    else {
+        const sat_fx16_t vx=player->velocity.x;
+        const sat_fx16_t vz=player->velocity.z;
+        if(vx> SAT_FX16_ONE/8 || vx<-SAT_FX16_ONE/8 ||
+           vz> SAT_FX16_ONE/8 || vz<-SAT_FX16_ONE/8)
+            next=SONIC_RUN;
+        else if(actor.was_grounded==0u && actor.landing_ticks==0u)
+            actor.landing_ticks=8u;
+        if(actor.landing_ticks){next=SONIC_LANDING;--actor.landing_ticks;}
+    }
+    actor.was_grounded=player->grounded;
+    if(actor.current_clip!=next){
+        sat_result_t rc=sat_skel_clip_player_set_clip(&actor.animation,clips[next],0);
+        if(rc!=SAT_OK)return fail(rc);
+        actor.current_clip=next;
+    }
+    sat_clip_event_t events[4];
+    uint16_t count=0;
+    sat_vec3_t root={0,0,0};
+    sat_result_t rc=sat_skel_clip_player_advance(&actor.animation,
+                 SONIC_DELTA,events,4,&count,&root);
+    if(rc!=SAT_OK)return fail(rc);
+    ++xtreme_sonic_debug.ticks;
+    xtreme_sonic_debug.clip=actor.current_clip;
+    return SAT_OK;
+}
+
+sat_result_t xtreme_sonic_submit(sat_scene_t* scene,const xtreme_player_t* player) {
+    if(!scene||!player||!actor.ready)return fail(SAT_ERR_INVALID_ARG);
+    const uint32_t start=sat_time_ms();
+    sat_result_t rc=sat_skel_clip_player_sample(&actor.animation,actor.pose,SONIC_MAX_JOINTS);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_skeleton_evaluate(&actor.skeleton,actor.pose,sonic_skeleton.joint_count);
+    if(rc!=SAT_OK)return fail(rc);
+    rc=sat_skeleton_world_matrices(&actor.skeleton,actor.joint_world,SONIC_MAX_JOINTS);
+    if(rc!=SAT_OK)return fail(rc);
+    xtreme_sonic_debug.animation_ms=sat_time_ms()-start;
+    const uint32_t skin_start=sat_time_ms();
+    rc=sat_skin_update_mesh(&sonic_skin,actor.joint_world,sonic_skeleton.joint_count,
+                            &actor.mesh,SONIC_MARGIN,&actor.bounds);
+    if(rc!=SAT_OK)return fail(rc);
+    xtreme_sonic_debug.skin_ms=sat_time_ms()-skin_start;
+    /* The generated bind minimum anchors the feet to the ground, rather than
+     * assuming an origin at the soles of this particular GLB. */
+    const sat_vec3_t where={
+        player->feet.x,
+        player->feet.y-sonic_bind_min.y,
+        player->feet.z
+    };
+    rc=sat_mat4_translate(&actor.world,where.x,where.y,where.z);
+    if(rc!=SAT_OK)return fail(rc);
+    xtreme_sonic_debug.pos_x=where.x;
+    xtreme_sonic_debug.pos_y=where.y;
+    xtreme_sonic_debug.pos_z=where.z;
+    const uint32_t draw_start=sat_time_ms();
+    rc=sat_scene_submit_instance(scene,&actor.instance,SAT_SCENE3D_SLOT_INHERIT,
+                                  actor.projected,actor.world_vertices);
+    if(rc!=SAT_OK)return fail(rc);
+    xtreme_sonic_debug.draw_ms=sat_time_ms()-draw_start;
+    ++xtreme_sonic_debug.draws;
+    return SAT_OK;
+}
