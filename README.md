@@ -18,7 +18,7 @@ Try the new stage separately on a Mac with the established SDK, Blender and Ymir
 cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/qualify-jade-adventure-mac.sh
 ```
 
-This passes `XTREME_STAGE_LAYOUT=adventure`, validates the graph and per-asset face limits, compiles the alternative stage into a new disc and automatically pushes sanitized screenshots/diagnostics to `ymir-evidence`. The 30 scene submissions/s/p95 target applies, but the **new visual stage has not yet been qualified on Saturn**. To return to the qualified classic stage, unset `XTREME_STAGE_LAYOUT` and run the normal build/probe. Gameplay rings, springs and checkpoints are still stage markers, not implemented collectible/interactive systems.
+This passes `XTREME_STAGE_LAYOUT=adventure`, validates the graph and per-asset face limits, compiles the alternative stage into a new disc and automatically pushes sanitized screenshots/diagnostics to `ymir-evidence`. The **four-case Adventure smoke qualification passed** in Ymir at 30 scene submissions/s and 34 ms p95; this is not a full traversal, stress test or hardware-displayed FPS verification. To return to the qualified classic stage, unset `XTREME_STAGE_LAYOUT` and run the normal build/probe. Gameplay rings, springs and checkpoints are still stage markers, not implemented collectible/interactive systems.
 
 ## Mac quick start
 
