@@ -5,6 +5,9 @@
 #include "greybox.h"
 #include "collision.h"
 #include "controller.h"
+#ifdef XTREME_HAS_SONIC
+#include "sonic_actor.h"
+#endif
 #include "debug_clock.h"
 #include <saturn/time.h>
 #include <saturn/follow_camera3d.h>
@@ -14,9 +17,15 @@
 
 #define WIDTH 320u
 #define HEIGHT 224u
-#define CAPACITY (STAGE_FACE_COUNT + 2u * STAGE_ENTITY_COUNT + 2u)
+#ifdef XTREME_HAS_SONIC
+#include "sonic.h"
+#define CHARACTER_FACES SONIC_FACE_COUNT
+#else
+#define CHARACTER_FACES 2u
+#endif
+#define CAPACITY (STAGE_FACE_COUNT + 2u * STAGE_ENTITY_COUNT + CHARACTER_FACES)
 #define FX(n) ((sat_fx16_t)((n) * 65536))
-_Static_assert(CAPACITY <= 384u, "greybox face budget exceeded");
+_Static_assert(CAPACITY <= 1024u, "scene capacity exceeded");
 
 static sat_scene_t scene;
 static sat_scene3d_face_t faces[CAPACITY];
@@ -261,6 +270,9 @@ static sat_result_t draw_stage(void) {
     return SAT_OK;
 }
 static sat_result_t draw_player(void) {
+#ifdef XTREME_HAS_SONIC
+    return xtreme_sonic_submit(&scene,&player);
+#else
     const sat_vec3_t p={player.feet.x,player.feet.y+FX(1),player.feet.z};
     const sat_fx16_t r=FX(1)/2;
     sat_quad3_t q={{{p.x,p.y+r,p.z},{p.x+r,p.y,p.z},
@@ -270,6 +282,7 @@ static sat_result_t draw_player(void) {
     q.v[1]=(sat_vec3_t){p.x,p.y,p.z+r};
     q.v[3]=(sat_vec3_t){p.x,p.y,p.z-r};
     return submit(&q,SAT_RGB555(5,18,31));
+#endif
 }
 /* One glyph can consume one command. Reserve worst-case rows, not estimates. */
 #define DMAX 38u
@@ -422,6 +435,10 @@ int main(void) {
     if(rc!=SAT_OK)return fail(rc);
     rc = sat_scene_init(&scene,faces,keys,order,CAPACITY);
     if (rc != SAT_OK) return fail(rc);
+#ifdef XTREME_HAS_SONIC
+    rc=xtreme_sonic_init();
+    if(rc!=SAT_OK)return fail(rc);
+#endif
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i)
         if (stage_entities[i].kind==0) xtreme_reset(&player,&stage_entities[i].pos);
     rc=sat_follow_camera3d_init(&chase,&player.feet,4,6,4);
@@ -484,6 +501,9 @@ int main(void) {
                 const sat_vec3_t before=player.feet;
                 const uint8_t was_grounded=player.grounded;
                 xtreme_tick(&player,in,ground_query,&ground);
+#ifdef XTREME_HAS_SONIC
+                rc=xtreme_sonic_tick(&player);if(rc!=SAT_OK)return fail(rc);
+#endif
                 if(player.feet.x==player.spawn.x&&player.feet.y==player.spawn.y&&player.feet.z==player.spawn.z&&
                    (before.x!=player.spawn.x||before.y!=player.spawn.y||before.z!=player.spawn.z)&&!player.grounded)
                     {++xtreme_debug.respawns;xtreme_debug.ray_valid=0;chase_snap=1;}
