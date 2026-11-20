@@ -20,6 +20,18 @@ add_custom_command(OUTPUT "${GENERATED}" "${GENERATED_COLLISION}"
     DEPENDS "${GREYBOX_OBJ}" "${GREYBOX_JSON}" "${GREYBOX_COLLISION}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_greybox.py"
     VERBATIM)
 add_executable(xtreme src/main.c src/controller.c "${GENERATED}" "${GENERATED_COLLISION}")
+# Character assets are generated on the user's Mac and never committed.
+# Keep the baseline build reproducible without any third-party character data.
+set(XTREME_SONIC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets/private/sonic-r/saturn"
+    CACHE PATH "Private generated Sonic R skeletal C/H directory")
+if(EXISTS "${XTREME_SONIC_DIR}/sonic.c" AND EXISTS "${XTREME_SONIC_DIR}/sonic.h")
+    message(STATUS "Private Sonic R actor: enabled (local-only)")
+    target_sources(xtreme PRIVATE src/sonic_actor.c "${XTREME_SONIC_DIR}/sonic.c")
+    target_include_directories(xtreme PRIVATE "${XTREME_SONIC_DIR}")
+    target_compile_definitions(xtreme PRIVATE XTREME_HAS_SONIC=1)
+else()
+    message(STATUS "Private Sonic R actor: not installed; using original blue proxy")
+endif()
 target_include_directories(xtreme PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_compile_features(xtreme PRIVATE c_std_11)
 target_link_libraries(xtreme PRIVATE LibSaturn::Saturn)
