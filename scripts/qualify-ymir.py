@@ -331,7 +331,7 @@ def main():
                         result["checks"]["sonic_rendered"]=(sonic["ready"]==1 and
                             sonic["error"]==0 and sonic["faces"]>0 and
                             sonic["vertices"]>0 and sonic["ticks"]>0 and sonic["draws"]>0)
-                        (d/"sonic-telemetry.json").write_text(json.dumps(sonic,indent=2)+"\\n")
+                        (d/"sonic-telemetry.json").write_text(json.dumps(sonic,indent=2)+"\n")
                     except (ValueError,OSError,struct.error) as exc:
                         result["checks"]["sonic_rendered"]=False
                         result["sonic_decode_error"]=str(exc)
