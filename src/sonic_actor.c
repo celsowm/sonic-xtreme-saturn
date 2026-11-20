@@ -1,4 +1,4 @@
-/* Native, local-only Sonic R presentation using the generated LibSaturn
+/* Native Sonic R presentation using the repository's generated LibSaturn
  * skeletal C asset. All buffers are caller-owned, no allocations in frames.
  * Motion is gameplay-controller driven; clip root motion is intentionally
  * ignored. No file copying or asset publication in this module. */
@@ -14,9 +14,9 @@
 #include <stdint.h>
 
 /* The stock texture registry has 64 handles; this imported model bakes
- * one indexed texture per triangle (281 unique textures for 286 faces).
- * Override the SDK's weak/default table ONLY in the private-character
- * build. Keep storage in WRAM-L and use a power-of-two hash table. */
+ * one indexed texture per triangle (148 in the current 159-face LOD).
+ * Override the SDK's default table only in the character build.
+ * Keep storage in WRAM-L and use a power-of-two hash table. */
 #define SONIC_TEXTURE_SLOTS (SONIC_TEXTURE_COUNT + 16u)
 static sat_texture_slot_t sonic_texture_slots[SONIC_TEXTURE_SLOTS]
     __attribute__((section(".wram_l")));
@@ -61,13 +61,14 @@ typedef struct {
 static sonic_actor_t actor;
 
 /* Stable, source-independent WRAM symbol readable by the Ymir probe.
- * magic = 'SXAC', v2. Independent of the game's XTDB v3 layout. */
+ * magic = 'SXAC', v3. Independent of the game's XTDB v3 layout. */
 volatile struct {
     uint32_t magic,version,enabled,ready,error;
     uint32_t vertices,faces,textures,joints,clip,ticks,draws;
     uint32_t animation_ms,skin_ms,draw_ms;
     int32_t pos_x,pos_y,pos_z;
     uint32_t registry_capacity,init_stage,vram_free;
+    uint32_t clip_mask,clip_changes,takeoffs,landings,ground_ticks,air_ticks;
 } xtreme_sonic_debug;
 
 static sat_result_t fail(sat_result_t rc) {
@@ -76,7 +77,7 @@ static sat_result_t fail(sat_result_t rc) {
 }
 sat_result_t xtreme_sonic_init(void) {
     xtreme_sonic_debug.magic=0x53584143u; /* SXAC */
-    xtreme_sonic_debug.version=2u;
+    xtreme_sonic_debug.version=3u;
     xtreme_sonic_debug.init_stage=1u;
     xtreme_sonic_debug.enabled=1u;
     xtreme_sonic_debug.vertices=SONIC_VERTEX_COUNT;
@@ -149,6 +150,12 @@ sat_result_t xtreme_sonic_init(void) {
 sat_result_t xtreme_sonic_tick(const xtreme_player_t* player) {
     if(!player||!actor.ready)return fail(SAT_ERR_INVALID_ARG);
     uint8_t next=SONIC_IDLE;
+    if(actor.was_grounded&&!player->grounded&&player->velocity.y>0)
+        ++xtreme_sonic_debug.takeoffs;
+    if(!actor.was_grounded&&player->grounded)
+        ++xtreme_sonic_debug.landings;
+    if(player->grounded)++xtreme_sonic_debug.ground_ticks;
+    else ++xtreme_sonic_debug.air_ticks;
     if(!player->grounded)next=player->velocity.y>0?SONIC_JUMP:SONIC_FALLING;
     else {
         const sat_fx16_t vx=player->velocity.x;
@@ -161,10 +168,12 @@ sat_result_t xtreme_sonic_tick(const xtreme_player_t* player) {
         if(actor.landing_ticks){next=SONIC_LANDING;--actor.landing_ticks;}
     }
     actor.was_grounded=player->grounded;
+    xtreme_sonic_debug.clip_mask|=1u<<next;
     if(actor.current_clip!=next){
         sat_result_t rc=sat_skel_clip_player_set_clip(&actor.animation,clips[next],0);
         if(rc!=SAT_OK)return fail(rc);
         actor.current_clip=next;
+        ++xtreme_sonic_debug.clip_changes;
     }
     sat_clip_event_t events[4];
     uint16_t count=0;
