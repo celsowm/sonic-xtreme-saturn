@@ -36,8 +36,9 @@ if [[ -n "${LIBSATURN_TOOLCHAIN_ROOT:-}" ]]; then
 fi
 command -v sh2eb-elf-gcc >/dev/null || die "SH-2 toolchain missing; set LIBSATURN_TOOLCHAIN_ROOT to its bin directory"
 if ! command -v mkisofs >/dev/null && ! command -v genisoimage >/dev/null && ! command -v xorrisofs >/dev/null; then die "ISO tool missing (brew install xorriso)"; fi
-SDK_BUILD="$ROOT/build/sdk-build"
-SDK="$ROOT/build/sdk-install"
+# One shared LibSaturn install for every Saturn project under $DEV.
+SDK_BUILD="${LIBSATURN_BUILD:-$SDK_SOURCE/build/sdk}"
+SDK="${LIBSATURN_PREFIX:-$DEV/saturn-prefix}"
 echo "[xtreme] SDK source: $SDK_SOURCE"
 git -C "$SDK_SOURCE" rev-parse HEAD
 python3 -m unittest discover -s tests
@@ -46,9 +47,9 @@ cc -std=c11 -Wall -Wextra -Werror -I src tests/test_debug_clock.c -o build/debug
 build/debug-clock-test
 build/controller-test
 "$BLENDER" --background --factory-startup --python-exit-code 1 --python tools/create_jade_gully.py -- "$PINNED" "$ROOT/build/jade-gully"
-cmake -S "$SDK_SOURCE" -B "$SDK_BUILD" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$SDK_SOURCE/cmake/toolchains/sh2eb-elf.cmake" -DLIBSATURN_BUILD_TESTS=OFF -DLIBSATURN_INSTALL=ON
+cmake -S "$SDK_SOURCE" -B "$SDK_BUILD" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$SDK_SOURCE/cmake/toolchains/sh2eb-elf.cmake" -DLIBSATURN_BUILD_TESTS=OFF -DLIBSATURN_INSTALL=ON -DCMAKE_INSTALL_PREFIX="$SDK"
 cmake --build "$SDK_BUILD"
-cmake --install "$SDK_BUILD" --prefix "$SDK"
+cmake --install "$SDK_BUILD"
 cmake -S "$ROOT" -B "$ROOT/build/game" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$SDK/share/libsaturn/toolchains/sh2eb-elf.cmake" -DCMAKE_PREFIX_PATH="$SDK" -DXTREME_GREYBOX_DIR="$ROOT/build/jade-gully"
 cmake --build "$ROOT/build/game" --target xtreme_disc
 CUE="$ROOT/build/game/disc/xtreme.cue"
