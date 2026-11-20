@@ -50,7 +50,14 @@ build/controller-test
 cmake -S "$SDK_SOURCE" -B "$SDK_BUILD" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$SDK_SOURCE/cmake/toolchains/sh2eb-elf.cmake" -DLIBSATURN_BUILD_TESTS=OFF -DLIBSATURN_INSTALL=ON -DCMAKE_INSTALL_PREFIX="$SDK"
 cmake --build "$SDK_BUILD"
 cmake --install "$SDK_BUILD"
-cmake -S "$ROOT" -B "$ROOT/build/game" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$SDK/share/libsaturn/toolchains/sh2eb-elf.cmake" -DCMAKE_PREFIX_PATH="$SDK" -DXTREME_GREYBOX_DIR="$ROOT/build/jade-gully"
+# Reconfigure the game from a fresh cache: CMakeSystem.cmake otherwise retains
+# the absolute toolchain path from the previous per-project SDK installation.
+# Do not touch the shared SDK build cache or delete project files.
+GAME_TOOLCHAIN="$SDK/share/libsaturn/toolchains/sh2eb-elf.cmake"
+[[ -f "$GAME_TOOLCHAIN" ]] || die "installed toolchain not found: $GAME_TOOLCHAIN"
+[[ -f "$SDK/lib/cmake/LibSaturn/LibSaturnConfig.cmake" ]] || die "installed LibSaturn package missing: $SDK"
+echo "[xtreme] Fresh game configuration with SDK: $SDK"
+cmake --fresh -S "$ROOT" -B "$ROOT/build/game" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$GAME_TOOLCHAIN" -DCMAKE_PREFIX_PATH="$SDK" -DLibSaturn_DIR="$SDK/lib/cmake/LibSaturn" -DXTREME_GREYBOX_DIR="$ROOT/build/jade-gully"
 cmake --build "$ROOT/build/game" --target xtreme_disc
 CUE="$ROOT/build/game/disc/xtreme.cue"
 [[ -f "$CUE" ]] || die "disc missing"
