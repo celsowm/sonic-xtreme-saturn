@@ -46,7 +46,23 @@ cc -std=c11 -Wall -Wextra -Werror -I "$SDK_SOURCE/include" -I src src/controller
 cc -std=c11 -Wall -Wextra -Werror -I src tests/test_debug_clock.c -o build/debug-clock-test
 build/debug-clock-test
 build/controller-test
-"$BLENDER" --background --factory-startup --python-exit-code 1 --python tools/create_jade_gully.py -- "$PINNED" "$ROOT/build/jade-gully"
+STAGE_LAYOUT="${XTREME_STAGE_LAYOUT:-classic}"
+case "$STAGE_LAYOUT" in
+    classic)
+        STAGE_SCRIPT="tools/create_jade_gully.py"
+        STAGE_DIR="$ROOT/build/jade-gully"
+        ;;
+    adventure)
+        STAGE_SCRIPT="tools/create_jade_gully_adventure.py"
+        STAGE_DIR="$ROOT/build/jade-gully-adventure"
+        python3 tools/validate_adventure_layout.py
+        ;;
+    *)
+        die "unknown XTREME_STAGE_LAYOUT '$STAGE_LAYOUT' (expected classic or adventure)"
+        ;;
+esac
+echo "[xtreme] Building stage layout: $STAGE_LAYOUT"
+"$BLENDER" --background --factory-startup --python-exit-code 1 --python "$STAGE_SCRIPT" -- "$PINNED" "$STAGE_DIR"
 cmake -S "$SDK_SOURCE" -B "$SDK_BUILD" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$SDK_SOURCE/cmake/toolchains/sh2eb-elf.cmake" -DLIBSATURN_BUILD_TESTS=OFF -DLIBSATURN_INSTALL=ON -DCMAKE_INSTALL_PREFIX="$SDK"
 cmake --build "$SDK_BUILD"
 cmake --install "$SDK_BUILD"
@@ -58,12 +74,12 @@ GAME_TOOLCHAIN="$SDK/share/libsaturn/toolchains/sh2eb-elf.cmake"
 [[ -f "$SDK/lib/cmake/LibSaturn/LibSaturnConfig.cmake" ]] || die "installed LibSaturn package missing: $SDK"
 echo "[xtreme] Fresh game configuration with SDK: $SDK"
 SONIC_ASSET_DIR="${XTREME_SONIC_DIR:-$ROOT/assets/sonic-r/lod-160}"
-cmake --fresh -S "$ROOT" -B "$ROOT/build/game" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$GAME_TOOLCHAIN" -DCMAKE_PREFIX_PATH="$SDK" -DLibSaturn_DIR="$SDK/lib/cmake/LibSaturn" -DXTREME_GREYBOX_DIR="$ROOT/build/jade-gully" -DXTREME_SONIC_DIR="$SONIC_ASSET_DIR"
+cmake --fresh -S "$ROOT" -B "$ROOT/build/game" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$GAME_TOOLCHAIN" -DCMAKE_PREFIX_PATH="$SDK" -DLibSaturn_DIR="$SDK/lib/cmake/LibSaturn" -DXTREME_GREYBOX_DIR="$STAGE_DIR" -DXTREME_SONIC_DIR="$SONIC_ASSET_DIR"
 cmake --build "$ROOT/build/game" --target xtreme_disc
 CUE="$ROOT/build/game/disc/xtreme.cue"
 [[ -f "$CUE" ]] || die "disc missing"
 echo "[xtreme] Disc: $CUE"
-echo "[xtreme] Blender: $ROOT/build/jade-gully/jade_gully.blend"
+echo "[xtreme] Blender: $STAGE_DIR/jade_gully.blend"
 if [[ "${1:-}" == "--build-only" ]]; then exit 0; fi
 LAUNCH="$SDK_SOURCE/emulators/mednafen/run-mednafen.sh"
 [[ -f "$LAUNCH" ]] || die "Mednafen launcher missing; open $CUE manually"
