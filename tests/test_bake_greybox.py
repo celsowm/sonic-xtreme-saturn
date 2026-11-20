@@ -18,15 +18,15 @@ class BakeTests(unittest.TestCase):
     def test_decor_material_palette_and_collision_isolation(self):
         # All render props are separate from the ground collision OBJ.
         # Group suffixes map to small, fixed renderer color indices.
-        header = b"v 0 0 0\\nv 2 0 0\\nv 0 2 0\\n"
+        header = b"v 0 0 0\nv 2 0 0\nv 0 2 0\n"
         for suffix, expected in (("canopy",3),("trunk",2),("rock",2),("water",5)):
-            source = header + f"o mesh_0000_palm_{suffix}\\nf 1 2 3\\n".encode()
+            source = header + f"o mesh_0000_palm_{suffix}\nf 1 2 3\n".encode()
             vertices, faces = parse_obj(source.decode())
             self.assertEqual(len(vertices),3)
             self.assertEqual([face[4] for face in faces],[expected])
         # Existing playable strips preserve their calibrated alternating palette.
-        strip = (b"v 0 0 0\\nv 2 0 0\\nv 2 3 1\\nv 0 3 1\\n"
-                 b"o mesh_0000_main_route\\nf 1 2 3 4\\nf 1 3 4\\n")
+        strip = (b"v 0 0 0\nv 2 0 0\nv 2 3 1\nv 0 3 1\n"
+                 b"o mesh_0000_main_route\nf 1 2 3 4\nf 1 3 4\n")
         self.assertEqual([f[4] for f in parse_obj(strip.decode())[1]],[0,0,3])
 
     def test_invalid_obj(self):
