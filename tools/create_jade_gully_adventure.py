@@ -69,8 +69,23 @@ def import_cc0_prop(item,materials):
             raise RuntimeError(f"{path}: cannot meet face budget {budget} (got {len(obj.data.polygons)})")
     if len(obj.data.polygons)==0:
         raise RuntimeError(f"{path}: face reduction removed model")
+    # Blender's decimator can leave many disconnected/orphaned source vertices
+    # even after reducing 500 triangles to 9. The old narrow Saturn OBJ baker
+    # counts all "v" records, including those referenced by no face.
+    # Compact deterministically to ONLY referenced indices, preserving faces.
+    old_mesh=obj.data
+    used=sorted({int(idx) for poly in old_mesh.polygons for idx in poly.vertices})
+    remap={old:new for new,old in enumerate(used)}
+    compact_vertices=[tuple(old_mesh.vertices[idx].co) for idx in used]
+    compact_faces=[tuple(remap[int(idx)] for idx in poly.vertices) for poly in old_mesh.polygons]
+    compact=bpy.data.meshes.new(name+"_compact")
+    compact.from_pydata(compact_vertices,[],compact_faces)
+    compact.update()
+    compact.materials.append(materials[item["palette"]])
+    obj.data=compact
+    if old_mesh.users==0:bpy.data.meshes.remove(old_mesh)
     obj["saturn_mesh"]="render"
-    print(f'[adventure] {item["id"]}: {len(faces)} -> {len(obj.data.polygons)} triangles; budget {budget}')
+    print(f'[adventure] {item["id"]}: {len(faces)} -> {len(obj.data.polygons)} triangles; {len(used)} live vertices; budget {budget}')
     return obj
 
 
