@@ -71,7 +71,7 @@ def parse_obj(raw):
                 v = tuple(vertices[c][i] - vertices[a][i] for i in range(3))
                 cross = (u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0])
                 if not any(cross):
-                    raise ValueError("degenerate triangle after quantization")
+                    raise ValueError(f"line {number}, mesh {group}, triangle {k-1}: degenerate triangle after quantization")
                 faces.append((a, b, c, c, color))
                 if len(faces) > MAX_FACES:
                     raise ValueError("face capacity exceeded")
