@@ -74,6 +74,12 @@ static void publish_debug(uint32_t serial) {
     xtreme_debug.snapshot_begin=serial;
 }
 #define xtreme_debug debug_live
+/* Boot record survives failures before the first rendered frame.
+ * XBT1 v1 is separate from XTDB v3 and contains no asset data. */
+volatile struct {
+    uint32_t magic,version,stage,error,main_entries,frames;
+} xtreme_boot_debug = {0x58425431u,1u,0u,0u,0u,0u};
+
 static uint32_t rate_start,rate_frames;
 static void debug_vec(volatile int32_t d[3],const sat_vec3_t* v){
     d[0]=v->x;d[1]=v->y;d[2]=v->z;
@@ -423,22 +429,33 @@ static sat_result_t draw_debug(void){
 }
 static int fail(sat_result_t status) {
     xtreme_error = (int32_t)status;
+    xtreme_boot_debug.error=(uint32_t)status;
     xtreme_debug.error=status;
+    /* Preserve a valid, committed XTDB even if sat_init() failed before
+     * rendering frame one. A failed boot is not silently a decoder failure. */
+    if(!xtreme_debug.frames)xtreme_debug.frames=1u;
+    publish_debug(xtreme_debug.frames);
     return 1;
 }
 int main(void) {
-    sat_result_t rc = sat_app_init_default();
-    if (rc != SAT_OK) return fail(rc);
+    ++xtreme_boot_debug.main_entries;
+    xtreme_boot_debug.stage=1u; /* entering sat_init */
     xtreme_debug.magic=0x58544442u;xtreme_debug.version=3;
     xtreme_debug.bytes=sizeof(xtreme_debug);
+    sat_result_t rc = sat_app_init_default();
+    if (rc != SAT_OK) return fail(rc);
+    xtreme_boot_debug.stage=2u; /* sat_init passed */
     rc=sat_hud_init_default(&debug_hud,&debug_font);
     if(rc!=SAT_OK)return fail(rc);
+    xtreme_boot_debug.stage=3u; /* HUD passed */
     rc = sat_scene_init(&scene,faces,keys,order,CAPACITY);
     if (rc != SAT_OK) return fail(rc);
+    xtreme_boot_debug.stage=4u; /* scene passed */
 #ifdef XTREME_HAS_SONIC
     rc=xtreme_sonic_init();
     if(rc!=SAT_OK)return fail(rc);
 #endif
+    xtreme_boot_debug.stage=5u; /* character initialized */
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i)
         if (stage_entities[i].kind==0) xtreme_reset(&player,&stage_entities[i].pos);
     rc=sat_follow_camera3d_init(&chase,&player.feet,4,6,4);
@@ -448,7 +465,9 @@ int main(void) {
     uint32_t last=sat_time_ms();
     rate_start=last;
     uint8_t jump_pending=0;
+    xtreme_boot_debug.stage=6u; /* entering frame loop */
     for (;;) {
+        xtreme_boot_debug.stage=7u;
         sat_pad_state_t pad = {0};
         rc = sat_app_frame_begin(SAT_RGB555(10,19,27),SAT_RGB555(10,19,27),&pad);
         if (rc != SAT_OK) return fail(rc);
@@ -567,6 +586,7 @@ int main(void) {
         if (rc != SAT_OK) return fail(rc);
         ++xtreme_frames;
         xtreme_debug.frames=xtreme_frames;
+        xtreme_boot_debug.frames=xtreme_frames;
         publish_debug(xtreme_frames);
     }
     (void)sat_shutdown();
