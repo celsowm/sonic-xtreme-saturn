@@ -207,7 +207,8 @@ volatile uint32_t xtreme_world_commands;
 
 static const uint16_t colors[] = {
     SAT_RGB555(9,21,7), SAT_RGB555(21,16,6), SAT_RGB555(16,14,12),
-    SAT_RGB555(5,15,5), SAT_RGB555(16,11,4)
+    SAT_RGB555(5,15,5), SAT_RGB555(16,11,4),
+    SAT_RGB555(7,23,28)
 };
 static const uint16_t marker_colors[] = {
     SAT_RGB555(4,12,31), SAT_RGB555(31,26,2), SAT_RGB555(31,4,4),
