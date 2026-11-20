@@ -2,7 +2,9 @@
 
 Unofficial third-person 3D action platformer concept for Sega Saturn, inspired by Sonic X-treme and Sonic Adventure. Not affiliated with Sega. The repository owner has requested that the third-party Sonic R model source and generated LOD be versioned; see [asset provenance and rights](assets/sonic-r/ATTRIBUTION.md). Redistribution permission has not been verified.
 
-**Status:** native Jade Gully greybox/controller passed 11 Ymir probe scenarios; the Sonic R skeletal actor and a 159-face LOD separately passed single-case idle probes at approximately 30 scene submissions/s. The model and generated LOD are intended to be tracked under `assets/sonic-r/`; full-game/physical-Saturn qualification remains open. Not a complete game.
+**Status:** native Jade Gully greybox/controller passed 11 Ymir probe scenarios; the Sonic R skeletal actor and a 159-face LOD separately passed single-case idle probes at approximately 30 scene submissions/s. Original model and generated LOD are tracked under `assets/sonic-r/`; full-game/physical-Saturn qualification remains open. Not a complete game.
+
+**Performance design target:** stable **30 displayed FPS** at NTSC 320×224, with **60 Hz fixed-step physics**. A displayed frame has ~33.33 ms of total budget. The measured 30 scene submissions/s in the Ymir idle probe are not an independent measurement of output display cadence, and dense-stage stress testing remains pending. See [performance acceptance and roadmap](docs/ROADMAP.md#performance-target-decision-stable-30-fps).
 
 Built on [LibSaturn](https://github.com/celsowm/libsaturn) and [Blender Toolkit](https://github.com/celsowm/libsaturn-blender).
 
