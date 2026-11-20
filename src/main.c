@@ -7,6 +7,7 @@
 #include "controller.h"
 #include "debug_clock.h"
 #include <saturn/time.h>
+#include <saturn/follow_camera3d.h>
 #include <saturn/hud.h>
 #include <saturn/fmt.h>
 #include <saturn/vdp1.h>
@@ -22,6 +23,9 @@ static sat_scene3d_face_t faces[CAPACITY];
 static uint32_t keys[CAPACITY];
 static uint16_t order[CAPACITY];
 static sat_camera3d_t camera;
+static sat_follow_camera3d_t chase;
+static uint8_t chase_snap=1;
+static sat_vec3_t chase_eye,chase_target;
 static xtreme_player_t player;
 static sat_mesh_t ground = {
     collision_vertices, collision_indices,
@@ -49,8 +53,18 @@ typedef struct {
     uint32_t world_commands,command_capacity,hud_reserved,hud_used;
     uint32_t frame_stats_valid,late_swaps,draw_waits,draw_timeouts,vram_free;
     uint32_t paused,steps,ray_tick,ray_sampled;
+    uint32_t sweep_queries,sweep_hits,jumps,landings,snapshot_begin,snapshot_end;
 } xtreme_debug_t;
 volatile xtreme_debug_t xtreme_debug;
+static xtreme_debug_t debug_live;
+/* The probe reads the last completed frame, never the live state. */
+static void publish_debug(uint32_t serial) {
+    xtreme_debug.snapshot_begin=0;
+    debug_live.snapshot_begin=0;debug_live.snapshot_end=serial;
+    xtreme_debug=debug_live;
+    xtreme_debug.snapshot_begin=serial;
+}
+#define xtreme_debug debug_live
 static uint32_t rate_start,rate_frames;
 static void debug_vec(volatile int32_t d[3],const sat_vec3_t* v){
     d[0]=v->x;d[1]=v->y;d[2]=v->z;
@@ -66,7 +80,25 @@ static int ground_query(void* ctx,const sat_vec3_t* origin,sat_fx16_t length,
     sat_hit3_t hit;
     xtreme_debug.ray_valid=1;xtreme_debug.ray_sampled=1;xtreme_debug.ray_tick=xtreme_ticks+1u;xtreme_debug.ray_hit=0;xtreme_debug.ray_face=0xffffu;
     debug_vec(xtreme_debug.ray_origin,origin);xtreme_debug.ray_length=length;
-    if (!sat_raycast_mesh(mesh,&ray,&hit)) return 0;
+    if (!sat_raycast_mesh(mesh,&ray,&hit)) {
+        /* Recover a missed seam within 12 cm; downward support cast only. */
+        const sat_fx16_t radius=FX(0.12);
+        const sat_sphere_t sphere={{origin->x,origin->y+radius,origin->z},radius};
+        const sat_vec3_t displacement={0,-length,0};
+        sat_sphere_mesh_hit_t sh;
+        uint8_t found=0;
+        ++xtreme_debug.sweep_queries;
+        const sat_result_t sr=sat_sphere_cast_mesh(mesh,&sphere,&displacement,&sh,&found);
+        if(sr!=SAT_OK){xtreme_debug.error=sr;return 0;}
+        if(!found||sh.normal.y<FX(.5))return 0;
+        const int64_t horizontal=(int64_t)sh.normal.x*(origin->x-sh.point.x)
+                                +(int64_t)sh.normal.z*(origin->z-sh.point.z);
+        const int64_t y=(int64_t)sh.point.y-horizontal/sh.normal.y;
+        if(y>origin->y||y<(int64_t)origin->y-length)return 0;
+        hit.point=(sat_vec3_t){origin->x,(sat_fx16_t)y,origin->z};
+        hit.normal=sh.normal;hit.face=sh.face;
+        ++xtreme_debug.sweep_hits;
+    }
     xtreme_debug.ray_hit=1;xtreme_debug.ray_face=hit.face;
     xtreme_debug.ray_distance=origin->y-hit.point.y;
     debug_vec(xtreme_debug.ray_point,&hit.point);
@@ -78,12 +110,19 @@ static int ground_query(void* ctx,const sat_vec3_t* origin,sat_fx16_t length,
     debug_vec(xtreme_debug.ray_normal,normal);
     return 1;
 }
+static sat_result_t chase_step(void) {
+    const sat_vec3_t eye={0,FX(5),FX(10)};
+    const sat_vec3_t target={player.velocity.x*4,FX(1),-FX(4)+player.velocity.z*4};
+    sat_result_t rc=sat_follow_camera3d_set_offsets(&chase,&eye,&target);
+    if(rc!=SAT_OK)return rc;
+    rc=sat_follow_camera3d_step(&chase,&player.feet,chase_snap,&chase_eye,&chase_target);
+    chase_snap=0;
+    return rc;
+}
 static sat_result_t follow_player(void) {
-    const sat_vec3_t p=player.feet;
-    const sat_vec3_t eye={p.x,p.y+FX(5),p.z+FX(10)};
-    const sat_vec3_t target={p.x,p.y+FX(1),p.z-FX(4)};
+    if(chase_snap){sat_result_t rc=chase_step();if(rc!=SAT_OK)return rc;}
     const sat_vec3_t up={0,FX(1),0};
-    return sat_camera3d_init(&camera,&eye,&target,&up,FX(65),
+    return sat_camera3d_init(&camera,&chase_eye,&chase_target,&up,FX(65),
         sat_fx16_div(FX(WIDTH),FX(HEIGHT)),FX(1),FX(240));
 }
 static xtreme_input_t sample_input(const sat_pad_state_t* pad) {
@@ -190,17 +229,19 @@ static sat_result_t draw_player(void) {
 }
 /* One glyph can consume one command. Reserve worst-case rows, not estimates. */
 #define DMAX 38u
-static const uint8_t debug_rows[DBG_COUNT]={0,6,14,9,12,7};
+static const uint8_t debug_rows[DBG_COUNT]={0,6,16,9,12,7};
 static unsigned debug_row;
 static uint16_t debug_budget(void){
-    return (uint16_t)(debug_rows[page]*DMAX+(vectors?3u:0u));
+    return (uint16_t)(debug_rows[page]*(DMAX+1u)+(vectors?3u:0u));
 }
 #define DTRY(e) do{sat_result_t st=(e);if(st!=SAT_OK)return st;}while(0)
 static sat_result_t dline(const char* s){
     unsigned n=0;
     while(s[n]){if(n>=DMAX)return SAT_ERR_CAPACITY;++n;}
     if(debug_row>=debug_rows[page])return SAT_ERR_CAPACITY;
-    return sat_hud_text(&debug_hud,s,4,4+10*(int)debug_row++);
+    const int y=4+10*(int)debug_row++;
+    DTRY(sat_draw_rect_screen(3,y-1,(uint16_t)(n*8+2),9,SAT_RGB555(2,3,5)));
+    return sat_hud_text(&debug_hud,s,4,y);
 }
 static int dappend(char* buf,unsigned* n,const char* s){
     while(*s){if(*n>=DMAX)return 0;buf[(*n)++]=*s++;}
@@ -286,6 +327,8 @@ static sat_result_t draw_debug(void){
         DP("TICK ",xtreme_debug.ticks," FRAME ",xtreme_debug.ticks_frame);
         DP("JUMP ",xtreme_debug.jump_pending," RESET ",xtreme_debug.respawns);
         DV("DROPPED MS ",xtreme_debug.dropped_ms);
+        DP("SWEEP ",xtreme_debug.sweep_hits," / ",xtreme_debug.sweep_queries);
+        DP("JUMPS ",xtreme_debug.jumps," LAND ",xtreme_debug.landings);
         break;
     case DBG_CAMERA:
         DTRY(dline("CAMERA / INPUT"));
@@ -329,7 +372,7 @@ static int fail(sat_result_t status) {
 int main(void) {
     sat_result_t rc = sat_app_init_default();
     if (rc != SAT_OK) return fail(rc);
-    xtreme_debug.magic=0x58544442u;xtreme_debug.version=2;
+    xtreme_debug.magic=0x58544442u;xtreme_debug.version=3;
     xtreme_debug.bytes=sizeof(xtreme_debug);
     rc=sat_hud_init_default(&debug_hud,&debug_font);
     if(rc!=SAT_OK)return fail(rc);
@@ -337,6 +380,8 @@ int main(void) {
     if (rc != SAT_OK) return fail(rc);
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i)
         if (stage_entities[i].kind==0) xtreme_reset(&player,&stage_entities[i].pos);
+    rc=sat_follow_camera3d_init(&chase,&player.feet,4,6,4);
+    if(rc!=SAT_OK)return fail(rc);
     rc=follow_player();
     if (rc!=SAT_OK) return fail(rc);
     uint32_t last=sat_time_ms();
@@ -367,6 +412,7 @@ int main(void) {
         xtreme_debug.analog_valid=0;xtreme_debug.input_x=0;xtreme_debug.input_z=0;
         if (pad.pressed&SAT_PAD_X) {
             viewer^=1;
+            if(!viewer)chase_snap=1;
             xtreme_clock_clear(&sim_clock); jump_pending=0; elapsed=0;
             if (viewer) { rc=set_view(1); if(rc!=SAT_OK) return fail(rc); }
         }
@@ -375,7 +421,7 @@ int main(void) {
         else {
             if (pad.pressed&SAT_PAD_B) {
                 xtreme_reset(&player,&player.spawn);
-                ++xtreme_debug.respawns;
+                ++xtreme_debug.respawns;chase_snap=1;
                 xtreme_clock_clear(&sim_clock); jump_pending=0; elapsed=0;
                 xtreme_debug.ray_valid=0;
             }
@@ -392,10 +438,16 @@ int main(void) {
                 in.jump=jump_pending;
                 jump_pending=0;
                 const sat_vec3_t before=player.feet;
+                const uint8_t was_grounded=player.grounded;
                 xtreme_tick(&player,in,ground_query,&ground);
                 if(player.feet.x==player.spawn.x&&player.feet.y==player.spawn.y&&player.feet.z==player.spawn.z&&
                    (before.x!=player.spawn.x||before.y!=player.spawn.y||before.z!=player.spawn.z)&&!player.grounded)
-                    {++xtreme_debug.respawns;xtreme_debug.ray_valid=0;}
+                    {++xtreme_debug.respawns;xtreme_debug.ray_valid=0;chase_snap=1;}
+                else {
+                    if(was_grounded&&!player.grounded&&in.jump&&player.velocity.y>0)++xtreme_debug.jumps;
+                    if(!was_grounded&&player.grounded)++xtreme_debug.landings;
+                }
+                rc=chase_step();if(rc!=SAT_OK)return fail(rc);
                 ++xtreme_debug.ticks_frame;
                 ++xtreme_ticks;
             }
@@ -451,6 +503,7 @@ int main(void) {
         if (rc != SAT_OK) return fail(rc);
         ++xtreme_frames;
         xtreme_debug.frames=xtreme_frames;
+        publish_debug(xtreme_frames);
     }
     (void)sat_shutdown();
     return 0;
