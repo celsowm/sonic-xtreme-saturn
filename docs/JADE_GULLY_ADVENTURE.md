@@ -27,7 +27,7 @@
                                     [GOAL]
 ```
 
-Route coordinates, radius/area constraints, collision-surface metadata, props, entities, and selection limits are **executable data** in [`assets/levels/jade_gully_adventure_v1.json`](../assets/levels/jade_gully_adventure_v1.json). Coordinate system: metres, Blender RH Z-up. The stage has four connected traversable ribbons: `main`, `upper`, `river`, and `ruins`. They share exact junction points and preserve the first stretch of the legacy main route for deterministic movement regression.
+Route coordinates, radius/area constraints, collision-surface metadata, props, entities, and selection limits are **executable data** in [`assets/levels/jade_gully_adventure_v1.json`](../assets/levels/jade_gully_adventure_v1.json). Coordinate system: metres, Blender RH Z-up. The stage has two open explorable courtyards (river basin and temple court) linked to four connected traversable ribbons: `main`, `upper`, `river`, and `ruins`. They share exact junction points and preserve the first stretch of the legacy main route for deterministic movement regression.
 
 ## Gameplay rhythm
 
@@ -48,7 +48,7 @@ The project now tracks **nine low-poly Kenney CC0 GLBs** under [`assets/kenney`]
 
 `tools/create_jade_gully_adventure.py` is a **separate Blender authoring builder**. It imports selected GLBs, flattens glTF transforms, decimates each mesh to its declared triangle cap, and assigns a temporary palette material. Separately, authored ribbon surfaces produce collision surfaces; low-poly cliff skirts and imported scenery are render-only. No general GLB runtime importer is added to LibSaturn. The primary build continues to use `tools/create_jade_gully.py` by default.
 
-The first artifact is deliberately a small, bounded scenic geometry proof: four traversable routes, 22 top segments (44 tris), 44 cliff-side quads (88 tris), max 80 imported prop triangles plus 2 water triangles — **214 planned render triangles** within the 256-face exporter limit. Runtime adds the Sonic LOD (159 faces) and markers separately. Actual exported counts must be checked by Blender and CI; this number is an authoring budget, **not an observed emulator result**.
+The first artifact is deliberately a small, bounded scenic geometry proof with walkable wider areas: four traversable routes, 22 top segments (44 tris), 44 cliff-side quads (88 tris), **two broad collision-enabled clearing pads** (20 tris including skirts), max 80 imported prop triangles plus 2 water triangles — **234 planned render triangles** within the 256-face exporter limit. Runtime adds the Sonic LOD (159 faces) and markers separately. Actual exported counts must be checked by Blender and CI; this number is an authoring budget, **not an observed emulator result**.
 
 ## Performance and quality gates
 
