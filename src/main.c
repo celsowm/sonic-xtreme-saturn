@@ -73,6 +73,47 @@ volatile uint32_t xtreme_ticks;
 volatile uint32_t xtreme_dropped_ms;
 volatile uint32_t xtreme_grounded;
 volatile int32_t xtreme_player_x,xtreme_player_y,xtreme_player_z;
+/* The fork overlaps vertically. A grounded player should follow the
+ * continuation of the surface under its feet, not automatically climb
+ * onto whichever branch happens to be highest inside the step-up window.
+ * Broad phase is XZ-only for these vertical casts; exact finite face
+ * intersection and normal remain the SDK's responsibility. */
+static int support_raycast(const sat_mesh_t* mesh,const sat_ray3_t* ray,sat_hit3_t* best) {
+    const sat_vec3_t* p=&ray->origin;
+    int64_t expected=player.feet.y;
+    if(player.grounded&&player.ground_normal.y>FX(.5)){
+        const int64_t h=(int64_t)player.ground_normal.x*(p->x-player.feet.x)
+                       +(int64_t)player.ground_normal.z*(p->z-player.feet.z);
+        expected-=h/player.ground_normal.y;
+    }
+    int found=0;
+    int64_t best_score=0;
+    for(uint16_t i=0;i<mesh->face_count;++i){
+        sat_quad3_t q;
+        for(unsigned j=0;j<4;++j)q.v[j]=mesh->vertices[mesh->indices[4u*i+j]];
+        sat_fx16_t lx=q.v[0].x,hx=lx,lz=q.v[0].z,hz=lz;
+        for(unsigned j=1;j<4;++j){
+            if(q.v[j].x<lx)lx=q.v[j].x;
+            if(q.v[j].x>hx)hx=q.v[j].x;
+            if(q.v[j].z<lz)lz=q.v[j].z;
+            if(q.v[j].z>hz)hz=q.v[j].z;
+        }
+        if(p->x<lx-2||p->x>hx+2||p->z<lz-2||p->z>hz+2)continue;
+        sat_hit3_t hit;
+        if(!sat_raycast_quad3(&q,ray,&hit))continue;
+        if(hit.normal.y<0){hit.normal.x=-hit.normal.x;hit.normal.y=-hit.normal.y;hit.normal.z=-hit.normal.z;}
+        if(hit.normal.y<FX(.5))continue;
+        int64_t score=hit.t;
+        if(player.grounded){
+            score=(int64_t)hit.point.y-expected;
+            if(score<0)score=-score;
+        }
+        if(!found||score<best_score||(score==best_score&&hit.t<best->t)){
+            hit.face=i; *best=hit; best_score=score;found=1;
+        }
+    }
+    return found;
+}
 static int ground_query(void* ctx,const sat_vec3_t* origin,sat_fx16_t length,
                         sat_vec3_t* point,sat_vec3_t* normal) {
     sat_mesh_t* mesh=ctx;
@@ -80,7 +121,10 @@ static int ground_query(void* ctx,const sat_vec3_t* origin,sat_fx16_t length,
     sat_hit3_t hit;
     xtreme_debug.ray_valid=1;xtreme_debug.ray_sampled=1;xtreme_debug.ray_tick=xtreme_ticks+1u;xtreme_debug.ray_hit=0;xtreme_debug.ray_face=0xffffu;
     debug_vec(xtreme_debug.ray_origin,origin);xtreme_debug.ray_length=length;
-    if (!sat_raycast_mesh(mesh,&ray,&hit)) {
+    if (!support_raycast(mesh,&ray,&hit)) {
+        /* Expensive edge recovery is useful only while maintaining support.
+         * Ordinary airborne misses are expected, not a reason to sweep. */
+        if(!player.grounded)return 0;
         /* Recover a missed seam within 12 cm; downward support cast only. */
         const sat_fx16_t radius=FX(0.12);
         const sat_sphere_t sphere={{origin->x,origin->y+radius,origin->z},radius};
