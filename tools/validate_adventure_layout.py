@@ -82,7 +82,8 @@ def validate(data, asset_root=None):
     limit=data["budgets"]["max_imported_prop_triangles"]
     if used_budget>limit:raise ValueError("prop budget exceeded")
     segments=sum(len(x["stations"])-1 for x in paths)
-    estimated_render_faces=segments*6+used_budget
+    # One paper-thin waterfall: two tris, purely visual.
+    estimated_render_faces=segments*6+used_budget+2
     if estimated_render_faces>data["budgets"]["render_faces_max"]:
         raise ValueError("render budget exceeded: routes+cliff skirts+props")
     if data["budgets"]["render_faces_max"]>256:
