@@ -1,0 +1,78 @@
+{
+  "compression": {
+    "constant_channel_bytes": 8932,
+    "constant_channel_integer_pose_error": 0,
+    "host_constant_decode_us_per_pose": 1.7775900005290168,
+    "host_native_decode_us_per_pose": 2.0790234884771053,
+    "max_translation_error": 1.52587890625e-05,
+    "native_pose_bytes": 9020,
+    "reason": "No per-frame decompression; each resident clip supports arbitrary time sampling.",
+    "selected": "native random-access poses",
+    "translation_q16_bytes": 6314
+  },
+  "skin": {
+    "blend": 0,
+    "clip_bytes": 9020,
+    "deformed_vertex_bytes": 1500,
+    "joints": 11,
+    "pos_shift": 14,
+    "rigid": 125,
+    "skeleton_bytes": 396,
+    "skin_bytes": 1000,
+    "total_rom_bytes": 11688,
+    "triangles": 159,
+    "vertices": 125
+  },
+  "target": "skeletal",
+  "textures": {
+    "count": 148,
+    "exposure": 1.0,
+    "palette_base": 0,
+    "pixel_bytes": 90040,
+    "resources": {
+      "animated_bounds_fx": [
+        [
+          -107424,
+          -89930,
+          -71176
+        ],
+        [
+          95734,
+          160621,
+          70640
+        ]
+      ],
+      "command_capacity": 2048,
+      "command_headroom": 1758,
+      "failing_gates": [],
+      "palette_banks_used": 1,
+      "passed": true,
+      "pose_stream_bytes": 0,
+      "profile": "saturn-vdp1",
+      "reserved_commands": 131,
+      "source_bounds_fx": [
+        [
+          -45737,
+          -83584,
+          -73554
+        ],
+        [
+          45737,
+          21264,
+          48278
+        ]
+      ],
+      "texture_budget_bytes": 442368,
+      "texture_payload_bytes": 90040,
+      "texture_vram_estimate": 90040,
+      "total_command_estimate": 290,
+      "worst_case_model_commands": 159
+    },
+    "studio_light": false,
+    "surface_transfer": true
+  },
+  "verification": {
+    "max_error": 0.0025445727313447583,
+    "rest_error": 7.462659299373176e-05
+  }
+}
