@@ -59,10 +59,15 @@ def locate(raw, map_paths):
             return decode(raw,off),addr,"map"
     # Unique fully validated header, never guess if multiple matches.
     header = struct.pack(">III", MAGIC,3,SIZE)
-    found = [m.start() for m in re.finditer(re.escape(header),raw) if m.start()%4==0]
+    found = []
+    for m in re.finditer(re.escape(header),raw):
+        if m.start()%4:continue
+        try:found.append((m.start(),decode(raw,m.start())))
+        except (ValueError,struct.error):continue
     if len(found)!=1:
-        raise ValueError(f"expected unique telemetry header, got {len(found)}")
-    return decode(raw,found[0]),0x06000000+found[0],"header_scan"
+        raise ValueError(f"expected unique committed telemetry snapshot, got {len(found)}")
+    off, values=found[0]
+    return values,0x06000000+off,"header_scan"
 
 def hash_file(path):
     h=hashlib.sha256()
