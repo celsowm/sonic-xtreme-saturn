@@ -1,6 +1,6 @@
 {
   "status": "review",
-  "game_commit": "f68678569c035c9d9ac9cc6e8d276f13714a01e6",
+  "game_commit": "f3eaaf092f5b6c2d3ed221fc1df04bc55cc83055",
   "sdk_commit": "08ad63b5923c97e498078628192a64ad66ce50a2",
   "game_dirty": "",
   "sdk_dirty": "",
@@ -15,144 +15,151 @@
         129
       ],
       "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "53b3b8f6b9dbfbeb6d57784fd6abc97736c39bb8cba5bdc8e4cc0739e590c3f8"
-    },
-    "idle_long": {
-      "exit": 0,
-      "frames_requested": 280,
-      "screenshots_expected": [
-        130,
-        279
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "d319a8c83ee6e81fd787a08a7f9a834135ada9f093fdf6f2326a29f205325827"
-    },
-    "jump_in_place": {
-      "exit": 0,
-      "frames_requested": 200,
-      "screenshots_expected": [
-        64,
-        72,
-        84,
-        105,
-        150,
-        199
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "b1f5b52dd20540b4aab5b7dfcf5121cfe04f8da6dea1e52aaec5132d78afe626"
-    },
-    "curve_route": {
-      "exit": 0,
-      "frames_requested": 145,
-      "screenshots_expected": [
-        64,
-        95,
-        108,
-        125,
-        144
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "ab6237a1125dd4004958f6f31e3979b3122759c489881bce3f72eb9f291dfec6"
-    },
-    "paused": {
-      "exit": 0,
-      "frames_requested": 180,
-      "screenshots_expected": [
-        90,
-        118,
-        165,
-        179
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "416fb36600601417cde0a929a6c9e9f1aa3eeeb2adc9714c85e2d14c8d28183e"
-    },
-    "one_step": {
-      "exit": 0,
-      "frames_requested": 215,
-      "screenshots_expected": [
-        189,
-        205,
-        214
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "6b5a99220c947f6f8a7d245bf10c16adb134c07ad3fc99efa3f24137f6316eae"
-    },
-    "jump_resume": {
-      "exit": 0,
-      "frames_requested": 365,
-      "screenshots_expected": [
-        239,
-        255,
-        275,
-        305,
-        340,
-        364
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "be01bdb5d926bde070d180f3556ea49b29658a30110812d2ede8807a5bcf6935"
-    },
-    "hud_pages": {
-      "exit": 0,
-      "frames_requested": 260,
-      "screenshots_expected": [
-        45,
-        75,
-        105,
-        135,
-        165,
-        195,
-        245,
-        259
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "9c28aecd5908a5577d20f349540b262982cded218490c360b1e15107e246dd91"
-    },
-    "fall_reset": {
-      "exit": 0,
-      "frames_requested": 400,
-      "screenshots_expected": [
-        80,
-        150,
-        240,
-        300,
-        345,
-        399
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "8987a8e7687e7046330a42f9a40b4301de9a29c5ae3f1bf92763e03cc4f32927"
-    },
-    "hud_on_route": {
-      "exit": 0,
-      "frames_requested": 190,
-      "screenshots_expected": [
-        99,
-        140,
-        189
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "7588fe62bfa287fcabf57475e79c5de23cae1048b99e1fed560578801c40fd4e"
-    },
-    "hud_off_route": {
-      "exit": 0,
-      "frames_requested": 190,
-      "screenshots_expected": [
-        99,
-        140,
-        189
-      ],
-      "screenshots_missing": [],
-      "decode_error": "telemetry header mismatch (expected XTDB v3)",
-      "wram_sha256": "7588fe62bfa287fcabf57475e79c5de23cae1048b99e1fed560578801c40fd4e"
+      "boot": {
+        "magic": 1480741937,
+        "version": 1,
+        "stage": 4,
+        "error": 4294967293,
+        "main_entries": 1,
+        "frames": 0
+      },
+      "boot_address": "0x6041d20",
+      "boot_method": "map",
+      "sonic": {
+        "magic": 1398292803,
+        "version": 1,
+        "enabled": 1,
+        "ready": 0,
+        "error": 4294967293,
+        "vertices": 189,
+        "faces": 286,
+        "textures": 281,
+        "joints": 11,
+        "clip": 0,
+        "ticks": 0,
+        "draws": 0,
+        "animation_ms": 0,
+        "skin_ms": 0,
+        "draw_ms": 0,
+        "pos_x": 0,
+        "pos_y": 0,
+        "pos_z": 0,
+        "position_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "sonic_address": "0x604e030",
+      "sonic_method": "map",
+      "pc_after_run": "0x600406e",
+      "telemetry": {
+        "magic": 1481917506,
+        "version": 3,
+        "bytes": 336,
+        "frames": 1,
+        "ticks": 0,
+        "ticks_frame": 0,
+        "dropped_ms": 0,
+        "error": -3,
+        "hud_error": 0,
+        "page": 0,
+        "geometry": 0,
+        "viewer": 0,
+        "grounded": 0,
+        "respawns": 0,
+        "pos_x": 0,
+        "pos_y": 0,
+        "pos_z": 0,
+        "vel_x": 0,
+        "vel_y": 0,
+        "vel_z": 0,
+        "normal_x": 0,
+        "normal_y": 0,
+        "normal_z": 0,
+        "eye_x": 0,
+        "eye_y": 0,
+        "eye_z": 0,
+        "target_x": 0,
+        "target_y": 0,
+        "target_z": 0,
+        "input_x": 0,
+        "input_z": 0,
+        "held": 0,
+        "pressed": 0,
+        "analog_valid": 0,
+        "analog_x": 0,
+        "analog_y": 0,
+        "jump_pending": 0,
+        "ray_valid": 0,
+        "ray_hit": 0,
+        "ray_face": 0,
+        "ray_origin_x": 0,
+        "ray_origin_y": 0,
+        "ray_origin_z": 0,
+        "ray_point_x": 0,
+        "ray_point_y": 0,
+        "ray_point_z": 0,
+        "ray_normal_x": 0,
+        "ray_normal_y": 0,
+        "ray_normal_z": 0,
+        "ray_length": 0,
+        "ray_distance": 0,
+        "frame_ms": 0,
+        "submit_x10": 0,
+        "sim_ms": 0,
+        "camera_ms": 0,
+        "scene_ms": 0,
+        "flush_ms": 0,
+        "hud_ms": 0,
+        "submitted": 0,
+        "flushed": 0,
+        "culled": 0,
+        "clipped": 0,
+        "skipped": 0,
+        "rejected": 0,
+        "blocked": 0,
+        "world_commands": 0,
+        "command_capacity": 0,
+        "hud_reserved": 0,
+        "hud_used": 0,
+        "frame_stats_valid": 0,
+        "late_swaps": 0,
+        "draw_waits": 0,
+        "draw_timeouts": 0,
+        "vram_free": 0,
+        "paused": 0,
+        "steps": 0,
+        "ray_tick": 0,
+        "ray_sampled": 0,
+        "sweep_queries": 0,
+        "sweep_hits": 0,
+        "jumps": 0,
+        "landings": 0,
+        "snapshot_begin": 1,
+        "snapshot_end": 1,
+        "position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "submission_rate_hz": 0.0
+      },
+      "telemetry_address": "0x60422f8",
+      "address_method": "map",
+      "checks": {
+        "guest_running": false,
+        "world_error_zero": false,
+        "hud_error_zero": true,
+        "overlay_within_reservation": true,
+        "expected_pause": true,
+        "sonic_rendered": false
+      }
     }
   },
   "comparisons": {},
@@ -162,21 +169,11 @@
   "probe_sha256": "d0c29fe9865aeae642fd3d6040dfefd41c47fb30d5c7af39d592423098513391",
   "bios_sha256": "96e106f740ab448cf89f0dd49dfbac7fe5391cb6bd6e14ad5e3061c13330266f",
   "build_exit": 0,
-  "app_sha256": "43b7cbc9ead54c25594a71ece03a12bbe817a430b155d098fe7421e44c6b1563",
+  "app_sha256": "0fb57d33a167bdefe747e13903b735500dd9bf1ec02f8e67281ea1048007f15f",
   "cue_sha256": "1fc5c7464c17d92e90f8fb1f302ad5c9aa6639c23d04c2b674ac8f9d1e08bdba",
-  "bin_sha256": "3579e887044846597f5e39c55bc91421a102db050cefce482cfa2a50621957d5",
-  "iso_sha256": "c0eb6601731da3785ace7d0cc27fe1d58ba26e4b901af44bfd580034001b92e4",
+  "bin_sha256": "016227a4440e4f2eb34a95fddbbd2da6f5418326877e60044aeed3366aa36df7",
+  "iso_sha256": "e5940f94797748ea5629888a570c706f2b432a82a751bff0268cbd34b1dfa376",
   "failures": [
-    "idle: decode",
-    "idle_long: decode",
-    "jump_in_place: decode",
-    "curve_route: decode",
-    "paused: decode",
-    "one_step: decode",
-    "jump_resume: decode",
-    "hud_pages: decode",
-    "fall_reset: decode",
-    "hud_on_route: decode",
-    "hud_off_route: decode"
+    "idle: telemetry checks"
   ]
 }

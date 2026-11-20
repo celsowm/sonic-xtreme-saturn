@@ -1,0 +1,25 @@
+{
+  "magic": 1398292803,
+  "version": 1,
+  "enabled": 1,
+  "ready": 0,
+  "error": 4294967293,
+  "vertices": 189,
+  "faces": 286,
+  "textures": 281,
+  "joints": 11,
+  "clip": 0,
+  "ticks": 0,
+  "draws": 0,
+  "animation_ms": 0,
+  "skin_ms": 0,
+  "draw_ms": 0,
+  "pos_x": 0,
+  "pos_y": 0,
+  "pos_z": 0,
+  "position_m": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

@@ -221,7 +221,7 @@ ninja: no work to do.
 -- Found assembler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc
 -- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
 -- Private Sonic R actor: enabled (local-only)
--- Configuring done (0.5s)
+-- Configuring done (0.4s)
 -- Generating done (0.0s)
 -- Build files have been written to: <GAME>/build/game
 [0/2] Re-checking globbed directories...
@@ -233,10 +233,10 @@ ninja: no work to do.
 [6/8] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
 [7/8] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 254144 initialized bytes match ELF
+-- [boot-memory] _start=0x06004000, 254328 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 254144, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 254328, 'flags': 0, 'record_offset': 37092} IP observations=[]
 -- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 324 MODE1/2352 sectors
 -- [check] disc image OK: 324 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
