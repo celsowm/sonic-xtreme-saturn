@@ -33,9 +33,16 @@ void xtreme_tick(xtreme_player_t* p, xtreme_input_t in, xtreme_ground_fn query, 
         p->velocity.z = approach(p->velocity.z,0,F(.010));
     }
     if (p->grounded) {
+        /* Static friction: shallow slopes must not generate motion from rest. */
+        const int stopped = !x && !z && absolute(p->velocity.x)<F(.018) &&
+                            absolute(p->velocity.z)<F(.018) && p->ground_normal.y>=F(.85);
+        if (stopped) {
+            p->velocity.x=0;p->velocity.z=0;
+        } else {
         /* Positive horizontal components of the upward normal point downhill. */
         p->velocity.x += mul(p->ground_normal.x,F(.016));
         p->velocity.z += mul(p->ground_normal.z,F(.016));
+        }
         p->velocity.y = 0;
     }
     p->velocity.x = SAT_CLAMP(p->velocity.x,-F(.75),F(.75));
@@ -69,7 +76,10 @@ void xtreme_tick(xtreme_player_t* p, xtreme_input_t in, xtreme_ground_fn query, 
             p->velocity.y=0;
             p->ground_normal=normal;
             p->grounded=1;
-        } else p->grounded=0;
+        } else {
+            if(p->grounded) next.y=before.y-F(.012);
+            p->grounded=0;
+        }
     }
     p->feet=next;
     if (p->feet.y < -F(30) || absolute(p->feet.x)>F(220) || absolute(p->feet.z)>F(220))
