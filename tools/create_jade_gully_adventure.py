@@ -13,7 +13,6 @@ import sys
 from pathlib import Path
 
 import bpy
-from mathutils import Vector
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
@@ -21,6 +20,7 @@ sys.path.insert(0,str(ROOT/"tools"))
 
 import create_jade_gully as base
 from tools.validate_adventure_layout import DEFAULT,validate
+from tools.read_kenney_glb import read_glb_triangles
 
 args=sys.argv[sys.argv.index("--")+1:] if "--" in sys.argv else []
 if len(args)!=2:
@@ -31,33 +31,16 @@ from libsaturn_toolkit.exporter import export_bundle
 
 
 def import_cc0_prop(item,materials):
-    """Flatten a GLB (including any glTF node transforms), then decimate it.
+    """Read a curated GLB with its node transforms, then decimate it.
 
     The original model, textures and provenance remain unchanged in assets/.
     Render mesh is stored in world coordinates; it has NO collision marker.
     """
     path=ROOT/"assets/kenney"/item["asset"]
-    before={o.as_pointer() for o in bpy.data.objects}
-    bpy.ops.import_scene.gltf(filepath=str(path))
-    bpy.context.view_layer.update()
-    added=[o for o in bpy.data.objects if o.as_pointer() not in before]
-    sources=[o for o in added if o.type=="MESH"]
-    if not sources:
-        raise RuntimeError(f"{path}: no mesh surfaces")
-    verts=[]
-    faces=[]
-    for mesh_object in sources:
-        off=len(verts)
-        matrix=mesh_object.matrix_world.copy()
-        verts.extend(tuple(matrix @ v.co) for v in mesh_object.data.vertices)
-        for polygon in mesh_object.data.polygons:
-            idx=list(polygon.vertices)
-            for i in range(1,len(idx)-1):
-                faces.append((off+idx[0],off+idx[i],off+idx[i+1]))
-    for obj in added:
-        bpy.data.objects.remove(obj,do_unlink=True)
-    if not verts or not faces:
-        raise RuntimeError(f"{path}: empty mesh")
+    # Read only the already-vetted, uncompressed GLB geometry. The generic
+    # Blender glTF importer requires numpy on some Linux builds; the pure
+    # standard-library parser makes CI and Mac authoring reproducible.
+    verts,faces=read_glb_triangles(path)
     mins=tuple(min(p[i] for p in verts) for i in range(3))
     maxs=tuple(max(p[i] for p in verts) for i in range(3))
     extent=maxs[2]-mins[2]
