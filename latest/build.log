@@ -1,6 +1,6 @@
 COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 [xtreme] SDK source: <DEV>/lib-saturn
-f7df144c719d45f76def9dc8309a8981e19c3d3a
+184076b854949af0aa63e8ef11f8ef66b8b2dea2
 .....
 ----------------------------------------------------------------------
 Ran 5 tests in 0.000s
@@ -204,19 +204,38 @@ ninja: no work to do.
 -- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnTargets-release.cmake
 -- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnConfig.cmake
 -- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnConfigVersion.cmake
-CMake Error at build/game/CMakeFiles/4.4.4/CMakeSystem.cmake:6 (include):
-  include could not find requested file:
-
-    <GAME>/build/sdk-install/share/libsaturn/toolchains/sh2eb-elf.cmake
-Call Stack (most recent call first):
-  CMakeLists.txt:2 (project)
-
-
-CMake Error at <DEV>/saturn-prefix/share/libsaturn/cmake/LibSaturnFunctions.cmake:51 (message):
-  libsaturn_configure_executable: CMAKE_OBJDUMP is not set; use the sh2eb-elf
-  toolchain file or pass NO_CTOR_CHECK
-Call Stack (most recent call first):
-  CMakeLists.txt:26 (libsaturn_configure_executable)
-
-
--- Configuring incomplete, errors occurred!
+[xtreme] Fresh game configuration with SDK: <DEV>/saturn-prefix
+-- The C compiler identification is GNU 13.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- The CXX compiler identification is GNU 13.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: <DEV>/saturn-tools/bin/sh2eb-elf-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The ASM compiler identification is GNU
+-- Found assembler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc
+-- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
+-- Configuring done (0.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: <GAME>/build/game
+[0/2] Re-checking globbed directories...
+[1/6] Generating generated/greybox.h, generated/collision.h
+[2/6] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
+[3/6] Building C object CMakeFiles/xtreme.dir/src/main.c.obj
+[4/6] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
+-- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
+[5/6] Creating Saturn disc image xtreme
+-- [boot-memory] _start=0x06004000, 83860 initialized bytes match ELF
+-- [native] validated IP size=4096 bytes; redistributable=False
+-- [check] native AIP instructions, System ID, payloads and handoff OK
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 83860, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 240 MODE1/2352 sectors
+-- [check] disc image OK: 240 MODE1/2352 sectors
+-- disc: <GAME>/build/game/disc/xtreme.cue
+[xtreme] Disc: <GAME>/build/game/disc/xtreme.cue
+[xtreme] Blender: <GAME>/build/jade-gully/jade_gully.blend
