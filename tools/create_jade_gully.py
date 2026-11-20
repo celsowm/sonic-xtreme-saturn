@@ -86,6 +86,51 @@ def decor(name, location, dimensions, mat):
     obj["saturn_mesh"] = "render"
     return obj
 
+def mesh_prop(name, vertices, faces, mat):
+    """Author-created presentation mesh; never copied into collision output."""
+    mesh = bpy.data.meshes.new(name)
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    mesh.materials.append(mat)
+    obj["saturn_mesh"] = "render"
+    return obj
+
+def palm(ident, x, y, z, grass, stone):
+    """Small silhouette: one trunk, eight triangles for a low-poly crown."""
+    height = 4.8
+    decor(f"{ident}_trunk", (x, y, z + height / 2),
+          (0.65, 0.65, height), stone)
+    vertices, faces = [], []
+    for direction in range(4):
+        angle = direction * math.pi / 2 + 0.27
+        dx, dy = math.cos(angle), math.sin(angle)
+        center = (x, y, z + height)
+        left = (x + 1.0 * dx - 0.60 * dy, y + 1.0 * dy + 0.60 * dx, z + height + 0.3)
+        right = (x + 1.0 * dx + 0.60 * dy, y + 1.0 * dy - 0.60 * dx, z + height + 0.3)
+        tip = (x + 3.0 * dx, y + 3.0 * dy, z + height - 1.25)
+        n = len(vertices)
+        vertices.extend((center, left, right, tip))
+        faces.extend(((n, n + 1, n + 3), (n, n + 3, n + 2)))
+    return mesh_prop(f"{ident}_canopy", vertices, faces, grass)
+
+def boulder(ident, x, y, z, stone):
+    """Five vertices, four triangles; outside the playable ribbon."""
+    vertices = [
+        (x - 1.5, y - 1.1, z), (x + 1.5, y - 1.1, z),
+        (x + 1.2, y + 1.0, z), (x - 1.1, y + 1.1, z),
+        (x + 0.15, y + 0.1, z + 2.6),
+    ]
+    return mesh_prop(f"{ident}_rock", vertices,
+                     ((0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)), stone)
+
+def waterfall(ident, x, y, base_z, height, mat):
+    """Single untextured waterfall plane; art only, no physics contact."""
+    vertices = [(x - 2, y, base_z + height), (x + 2, y, base_z + height),
+                (x + 2, y, base_z), (x - 2, y, base_z)]
+    return mesh_prop(f"{ident}_water", vertices, ((0, 1, 2), (0, 2, 3)), mat)
+
 def main():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
@@ -94,6 +139,8 @@ def main():
     grass = material("Greybox grass", (0.22, 0.56, 0.18))
     upper = material("Greybox upper path", (0.60, 0.45, 0.17))
     stone = material("Greybox stone", (0.35, 0.31, 0.25))
+    fronds = material("Low-poly palm green", (0.10, 0.43, 0.16))
+    water = material("Flat waterfall cyan", (0.25, 0.72, 0.81))
     collision_copy(ribbon("main_route", MAIN, grass))
     collision_copy(ribbon("upper_route", UPPER, upper))
     marker("spawn", "player_spawn", (0, 2, 11))
@@ -109,6 +156,22 @@ def main():
     for i in range(3):
         decor(f"ruin_left_{i}", (-11, 104 + 5 * i, 2.5), (2, 2, 5), stone)
         decor(f"ruin_right_{i}", (3, 104 + 5 * i, 2.5), (2, 2, 5), stone)
+    # Cheap, deterministic authored silhouettes beyond the track boundary.
+    # The ribbon/collision objects are unchanged: no extra walkable geometry.
+    for ident, x, y, z in (
+        ("palm_overlook", 11, 14, 7),
+        ("palm_gully", 22, 51, 3),
+        ("palm_temple", -17, 108, 3),
+    ):
+        palm(ident, x, y, z, fronds, stone)
+    for ident, x, y, z in (
+        ("rock_descent", -10, 22, 5),
+        ("rock_bend", 22, 39, 0),
+        ("rock_fork", -20, 57, 6),
+        ("rock_temple", 12, 113, 1),
+    ):
+        boulder(ident, x, y, z, stone)
+    waterfall("gully", -19, 76, 0, 11, water)
     bpy.context.view_layer.update()
     out.mkdir(parents=True, exist_ok=True)
     paths = export_bundle(bpy.context, out / "jade_gully.json")
