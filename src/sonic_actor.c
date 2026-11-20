@@ -60,12 +60,13 @@ typedef struct {
 static sonic_actor_t actor;
 
 /* Stable, source-independent WRAM symbol readable by the Ymir probe.
- * magic = 'SXAC', v1. Independent of the game's XTDB v3 layout. */
+ * magic = 'SXAC', v2. Independent of the game's XTDB v3 layout. */
 volatile struct {
     uint32_t magic,version,enabled,ready,error;
     uint32_t vertices,faces,textures,joints,clip,ticks,draws;
     uint32_t animation_ms,skin_ms,draw_ms;
     int32_t pos_x,pos_y,pos_z;
+    uint32_t registry_capacity,init_stage,vram_free;
 } xtreme_sonic_debug;
 
 static sat_result_t fail(sat_result_t rc) {
@@ -74,7 +75,8 @@ static sat_result_t fail(sat_result_t rc) {
 }
 sat_result_t xtreme_sonic_init(void) {
     xtreme_sonic_debug.magic=0x53584143u; /* SXAC */
-    xtreme_sonic_debug.version=1u;
+    xtreme_sonic_debug.version=2u;
+    xtreme_sonic_debug.init_stage=1u;
     xtreme_sonic_debug.enabled=1u;
     xtreme_sonic_debug.vertices=SONIC_VERTEX_COUNT;
     xtreme_sonic_debug.faces=SONIC_FACE_COUNT;
@@ -82,6 +84,7 @@ sat_result_t xtreme_sonic_init(void) {
     xtreme_sonic_debug.joints=sonic_skeleton.joint_count;
     /* Fail with an explicit capacity result before uploading anything.
      * No hidden temporary upload or texture table expansion at runtime. */
+    xtreme_sonic_debug.registry_capacity=sat_texture_capacity();
     if(sat_texture_capacity()<SONIC_TEXTURE_COUNT)
         return fail(SAT_ERR_CAPACITY);
     if(sonic_skeleton.joint_count==0 ||
@@ -90,8 +93,10 @@ sat_result_t xtreme_sonic_init(void) {
         return fail(SAT_ERR_CAPACITY);
     sat_result_t rc=sat_model_validate(&sonic_asset);
     if(rc!=SAT_OK)return fail(rc);
+    xtreme_sonic_debug.init_stage=2u;
     rc=sat_skeleton_validate(&sonic_skeleton);
     if(rc!=SAT_OK)return fail(rc);
+    xtreme_sonic_debug.init_stage=3u;
     rc=sat_skin_validate(&sonic_skin);
     if(rc!=SAT_OK)return fail(rc);
     rc=sat_skeleton_instance_init(&actor.skeleton,&sonic_skeleton,
@@ -102,6 +107,7 @@ sat_result_t xtreme_sonic_init(void) {
     if(rc!=SAT_OK)return fail(rc);
     rc=sat_skel_clip_player_init(&actor.animation,&sonic_clip_idle);
     if(rc!=SAT_OK)return fail(rc);
+    xtreme_sonic_debug.init_stage=4u;
     rc=sat_mesh_init(&actor.mesh,actor.vertices,SONIC_VERTEX_COUNT,
                      actor.indices,SONIC_FACE_COUNT);
     if(rc!=SAT_OK)return fail(rc);
@@ -109,10 +115,13 @@ sat_result_t xtreme_sonic_init(void) {
     if(rc!=SAT_OK)return fail(rc);
     rc=sat_skin_validate_mesh(&sonic_skin,&actor.mesh);
     if(rc!=SAT_OK)return fail(rc);
+    xtreme_sonic_debug.init_stage=5u;
     rc=sat_character_materials_upload(&sonic_asset,actor.textures,
                                       actor.native_textures,actor.materials,
                                       SONIC_TEXTURE_COUNT);
     if(rc!=SAT_OK)return fail(rc);
+    xtreme_sonic_debug.init_stage=6u;
+    xtreme_sonic_debug.vram_free=sat_vdp1_vram_free_bytes();
     actor.instance=(sat_scene3d_instance_t){0};
     actor.instance.mesh=&actor.mesh;
     actor.instance.materials=actor.materials;
@@ -123,6 +132,7 @@ sat_result_t xtreme_sonic_init(void) {
     actor.instance.bounds=&actor.bounds;
     actor.ready=1u;
     xtreme_sonic_debug.ready=1u;
+    xtreme_sonic_debug.init_stage=7u;
     return SAT_OK;
 }
 
