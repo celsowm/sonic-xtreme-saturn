@@ -175,13 +175,45 @@ def publish(archive, work, summary):
     print("[xtreme] Results: https://github.com/celsowm/sonic-xtreme-saturn/tree/ymir-evidence/latest",flush=True)
     print("[xtreme] Evidence commit: "+commit,flush=True)
 
+def republish_latest():
+    """Retry publication of an existing complete return ZIP without booting Ymir."""
+    candidates=sorted((ROOT/"build").glob("ymir-evidence-*-return.zip"),
+                      key=lambda p:p.stat().st_mtime,reverse=True)
+    if not candidates:
+        print("[xtreme] No previous return ZIP found; run the full qualification.",file=sys.stderr)
+        return 2
+    archive=candidates[0]
+    try:
+        # Rebuild a temporary evidence directory from the final sanitized ZIP.
+        # Do not trust archive paths, and do not publish a mutable work directory.
+        with tempfile.TemporaryDirectory(prefix="xtreme-republish-") as tmp:
+            work=Path(tmp)
+            with zipfile.ZipFile(archive) as z:
+                if z.testzip() is not None:raise ValueError("corrupt return ZIP")
+                for item in z.infolist():
+                    p=Path(item.filename)
+                    if p.is_absolute() or ".." in p.parts:raise ValueError("unsafe ZIP member")
+                    if item.is_dir():continue
+                    dst=work/p
+                    dst.parent.mkdir(parents=True,exist_ok=True)
+                    with z.open(item) as src,dst.open("wb") as out:shutil.copyfileobj(src,out)
+            summary=json.loads((work/"summary.json").read_text())
+            print("[xtreme] Republishing",archive.name,"game",summary["game_commit"],"status",summary["status"],flush=True)
+            publish(archive,work,summary)
+        return 0
+    except (OSError,ValueError,RuntimeError,KeyError,zipfile.BadZipFile,subprocess.CalledProcessError) as exc:
+        print(f"[xtreme] Retry failed: {type(exc).__name__}: {exc}",file=sys.stderr)
+        return 2
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--probe",type=Path);p.add_argument("--bios",type=Path)
     p.add_argument("--case",action="append",choices=[c[0] for c in CASES])
     p.add_argument("--timeout",type=int,default=600)
     p.add_argument("--no-publish",action="store_true",help="keep ZIP local instead of publishing to the public GitHub evidence branch")
+    p.add_argument("--publish-latest",action="store_true",help="retry GitHub push of the newest local return ZIP without rebuilding")
     a=p.parse_args()
+    if a.publish_latest:return republish_latest()
     sdk=Path(os.environ.get("LIBSATURN_SOURCE",str(DEV/"lib-saturn"))).expanduser()
     if not (sdk/"CMakeLists.txt").exists(): sdk=DEV/"libsaturn"
     probe=a.probe or Path(os.environ.get("YMIR_PROBE",str(sdk/"harness/build-macos/probe")))
