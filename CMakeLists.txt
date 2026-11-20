@@ -20,17 +20,21 @@ add_custom_command(OUTPUT "${GENERATED}" "${GENERATED_COLLISION}"
     DEPENDS "${GREYBOX_OBJ}" "${GREYBOX_JSON}" "${GREYBOX_COLLISION}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_greybox.py"
     VERBATIM)
 add_executable(xtreme src/main.c src/controller.c "${GENERATED}" "${GENERATED_COLLISION}")
-# Character assets are generated on the user's Mac and never committed.
-# Keep the baseline build reproducible without any third-party character data.
-set(XTREME_SONIC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets/private/sonic-r/saturn"
-    CACHE PATH "Private generated Sonic R skeletal C/H directory")
+# The requested Sonic R source and generated LOD are ordinary tracked
+# repository assets, not dependencies on an individual Mac's private folder.
+# Alternate LODs may be selected explicitly for performance comparisons.
+set(XTREME_SONIC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets/sonic-r/lod-160"
+    CACHE PATH "Generated Sonic R C/H directory (versioned in this repository)")
+set(XTREME_SONIC_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/assets/sonic-r/source/sonic.glb")
 if(EXISTS "${XTREME_SONIC_DIR}/sonic.c" AND EXISTS "${XTREME_SONIC_DIR}/sonic.h")
-    message(STATUS "Private Sonic R actor: enabled (local-only)")
+    message(STATUS "Repository Sonic R skeletal actor: ${XTREME_SONIC_DIR}")
     target_sources(xtreme PRIVATE src/sonic_actor.c "${XTREME_SONIC_DIR}/sonic.c")
     target_include_directories(xtreme PRIVATE "${XTREME_SONIC_DIR}")
     target_compile_definitions(xtreme PRIVATE XTREME_HAS_SONIC=1)
+elseif(EXISTS "${XTREME_SONIC_SOURCE}")
+    message(FATAL_ERROR "Repository Sonic GLB exists but compiled C/H are missing from ${XTREME_SONIC_DIR}. Run scripts/vendor-sonic-r-mac.sh to add the generated LOD.")
 else()
-    message(STATUS "Private Sonic R actor: not installed; using original blue proxy")
+    message(STATUS "Sonic R asset not yet committed; using original blue proxy")
 endif()
 target_include_directories(xtreme PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_compile_features(xtreme PRIVATE c_std_11)
