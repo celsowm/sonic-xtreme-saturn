@@ -40,6 +40,57 @@ SONIC_NAMES = ("magic version enabled ready error vertices faces textures joints
                "clip_mask clip_changes takeoffs landings ground_ticks air_ticks").split()
 SONIC_SIZE = len(SONIC_NAMES) * 4
 
+FRAME_CAPACITY=64
+FRAME_WORDS=4
+FRAME_NAMES=("frame_ms","sim_ms","scene_ms","flush_ms")
+
+def percentile_nearest_rank(values, percent):
+    ordered=sorted(values)
+    if not ordered:return None
+    return ordered[max(0,((len(ordered)*percent+99)//100)-1)]
+
+def decode_frame_history(raw, offset):
+    need=16+FRAME_CAPACITY*FRAME_WORDS*4
+    if offset<0 or offset+need>len(raw):
+        raise ValueError("truncated frame timing ring")
+    magic,version,count,nxt=struct.unpack_from(">4I",raw,offset)
+    if magic!=0x58465031 or version!=1 or count>FRAME_CAPACITY or nxt<count:
+        raise ValueError("invalid XFP1 timing record")
+    samples=[]
+    start=(nxt-count)%FRAME_CAPACITY
+    for i in range(count):
+        pos=(start+i)%FRAME_CAPACITY
+        frame=struct.unpack_from(">4I",raw,offset+16+pos*FRAME_WORDS*4)
+        samples.append(dict(zip(FRAME_NAMES,frame)))
+    return {
+        "version":version,"count":count,"total_frames_recorded":nxt,
+        "last_frames":samples,
+        "frame_ms_p50":percentile_nearest_rank([s["frame_ms"] for s in samples],50),
+        "frame_ms_p95":percentile_nearest_rank([s["frame_ms"] for s in samples],95),
+        "frame_ms_p99":percentile_nearest_rank([s["frame_ms"] for s in samples],99),
+        "frame_ms_max":max((s["frame_ms"] for s in samples),default=None),
+        "scene_ms_p95":percentile_nearest_rank([s["scene_ms"] for s in samples],95),
+        "sim_ms_p95":percentile_nearest_rank([s["sim_ms"] for s in samples],95),
+        "flush_ms_p95":percentile_nearest_rank([s["flush_ms"] for s in samples],95),
+    }
+
+def locate_frame_history(raw,maps):
+    for p in maps:
+        m=re.search(r"0x([0-9a-fA-F]+)\s+_?xtreme_frame_history\b",
+                    p.read_text(errors="replace"))
+        if m:
+            address=int(m[1],16)
+            return decode_frame_history(raw,address-0x06000000),address,"map"
+    found=[]
+    sig=struct.pack(">II",0x58465031,1)
+    for m in re.finditer(re.escape(sig),raw):
+        if m.start()%4:continue
+        try:found.append((m.start(),decode_frame_history(raw,m.start())))
+        except (ValueError,struct.error):continue
+    if len(found)!=1:raise ValueError(f"expected unique XFP1 timing record, got {len(found)}")
+    off,values=found[0]
+    return values,0x06000000+off,"header_scan"
+
 BOOT_NAMES=("magic version stage error main_entries frames").split()
 BOOT_SIZE=4*len(BOOT_NAMES)
 
@@ -315,6 +366,7 @@ def main():
     summary["performance_policy"]={
         "display_target_fps":30,"physics_target_hz":60,
         "min_measured_submission_rate_hz":29.0,"max_terminal_frame_ms":40,
+        "max_recent_frame_ms_p95":38,"frame_history_window":64,
         "display_cadence_independently_verified":False,
         "note":"A 1s submission-rate sample and terminal frame time are diagnostic gates, not display FPS or p95."}
     failures=[]
@@ -384,6 +436,27 @@ def main():
                     pass
                 t,addr,method=locate(raw,maps)
                 result.update(telemetry=t,telemetry_address=hex(addr),address_method=method,checks=checks(name,t))
+                try:
+                    hist,hist_addr,hist_method=locate_frame_history(raw,maps)
+                    result["frame_pacing"]=hist
+                    result["frame_pacing_address"]=hex(hist_addr)
+                    result["frame_pacing_method"]=hist_method
+                    (d/"frame-pacing.json").write_text(json.dumps(hist,indent=2)+"\n")
+                except (ValueError,OSError,struct.error) as exc:
+                    result["frame_pacing_decode_error"]=str(exc)
+                if sonic_present:
+                    hist=result.get("frame_pacing")
+                    result["checks"]["frame_history_available"]=(hist is not None and hist["count"]>=30)
+                    if hist is not None:
+                        result["checks"]["frame_p95_30_target"]=(hist["frame_ms_p95"] is not None and hist["frame_ms_p95"]<=38)
+                        result["performance_frame_pacing"]={
+                            "recent_samples":hist["count"],
+                            "frame_ms_p50":hist["frame_ms_p50"],
+                            "frame_ms_p95":hist["frame_ms_p95"],
+                            "frame_ms_p99":hist["frame_ms_p99"],
+                            "frame_ms_max":hist["frame_ms_max"],
+                            "scene_ms_p95":hist["scene_ms_p95"],
+                            "independent_display_fps":None}
                 if sonic_present:
                     sonic=result.get("sonic")
                     result["checks"]["sonic_rendered"]=(sonic is not None and
