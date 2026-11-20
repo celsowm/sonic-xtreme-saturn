@@ -1,0 +1,16 @@
+{
+  "status": "failed",
+  "game_commit": "db846e65e243451c453af43608280c3c48e628da",
+  "sdk_commit": "f7df144c719d45f76def9dc8309a8981e19c3d3a",
+  "game_dirty": "",
+  "sdk_dirty": "",
+  "boot": "Ymir injection via CUE + app.bin, not optical boot",
+  "cases": {},
+  "comparisons": {},
+  "probe_sha256": "d0c29fe9865aeae642fd3d6040dfefd41c47fb30d5c7af39d592423098513391",
+  "bios_sha256": "96e106f740ab448cf89f0dd49dfbac7fe5391cb6bd6e14ad5e3061c13330266f",
+  "build_exit": 1,
+  "failures": [
+    "build failed; see build.log"
+  ]
+}

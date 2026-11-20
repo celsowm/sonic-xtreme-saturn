@@ -1,0 +1,222 @@
+COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
+[xtreme] SDK source: <DEV>/lib-saturn
+f7df144c719d45f76def9dc8309a8981e19c3d3a
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+
+OK
+Info: Saved as "jade_gully.blend"
+Greybox generated: 18 entities
+Authoring outputs only; no Saturn runtime qualification.
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: <DEV>/lib-saturn/build/sdk
+[0/2] Re-checking globbed directories...
+ninja: no work to do.
+-- Install configuration: "Release"
+-- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn.a
+-- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn_startup.a
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/sound_driver.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/time.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/sprite_batch.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/music.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/cd_mount.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/sprite_clip.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/dma.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/anim3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/sprite_atlas.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp1_command_batch.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/math3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/input.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/task.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/character3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/collide3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/stage_map2.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/core.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/version.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/profile.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/math2d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/cd.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/music_codecs.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/sprite_anim.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/collide2d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/hud.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/sampler.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/surface.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp1.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_rbg0_ground.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_alloc.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_floor.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/spatial.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/skin3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/sh2.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/geometry3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/world_lod3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/world_lod_fade3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/mesh3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/save.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/movie.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/follow_camera3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/scene3d_faces.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/file.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/scu_dsp.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/render3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_color_calc.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/int_math.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/skeleton3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/color.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/entity_stream2.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/scsp_dsp.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/render2d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/audio.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_special.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/app.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/uart.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/geometry2d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/cart_overlay.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/voxel_terrain.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/fmt.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/dual_sh2.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/scene3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/terrain2.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/grid.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/cd_block.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/texture_memory.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/cdfs.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/follow_camera2d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/cdda.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/physics2_world.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/fade3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_environment.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/world_lod3d_governor.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/palette.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/water_volume.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/tate_fb.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp1_color_calc.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/loader.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/disc_stream.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_layers.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/surface3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/physics3_transform.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/save_schema.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/mesh3d_draw.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/character_asset_format.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/character2.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/spatial3.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/water.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/resource_plan.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/video.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/exec.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/ram_cart.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/physics3_world.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/irq.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/fx_compositor.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/view_cache.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/memory.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/saturn.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/font.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/texture.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/scene3d_material_pool.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/transform3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/asset_memory.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_sprite_shadow.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_color_offset.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/asset.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_rotation_coefficients.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/parallel.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp2_compose.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/mpeg.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/abus.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/model3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/smpc.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/orbit_camera3d.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/physics.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/tate.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/path2.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/lz.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/scene.h
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/linker/saturn.ld
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/cmake/LibSaturnFunctions.cmake
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/cmake/LibSaturnCheckNoInitArray.cmake
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/cmake/LibSaturnCheckImageSize.cmake
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/cmake/LibSaturnBuildDisc.cmake
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/memory_layout.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/gen_ip_bin.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/check_ip_bin.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/check_iso.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/boot_image.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/build_native_ip.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/check_native_ip.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/check_boot_memory.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/boot_trace_address.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/normalize_iso_dates.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/prepare_native_payloads.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/inspect_boot_image.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/iso_to_raw.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/gen_cue.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/check_disc_image.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/satlz.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/satmovie.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/assets/movies/libsaturn_intro.mov
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/boot/aip.s
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/boot/ip_sbl_template.bin
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/boot/ip_yaul_template.bin
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d_tool.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/__init__.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/build.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/clips.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/emit_c.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/entities.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/errors.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/grid.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/metatiles.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/paths.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/tools/stage2d/terrain.py
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/math2d/api.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/math2d/logic.hpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/math2d/tables.hpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/math3d/logic.hpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/task/task.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/graphics/2d/sprites/clip.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/character2.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/character2_logic.hpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/collision.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/collision_logic.hpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/follow_camera2d.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/grid.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/grid_logic.hpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/path2.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/physics2_world.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/terrain2.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/terrain2_logic.hpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/spatial/2d.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/spatial/2d_logic.hpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/spatial/entity_stream2.cpp
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/toolchains/sh2eb-elf.cmake
+-- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/LICENSE
+-- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnTargets.cmake
+-- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnTargets-release.cmake
+-- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnConfig.cmake
+-- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnConfigVersion.cmake
+CMake Error at build/game/CMakeFiles/4.4.4/CMakeSystem.cmake:6 (include):
+  include could not find requested file:
+
+    <GAME>/build/sdk-install/share/libsaturn/toolchains/sh2eb-elf.cmake
+Call Stack (most recent call first):
+  CMakeLists.txt:2 (project)
+
+
+CMake Error at <DEV>/saturn-prefix/share/libsaturn/cmake/LibSaturnFunctions.cmake:51 (message):
+  libsaturn_configure_executable: CMAKE_OBJDUMP is not set; use the sh2eb-elf
+  toolchain file or pass NO_CTOR_CHECK
+Call Stack (most recent call first):
+  CMakeLists.txt:26 (libsaturn_configure_executable)
+
+
+-- Configuring incomplete, errors occurred!
