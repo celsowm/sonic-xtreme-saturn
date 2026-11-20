@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""Headless Ymir qualification. Build, replay, decode, zip; no GUI or BIOS in ZIP."""
+import argparse
+import hashlib
+import json
+import os
+import re
+import shutil
+import struct
+import subprocess
+import sys
+import tempfile
+import time
+import zipfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DEV = ROOT.parent
+MAGIC = 0x58544442
+NAMES = ("magic version bytes frames ticks ticks_frame dropped_ms error hud_error "
+         "page geometry viewer grounded respawns "
+         "pos_x pos_y pos_z vel_x vel_y vel_z normal_x normal_y normal_z "
+         "eye_x eye_y eye_z target_x target_y target_z input_x input_z "
+         "held pressed analog_valid analog_x analog_y jump_pending ray_valid ray_hit ray_face "
+         "ray_origin_x ray_origin_y ray_origin_z ray_point_x ray_point_y ray_point_z "
+         "ray_normal_x ray_normal_y ray_normal_z ray_length ray_distance "
+         "frame_ms submit_x10 sim_ms camera_ms scene_ms flush_ms hud_ms "
+         "submitted flushed culled clipped skipped rejected blocked world_commands command_capacity "
+         "hud_reserved hud_used frame_stats_valid late_swaps draw_waits draw_timeouts vram_free "
+         "paused steps ray_tick ray_sampled").split()
+SIGNED = {"error", "hud_error", "input_x", "input_z", "ray_length", "ray_distance"} | {
+    f"{prefix}_{axis}" for prefix in ("pos","vel","normal","eye","target","ray_origin","ray_point","ray_normal")
+    for axis in "xyz"
+}
+SIZE = len(NAMES)*4
+
+def decode(raw, offset=0):
+    if len(raw) < offset+SIZE or offset < 0:
+        raise ValueError("truncated telemetry")
+    values = dict(zip(NAMES, struct.unpack_from(">"+str(len(NAMES))+"I", raw, offset)))
+    if (values["magic"], values["version"], values["bytes"]) != (MAGIC, 2, SIZE):
+        raise ValueError("telemetry header mismatch (expected XTDB v2)")
+    for k in SIGNED:
+        if values[k] >= 2**31:
+            values[k] -= 2**32
+    values["position_m"] = [values["pos_"+a]/65536 for a in "xyz"]
+    values["velocity_m_s"] = [values["vel_"+a]*60/65536 for a in "xyz"]
+    values["submission_rate_hz"] = values["submit_x10"]/10
+    return values
+
+def locate(raw, map_paths):
+    for p in map_paths:
+        m = re.search(r"0x([0-9a-fA-F]+)\s+_?xtreme_debug\b", p.read_text(errors="replace"))
+        if m:
+            addr = int(m[1],16)
+            off = addr-0x06000000
+            return decode(raw,off),addr,"map"
+    # Unique fully validated header, never guess if multiple matches.
+    header = struct.pack(">III", MAGIC,2,SIZE)
+    found = [m.start() for m in re.finditer(re.escape(header),raw) if m.start()%4==0]
+    if len(found)!=1:
+        raise ValueError(f"expected unique telemetry header, got {len(found)}")
+    return decode(raw,found[0]),0x06000000+found[0],"header_scan"
+
+def hash_file(path):
+    h=hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda:f.read(1024*1024),b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+def git(path, *args):
+    p=subprocess.run(["git","-C",str(path),*args],text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    return p.stdout.strip()
+
+def run(cmd, log, env=None, timeout=600):
+    with log.open("w") as f:
+        f.write("COMMAND: "+repr([str(x) for x in cmd])+"\n");f.flush()
+        try:
+            p=subprocess.run([str(x) for x in cmd],cwd=ROOT,stdout=f,stderr=subprocess.STDOUT,env=env,timeout=timeout)
+            return p.returncode
+        except subprocess.TimeoutExpired:
+            f.write("\nTIMEOUT\n");return 124
+        except OSError as exc:
+            f.write("\n"+str(exc)+"\n");return 127
+
+def pad(events):
+    rows={0:"NONE"}
+    for at,buttons,length in events:
+        if at in rows or at+length in rows:
+            raise ValueError("overlapping event boundary")
+        rows[at]=buttons;rows[at+length]="NONE"
+    return "".join(f"{k} {rows[k]}\n" for k in sorted(rows))
+
+# Program fields, not guest ticks. Each run starts fresh with the same boot.
+# Leave wide gaps for SMPC sampling; no START (it exits the game).
+BASE=[(60,"Y",6),(80,"Z",6),(100,"UP",28),(140,"L",6)]
+STEP=BASE+[(190,"R",6)]
+JUMP=STEP+[(220,"A",6),(240,"R",6),(270,"L",6),(290,"UP",45)]
+CASES=[
+    ("idle",130,[],[40,90,129]),
+    ("paused",180,BASE,[90,118,165,179]),
+    ("one_step",215,STEP,[189,205,214]),
+    ("jump_resume",365,JUMP,[239,255,275,305,340,364]),
+    ("hud_pages",260,[(60,"Y",6),(90,"Y",6),(120,"Y",6),(150,"Y",6),(180,"Y",6),(210,"X",6)],[45,75,105,135,165,195,245,259]),
+    ("fall_reset",400,[(60,"Y",6),(85,"RIGHT",180),(310,"B",6)],[80,150,240,300,345,399]),
+    ("hud_on_route",190,[(100,"UP",48),(155,"A",6)],[99,140,189]),
+    ("hud_off_route",190,[(20,"Y",5),(35,"Y",5),(50,"Y",5),(65,"Y",5),(80,"Y",5),(100,"UP",48),(155,"A",6)],[99,140,189]),
+]
+
+def checks(name,t):
+    return {"guest_running":t["frames"]>0 and t["ticks"]>0,
+            "world_error_zero":t["error"]==0,"hud_error_zero":t["hud_error"]==0,
+            "overlay_within_reservation":t["hud_used"]<=t["hud_reserved"],
+            "expected_pause":t["paused"]==1 if name in ("paused","one_step") else t["paused"]==0}
+
+def main():
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--probe",type=Path);p.add_argument("--bios",type=Path)
+    p.add_argument("--case",action="append",choices=[c[0] for c in CASES])
+    p.add_argument("--timeout",type=int,default=600)
+    a=p.parse_args()
+    sdk=Path(os.environ.get("LIBSATURN_SOURCE",str(DEV/"lib-saturn"))).expanduser()
+    if not (sdk/"CMakeLists.txt").exists(): sdk=DEV/"libsaturn"
+    probe=a.probe or Path(os.environ.get("YMIR_PROBE",str(sdk/"harness/build-macos/probe")))
+    bios_candidates=[DEV/"tekken3-saturn/assets/imported/ymir/profile/roms/ipl/saturn_101a_us.bin",sdk/"bios/firmware/mpr-17933.bin"]
+    bios=a.bios or (Path(os.environ["LIBSATURN_BIOS"]) if os.environ.get("LIBSATURN_BIOS") else next((x for x in bios_candidates if x.is_file()),bios_candidates[0]))
+    probe=probe.expanduser().resolve();bios=bios.expanduser().resolve()
+    output=ROOT/"build";output.mkdir(exist_ok=True)
+    work=Path(tempfile.mkdtemp(prefix="ymir-evidence-",dir=output))
+    archive=output/(work.name+"-return.zip")
+    summary={"status":"incomplete","game_commit":git(ROOT,"rev-parse","HEAD"),"sdk_commit":git(sdk,"rev-parse","HEAD"),
+             "game_dirty":git(ROOT,"status","--porcelain","--untracked-files=no"),"sdk_dirty":git(sdk,"status","--porcelain","--untracked-files=no"),
+             "boot":"Ymir injection via CUE + app.bin, not optical boot","cases":{},"comparisons":{}}
+    failures=[]
+    try:
+        if not probe.is_file() or not os.access(probe,os.X_OK):raise ValueError(f"Ymir probe missing: {probe}; set YMIR_PROBE")
+        if not bios.is_file() or bios.stat().st_size!=524288:raise ValueError(f"512 KiB BIOS missing: {bios}; set LIBSATURN_BIOS")
+        summary.update(probe_sha256=hash_file(probe),bios_sha256=hash_file(bios))
+        print("[xtreme] Building with existing local SDK...",flush=True)
+        env=dict(os.environ,LIBSATURN_SOURCE=str(sdk))
+        rc=run(["bash","scripts/run-mac.sh","--build-only"],work/"build.log",env,timeout=max(1800,a.timeout))
+        summary["build_exit"]=rc
+        if rc:raise RuntimeError("build failed; see build.log")
+        game=ROOT/"build/game";cue=game/"disc/xtreme.cue"
+        apps=sorted(game.rglob("xtreme.app.bin"))
+        if not cue.is_file() or len(apps)!=1:raise ValueError(f"disc/app.bin missing or ambiguous: {apps}")
+        app=apps[0]
+        maps=sorted(game.rglob("*.map"))
+        summary.update(app_sha256=hash_file(app),cue_sha256=hash_file(cue))
+        for image in (cue.with_suffix(".bin"),cue.with_suffix(".iso")):
+            if image.is_file():summary[image.suffix[1:]+"_sha256"]=hash_file(image)
+        build_dir=work/"build";build_dir.mkdir()
+        for i,m in enumerate(maps):shutil.copy2(m,build_dir/f"{i}-{m.name}")
+        for file in ("greybox.h","collision.h"):
+            src=game/"generated"/file
+            if src.is_file():shutil.copy2(src,build_dir/file)
+        for name,frames,events,shots in CASES:
+            if a.case and name not in a.case:continue
+            d=work/name;d.mkdir()
+            script=d/"input.pad";script.write_text(pad(events))
+            wram=d/"wram-high.bin"
+            cmd=[probe,"--iso",cue,"--bin",app,"--bios",bios,"--frames",frames,"--out",d/"probe.json",
+                 "--pad-script",script,"--dump-wram-high",wram]
+            for field in shots:cmd += ["--screenshot",f"{field}:{d / ('frame-%04d.png'%field)}"]
+            print(f"[xtreme] Ymir {name}: {frames} fields",flush=True)
+            rc=run(cmd,d/"probe.log",timeout=a.timeout)
+            result={"exit":rc,"frames_requested":frames,"screenshots_expected":shots,
+                    "screenshots_missing":[f for f in shots if not (d/("frame-%04d.png"%f)).is_file()]}
+            summary["cases"][name]=result
+            if rc or result["screenshots_missing"]:failures.append(name+": probe/screenshots")
+            try:
+                raw=wram.read_bytes()
+                t,addr,method=locate(raw,maps)
+                result.update(telemetry=t,telemetry_address=hex(addr),address_method=method,checks=checks(name,t))
+                (d/"telemetry.json").write_text(json.dumps(t,indent=2)+"\n")
+                off=addr-0x06000000
+                (d/"telemetry.bin").write_bytes(raw[off:off+SIZE])
+                # WRAM can contain injected application code; keep only requested telemetry in return ZIP.
+                wram.unlink()
+                if not all(result["checks"].values()):failures.append(name+": telemetry checks")
+            except (OSError,ValueError,struct.error) as exc:
+                result["decode_error"]=str(exc);failures.append(name+": decode")
+                if wram.exists():
+                    result["wram_sha256"]=hash_file(wram);wram.unlink()
+        cases=summary["cases"]
+        def compare(label,names,fn):
+            if all("telemetry" in cases.get(n,{}) for n in names):
+                outcome=fn(*(cases[n]["telemetry"] for n in names))
+                summary["comparisons"][label]=outcome
+                if not outcome:failures.append(label)
+        compare("paused_to_one_step",["paused","one_step"],lambda x,y:y["ticks"]-x["ticks"]==1 and y["steps"]-x["steps"]==1)
+        compare("hud_on_off_terminal_state",["hud_on_route","hud_off_route"],lambda x,y:y["page"]==0 and x["page"]!=0 and all(x[k]==y[k] for k in ("ticks","pos_x","pos_y","pos_z","vel_x","vel_y","vel_z","grounded")))
+        # Different observed field cadence can invalidate HUD equivalence; report, don't hide it.
+        summary["status"]="pass" if not failures else "review"
+    except (OSError,ValueError,RuntimeError) as exc:
+        failures.append(str(exc));summary["status"]="failed"
+    finally:
+        summary["failures"]=failures
+        (work/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")
+        with zipfile.ZipFile(archive,"w",zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+            for f in sorted(work.rglob("*")):
+                if f.is_file() and f.name!="wram-high.bin":z.write(f,f.relative_to(work))
+        print(f"\n[xtreme] {summary['status']}: {archive}",flush=True)
+        print("[xtreme] Send this ZIP in chat; review logs for local paths first.",flush=True)
+    return 0 if summary["status"]=="pass" else 1
+
+if __name__=="__main__":
+    sys.exit(main())
