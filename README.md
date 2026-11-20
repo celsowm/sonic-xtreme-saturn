@@ -2,9 +2,13 @@
 
 Unofficial fan-project concept: an original third-person 3D action platformer for Sega Saturn, inspired by the visual direction of the cancelled Sonic X-treme and the movement of Sonic Adventure.
 
-**Status: bootstrap / hardware smoke test, not a playable game.** Not affiliated with Sega. No proprietary game assets included.
+**Status: authoring greybox + hardware smoke test, not a playable game.** Not affiliated with Sega. No proprietary game assets included.
 
 Built on [LibSaturn](https://github.com/celsowm/libsaturn) and the companion [Blender Toolkit](https://github.com/celsowm/libsaturn-blender).
+
+## First original stage fixture
+
+[Jade Gully greybox generation](docs/GREYBOX.md) creates a local .blend and separate scene/geometry exports. CI runs the generation in headless Blender; Saturn loading is not implemented yet.
 
 ## Build the smoke test
 Install the LibSaturn SDK using its documented saturn-release preset. Set SDK to the absolute installation prefix, then:

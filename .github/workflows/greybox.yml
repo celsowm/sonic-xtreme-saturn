@@ -1,0 +1,26 @@
+name: Greybox authoring
+on: [push, pull_request]
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: celsowm/libsaturn-blender
+          ref: 573fd8aa63c6ef0698f455b7cbd8afaba597d2ce
+          path: toolkit
+          persist-credentials: false
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - run: blender --version
+      - run: |
+          blender --background --factory-startup --python-exit-code 1 --python tools/create_jade_gully.py -- toolkit build/jade-gully
+          blender --background --factory-startup --python-exit-code 1 --python tools/create_jade_gully.py -- toolkit build/repeat
+          for file in jade_gully.json jade_gully.render.obj jade_gully.collision.obj; do
+            cmp "build/jade-gully/$file" "build/repeat/$file"
+          done
+          python toolkit/tools/validate_scene.py build/jade-gully/jade_gully.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jade-gully-greybox
+          path: build/jade-gully/
