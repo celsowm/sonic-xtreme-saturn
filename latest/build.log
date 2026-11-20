@@ -21,16 +21,16 @@ OK
 }
 [xtreme] Building stage layout: adventure
 [adventure] Contract validated: {'routes': 4, 'zones': 6, 'entities': 13, 'props': 10, 'walkable_clearings': 2, 'path_segments': 22, 'corridor_triangles': 44, 'cliff_triangles': 88, 'prop_triangle_budget': 80, 'face_budget_total': 234, 'face_capacity': 256}
-[adventure] palm_start: 186 -> 7 triangles; 21 live vertices; budget 8
-[adventure] palm_basin: 200 -> 7 triangles; 21 live vertices; budget 8
-[adventure] palm_temple: 186 -> 7 triangles; 21 live vertices; budget 8
-[adventure] rock_fork: 80 -> 5 triangles; 11 live vertices; budget 6
-[adventure] rock_temple: 80 -> 5 triangles; 11 live vertices; budget 6
-[adventure] waterfall_cliff: 34 -> 7 triangles; 15 live vertices; budget 8
-[adventure] temple_pillar: 186 -> 9 triangles; 20 live vertices; budget 10
-[adventure] temple_gate: 500 -> 9 triangles; 17 live vertices; budget 10
-[adventure] basin_bush: 32 -> 5 triangles; 15 live vertices; budget 6
-[adventure] bridge_waterfall: 220 -> 9 triangles; 23 live vertices; budget 10
+[adventure] palm_start: 186 -> 7 triangles; 21 live vertices; removed 0 zero-area faces; budget 8
+[adventure] palm_basin: 200 -> 7 triangles; 21 live vertices; removed 0 zero-area faces; budget 8
+[adventure] palm_temple: 186 -> 7 triangles; 21 live vertices; removed 0 zero-area faces; budget 8
+[adventure] rock_fork: 80 -> 5 triangles; 11 live vertices; removed 0 zero-area faces; budget 6
+[adventure] rock_temple: 80 -> 5 triangles; 11 live vertices; removed 0 zero-area faces; budget 6
+[adventure] waterfall_cliff: 34 -> 7 triangles; 15 live vertices; removed 0 zero-area faces; budget 8
+[adventure] temple_pillar: 186 -> 9 triangles; 20 live vertices; removed 0 zero-area faces; budget 10
+[adventure] temple_gate: 500 -> 7 triangles; 17 live vertices; removed 2 zero-area faces; budget 10
+[adventure] basin_bush: 32 -> 5 triangles; 15 live vertices; removed 0 zero-area faces; budget 6
+[adventure] bridge_waterfall: 220 -> 9 triangles; 23 live vertices; removed 0 zero-area faces; budget 10
 Info: Saved as "jade_gully.blend"
 [adventure] 13 markers, render/collision exports ready
 [adventure] This candidate is NOT qualified on Saturn until Ymir passes.
@@ -41,9 +41,11 @@ Blender quit
 -- Generating done (0.0s)
 -- Build files have been written to: <DEV>/lib-saturn/build/sdk
 [0/2] Re-checking globbed directories...
-ninja: no work to do.
+[1/4] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/water.cpp.obj
+[2/4] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/water_sim.cpp.obj
+[3/4] Linking CXX static library libsaturn.a
 -- Install configuration: "Release"
--- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn.a
+-- Installing: <DEV>/saturn-prefix/lib/libsaturn.a
 -- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn_startup.a
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/sound_driver.h
@@ -115,6 +117,7 @@ ninja: no work to do.
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/texture_memory.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/cdfs.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/follow_camera2d.h
+-- Installing: <DEV>/saturn-prefix/include/saturn/water_sim.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/cdda.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/physics2_world.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/fade3d.h
@@ -134,7 +137,7 @@ ninja: no work to do.
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/character_asset_format.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/character2.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/spatial3.h
--- Up-to-date: <DEV>/saturn-prefix/include/saturn/water.h
+-- Installing: <DEV>/saturn-prefix/include/saturn/water.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/resource_plan.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/video.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/exec.h
@@ -246,15 +249,24 @@ ninja: no work to do.
 -- Found assembler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc
 -- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
 -- Repository Sonic R skeletal actor: <GAME>/assets/sonic-r/lod-160
--- Configuring done (0.7s)
+-- Configuring done (0.5s)
 -- Generating done (0.0s)
 -- Build files have been written to: <GAME>/build/game
 [0/2] Re-checking globbed directories...
 [1/8] Generating generated/greybox.h, generated/collision.h
-FAILED: [code=2] generated/greybox.h generated/collision.h <GAME>/build/game/generated/greybox.h <GAME>/build/game/generated/collision.h 
-cd <GAME>/build/game && /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 <GAME>/tools/bake_greybox.py <GAME>/build/jade-gully-adventure/jade_gully.render.obj <GAME>/build/jade-gully-adventure/jade_gully.json <GAME>/build/game/generated/greybox.h --collision <GAME>/build/jade-gully-adventure/jade_gully.collision.obj --collision-output <GAME>/build/game/generated/collision.h
-usage: bake_greybox.py [-h] [--collision COLLISION]
-                       [--collision-output COLLISION_OUTPUT]
-                       obj scene output
-bake_greybox.py: error: degenerate triangle after quantization
-ninja: build stopped: subcommand failed.
+[2/8] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
+[3/8] Building C object CMakeFiles/xtreme.dir/src/sonic_actor.c.obj
+[4/8] Building C object CMakeFiles/xtreme.dir/assets/sonic-r/lod-160/sonic.c.obj
+[5/8] Building C object CMakeFiles/xtreme.dir/src/main.c.obj
+[6/8] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
+-- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
+[7/8] Creating Saturn disc image xtreme
+-- [boot-memory] _start=0x06004000, 241208 initialized bytes match ELF
+-- [native] validated IP size=4096 bytes; redistributable=False
+-- [check] native AIP instructions, System ID, payloads and handoff OK
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 241208, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 317 MODE1/2352 sectors
+-- [check] disc image OK: 317 MODE1/2352 sectors
+-- disc: <GAME>/build/game/disc/xtreme.cue
+[xtreme] Disc: <GAME>/build/game/disc/xtreme.cue
+[xtreme] Blender: <GAME>/build/jade-gully-adventure/jade_gully.blend

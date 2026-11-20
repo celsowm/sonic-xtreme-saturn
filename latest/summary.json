@@ -1,11 +1,2385 @@
 {
-  "status": "failed",
-  "game_commit": "844c24f1369eafe1ecf7f88c62c6fe4f7108abae",
+  "status": "pass",
+  "game_commit": "042c228ac69068dcc031cc6acc486dd32b321d4f",
   "sdk_commit": "08ad63b5923c97e498078628192a64ad66ce50a2",
   "game_dirty": "",
-  "sdk_dirty": "M docs/WATER_BENCHMARKS.md\n M examples/water_lab/main.c\n M harness/run-water-lab.sh\n M harness/tests/test_water_lab.py\n M src/core/math3d/logic.hpp\n M tests/host/test_math3d_logic.cpp",
+  "sdk_dirty": "M Makefile\n M cmake/LibSaturnSources.cmake\n M docs/WATER_BENCHMARKS.md\n M docs/WATER_RENDERING.md\n M examples/water_lab/main.c\n M harness/run-water-lab.sh\n M harness/tests/test_water_lab.py\n M include/saturn/water.h\n M src/core/math3d/logic.hpp\n M src/graphics/3d/rendering/water.cpp\n M tests/host/test_math3d_logic.cpp\n M tests/host/test_water.cpp",
   "boot": "Ymir injection via CUE + app.bin, not optical boot",
-  "cases": {},
+  "cases": {
+    "idle": {
+      "exit": 0,
+      "frames_requested": 130,
+      "screenshots_expected": [
+        40,
+        90,
+        129
+      ],
+      "screenshots_missing": [],
+      "boot": {
+        "magic": 1480741937,
+        "version": 1,
+        "stage": 7,
+        "error": 0,
+        "main_entries": 1,
+        "frames": 62
+      },
+      "boot_address": "0x603e7f0",
+      "boot_method": "map",
+      "sonic": {
+        "magic": 1398292803,
+        "version": 3,
+        "enabled": 1,
+        "ready": 1,
+        "error": 0,
+        "vertices": 125,
+        "faces": 159,
+        "textures": 148,
+        "joints": 11,
+        "clip": 0,
+        "ticks": 124,
+        "draws": 62,
+        "animation_ms": 1,
+        "skin_ms": 1,
+        "draw_ms": 4,
+        "pos_x": 0,
+        "pos_y": 727569,
+        "pos_z": -131072,
+        "registry_capacity": 164,
+        "init_stage": 7,
+        "vram_free": 264232,
+        "clip_mask": 25,
+        "clip_changes": 3,
+        "takeoffs": 0,
+        "landings": 1,
+        "ground_ticks": 111,
+        "air_ticks": 13,
+        "position_m": [
+          0.0,
+          11.101821899414062,
+          -2.0
+        ]
+      },
+      "sonic_address": "0x604a680",
+      "sonic_method": "map",
+      "pc_after_run": "0x600d634",
+      "telemetry": {
+        "magic": 1481917506,
+        "version": 3,
+        "bytes": 336,
+        "frames": 62,
+        "ticks": 122,
+        "ticks_frame": 2,
+        "dropped_ms": 0,
+        "error": 0,
+        "hud_error": 0,
+        "page": 1,
+        "geometry": 0,
+        "viewer": 0,
+        "grounded": 1,
+        "respawns": 0,
+        "pos_x": 0,
+        "pos_y": 643985,
+        "pos_z": -131072,
+        "vel_x": 0,
+        "vel_y": 0,
+        "vel_z": 0,
+        "normal_x": 0,
+        "normal_y": 65290,
+        "normal_z": -5665,
+        "eye_x": 0,
+        "eye_y": 971670,
+        "eye_z": 524288,
+        "target_x": 0,
+        "target_y": 709526,
+        "target_z": -393216,
+        "input_x": 0,
+        "input_z": 0,
+        "held": 0,
+        "pressed": 0,
+        "analog_valid": 0,
+        "analog_x": 0,
+        "analog_y": 0,
+        "jump_pending": 0,
+        "ray_valid": 1,
+        "ray_hit": 1,
+        "ray_face": 0,
+        "ray_origin_x": 0,
+        "ray_origin_y": 686584,
+        "ray_origin_z": -131072,
+        "ray_point_x": 0,
+        "ray_point_y": 643985,
+        "ray_point_z": -131072,
+        "ray_normal_x": 0,
+        "ray_normal_y": 65290,
+        "ray_normal_z": -5665,
+        "ray_length": 98303,
+        "ray_distance": 42599,
+        "frame_ms": 33,
+        "submit_x10": 300,
+        "sim_ms": 1,
+        "camera_ms": 0,
+        "scene_ms": 21,
+        "flush_ms": 5,
+        "hud_ms": 0,
+        "submitted": 314,
+        "flushed": 314,
+        "culled": 93,
+        "clipped": 0,
+        "skipped": 0,
+        "rejected": 0,
+        "blocked": 0,
+        "world_commands": 314,
+        "command_capacity": 2048,
+        "hud_reserved": 234,
+        "hud_used": 97,
+        "frame_stats_valid": 1,
+        "late_swaps": 0,
+        "draw_waits": 0,
+        "draw_timeouts": 0,
+        "vram_free": 264232,
+        "paused": 0,
+        "steps": 0,
+        "ray_tick": 122,
+        "ray_sampled": 1,
+        "sweep_queries": 0,
+        "sweep_hits": 0,
+        "jumps": 0,
+        "landings": 1,
+        "snapshot_begin": 62,
+        "snapshot_end": 62,
+        "position_m": [
+          0.0,
+          9.826431274414062,
+          -2.0
+        ],
+        "velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "submission_rate_hz": 30.0
+      },
+      "telemetry_address": "0x603efb8",
+      "address_method": "map",
+      "checks": {
+        "guest_running": true,
+        "world_error_zero": true,
+        "hud_error_zero": true,
+        "overlay_within_reservation": true,
+        "expected_pause": true,
+        "frame_history_available": true,
+        "frame_p95_30_target": true,
+        "sonic_rendered": true,
+        "actor_sim_sync": true,
+        "actor_position_sync": true,
+        "idle_clip_visited": true,
+        "submission_rate_30_target": true,
+        "terminal_frame_budget": true,
+        "no_draw_timeout": true,
+        "no_late_swap": true,
+        "no_dropped_physics_time": true,
+        "command_headroom": true
+      },
+      "frame_pacing": {
+        "version": 1,
+        "count": 62,
+        "total_frames_recorded": 62,
+        "last_frames": [
+          {
+            "frame_ms": 6,
+            "sim_ms": 0,
+            "scene_ms": 20,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 2,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          }
+        ],
+        "frame_ms_p50": 33,
+        "frame_ms_p95": 34,
+        "frame_ms_p99": 34,
+        "frame_ms_max": 34,
+        "scene_ms_p95": 21,
+        "sim_ms_p95": 1,
+        "flush_ms_p95": 5
+      },
+      "frame_pacing_address": "0x603e3e0",
+      "frame_pacing_method": "map",
+      "performance_frame_pacing": {
+        "recent_samples": 62,
+        "frame_ms_p50": 33,
+        "frame_ms_p95": 34,
+        "frame_ms_p99": 34,
+        "frame_ms_max": 34,
+        "scene_ms_p95": 21,
+        "independent_display_fps": null
+      },
+      "performance": {
+        "target_display_fps": 30,
+        "measured_submission_rate_hz": 30.0,
+        "terminal_frame_ms": 33,
+        "simulated_physics_hz": 60,
+        "display_cadence_independently_verified": false
+      }
+    },
+    "jump_in_place": {
+      "exit": 0,
+      "frames_requested": 200,
+      "screenshots_expected": [
+        64,
+        72,
+        84,
+        105,
+        150,
+        199
+      ],
+      "screenshots_missing": [],
+      "boot": {
+        "magic": 1480741937,
+        "version": 1,
+        "stage": 7,
+        "error": 0,
+        "main_entries": 1,
+        "frames": 97
+      },
+      "boot_address": "0x603e7f0",
+      "boot_method": "map",
+      "sonic": {
+        "magic": 1398292803,
+        "version": 3,
+        "enabled": 1,
+        "ready": 1,
+        "error": 0,
+        "vertices": 125,
+        "faces": 159,
+        "textures": 148,
+        "joints": 11,
+        "clip": 0,
+        "ticks": 194,
+        "draws": 97,
+        "animation_ms": 1,
+        "skin_ms": 1,
+        "draw_ms": 4,
+        "pos_x": 0,
+        "pos_y": 727569,
+        "pos_z": -131072,
+        "registry_capacity": 164,
+        "init_stage": 7,
+        "vram_free": 264232,
+        "clip_mask": 29,
+        "clip_changes": 7,
+        "takeoffs": 1,
+        "landings": 2,
+        "ground_ticks": 142,
+        "air_ticks": 52,
+        "position_m": [
+          0.0,
+          11.101821899414062,
+          -2.0
+        ]
+      },
+      "sonic_address": "0x604a680",
+      "sonic_method": "map",
+      "pc_after_run": "0x600d614",
+      "telemetry": {
+        "magic": 1481917506,
+        "version": 3,
+        "bytes": 336,
+        "frames": 97,
+        "ticks": 192,
+        "ticks_frame": 2,
+        "dropped_ms": 0,
+        "error": 0,
+        "hud_error": 0,
+        "page": 1,
+        "geometry": 0,
+        "viewer": 0,
+        "grounded": 1,
+        "respawns": 0,
+        "pos_x": 0,
+        "pos_y": 643985,
+        "pos_z": -131072,
+        "vel_x": 0,
+        "vel_y": 0,
+        "vel_z": 0,
+        "normal_x": 0,
+        "normal_y": 65290,
+        "normal_z": -5665,
+        "eye_x": 0,
+        "eye_y": 971670,
+        "eye_z": 524288,
+        "target_x": 0,
+        "target_y": 709526,
+        "target_z": -393216,
+        "input_x": 0,
+        "input_z": 0,
+        "held": 0,
+        "pressed": 0,
+        "analog_valid": 0,
+        "analog_x": 0,
+        "analog_y": 0,
+        "jump_pending": 0,
+        "ray_valid": 1,
+        "ray_hit": 1,
+        "ray_face": 0,
+        "ray_origin_x": 0,
+        "ray_origin_y": 686584,
+        "ray_origin_z": -131072,
+        "ray_point_x": 0,
+        "ray_point_y": 643985,
+        "ray_point_z": -131072,
+        "ray_normal_x": 0,
+        "ray_normal_y": 65290,
+        "ray_normal_z": -5665,
+        "ray_length": 98303,
+        "ray_distance": 42599,
+        "frame_ms": 33,
+        "submit_x10": 300,
+        "sim_ms": 1,
+        "camera_ms": 0,
+        "scene_ms": 21,
+        "flush_ms": 4,
+        "hud_ms": 1,
+        "submitted": 315,
+        "flushed": 315,
+        "culled": 92,
+        "clipped": 0,
+        "skipped": 0,
+        "rejected": 0,
+        "blocked": 0,
+        "world_commands": 315,
+        "command_capacity": 2048,
+        "hud_reserved": 234,
+        "hud_used": 97,
+        "frame_stats_valid": 1,
+        "late_swaps": 0,
+        "draw_waits": 0,
+        "draw_timeouts": 0,
+        "vram_free": 264232,
+        "paused": 0,
+        "steps": 0,
+        "ray_tick": 192,
+        "ray_sampled": 1,
+        "sweep_queries": 0,
+        "sweep_hits": 0,
+        "jumps": 1,
+        "landings": 2,
+        "snapshot_begin": 97,
+        "snapshot_end": 97,
+        "position_m": [
+          0.0,
+          9.826431274414062,
+          -2.0
+        ],
+        "velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "submission_rate_hz": 30.0
+      },
+      "telemetry_address": "0x603efb8",
+      "address_method": "map",
+      "checks": {
+        "guest_running": true,
+        "world_error_zero": true,
+        "hud_error_zero": true,
+        "overlay_within_reservation": true,
+        "expected_pause": true,
+        "jump_observed": true,
+        "landed": true,
+        "no_respawn": true,
+        "frame_history_available": true,
+        "frame_p95_30_target": true,
+        "sonic_rendered": true,
+        "actor_sim_sync": true,
+        "actor_position_sync": true,
+        "jump_clip_visited": true,
+        "falling_clip_visited": true,
+        "landing_clip_visited": true,
+        "takeoff_observed": true,
+        "landing_observed": true,
+        "submission_rate_30_target": true,
+        "terminal_frame_budget": true,
+        "no_draw_timeout": true,
+        "no_late_swap": true,
+        "no_dropped_physics_time": true,
+        "command_headroom": true
+      },
+      "frame_pacing": {
+        "version": 1,
+        "count": 64,
+        "total_frames_recorded": 97,
+        "last_frames": [
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          }
+        ],
+        "frame_ms_p50": 33,
+        "frame_ms_p95": 34,
+        "frame_ms_p99": 34,
+        "frame_ms_max": 34,
+        "scene_ms_p95": 21,
+        "sim_ms_p95": 1,
+        "flush_ms_p95": 5
+      },
+      "frame_pacing_address": "0x603e3e0",
+      "frame_pacing_method": "map",
+      "performance_frame_pacing": {
+        "recent_samples": 64,
+        "frame_ms_p50": 33,
+        "frame_ms_p95": 34,
+        "frame_ms_p99": 34,
+        "frame_ms_max": 34,
+        "scene_ms_p95": 21,
+        "independent_display_fps": null
+      },
+      "performance": {
+        "target_display_fps": 30,
+        "measured_submission_rate_hz": 30.0,
+        "terminal_frame_ms": 33,
+        "simulated_physics_hz": 60,
+        "display_cadence_independently_verified": false
+      }
+    },
+    "curve_route": {
+      "exit": 0,
+      "frames_requested": 145,
+      "screenshots_expected": [
+        64,
+        95,
+        108,
+        125,
+        144
+      ],
+      "screenshots_missing": [],
+      "boot": {
+        "magic": 1480741937,
+        "version": 1,
+        "stage": 7,
+        "error": 0,
+        "main_entries": 1,
+        "frames": 70
+      },
+      "boot_address": "0x603e7f0",
+      "boot_method": "map",
+      "sonic": {
+        "magic": 1398292803,
+        "version": 3,
+        "enabled": 1,
+        "ready": 1,
+        "error": 0,
+        "vertices": 125,
+        "faces": 159,
+        "textures": 148,
+        "joints": 11,
+        "clip": 1,
+        "ticks": 138,
+        "draws": 70,
+        "animation_ms": 1,
+        "skin_ms": 1,
+        "draw_ms": 4,
+        "pos_x": 262466,
+        "pos_y": 255950,
+        "pos_z": -2184660,
+        "registry_capacity": 164,
+        "init_stage": 7,
+        "vram_free": 264232,
+        "clip_mask": 27,
+        "clip_changes": 4,
+        "takeoffs": 0,
+        "landings": 1,
+        "ground_ticks": 125,
+        "air_ticks": 13,
+        "position_m": [
+          4.004913330078125,
+          3.905487060546875,
+          -33.33526611328125
+        ]
+      },
+      "sonic_address": "0x604a680",
+      "sonic_method": "map",
+      "pc_after_run": "0x600759e",
+      "telemetry": {
+        "magic": 1481917506,
+        "version": 3,
+        "bytes": 336,
+        "frames": 70,
+        "ticks": 138,
+        "ticks_frame": 2,
+        "dropped_ms": 0,
+        "error": 0,
+        "hud_error": 0,
+        "page": 1,
+        "geometry": 0,
+        "viewer": 0,
+        "grounded": 1,
+        "respawns": 0,
+        "pos_x": 262466,
+        "pos_y": 172366,
+        "pos_z": -2184660,
+        "vel_x": 101,
+        "vel_y": 0,
+        "vel_z": -29399,
+        "normal_x": 6377,
+        "normal_y": 63082,
+        "normal_z": -16581,
+        "eye_x": 262147,
+        "eye_y": 541247,
+        "eye_z": -1438219,
+        "target_x": 262551,
+        "target_y": 279103,
+        "target_z": -2473319,
+        "input_x": 0,
+        "input_z": 0,
+        "held": 0,
+        "pressed": 0,
+        "analog_valid": 0,
+        "analog_x": 0,
+        "analog_y": 0,
+        "jump_pending": 0,
+        "ray_valid": 1,
+        "ray_hit": 1,
+        "ray_face": 5,
+        "ray_origin_x": 262466,
+        "ray_origin_y": 222701,
+        "ray_origin_z": -2184660,
+        "ray_point_x": 262466,
+        "ray_point_y": 172366,
+        "ray_point_z": -2184660,
+        "ray_normal_x": 6377,
+        "ray_normal_y": 63082,
+        "ray_normal_z": -16581,
+        "ray_length": 98303,
+        "ray_distance": 50335,
+        "frame_ms": 33,
+        "submit_x10": 300,
+        "sim_ms": 1,
+        "camera_ms": 0,
+        "scene_ms": 22,
+        "flush_ms": 7,
+        "hud_ms": 1,
+        "submitted": 306,
+        "flushed": 289,
+        "culled": 118,
+        "clipped": 10,
+        "skipped": 0,
+        "rejected": 0,
+        "blocked": 0,
+        "world_commands": 287,
+        "command_capacity": 2048,
+        "hud_reserved": 234,
+        "hud_used": 99,
+        "frame_stats_valid": 1,
+        "late_swaps": 0,
+        "draw_waits": 0,
+        "draw_timeouts": 0,
+        "vram_free": 264232,
+        "paused": 0,
+        "steps": 0,
+        "ray_tick": 138,
+        "ray_sampled": 1,
+        "sweep_queries": 0,
+        "sweep_hits": 0,
+        "jumps": 0,
+        "landings": 1,
+        "snapshot_begin": 70,
+        "snapshot_end": 70,
+        "position_m": [
+          4.004913330078125,
+          2.630096435546875,
+          -33.33526611328125
+        ],
+        "velocity_m_s": [
+          0.09246826171875,
+          0.0,
+          -26.91558837890625
+        ],
+        "submission_rate_hz": 30.0
+      },
+      "telemetry_address": "0x603efb8",
+      "address_method": "map",
+      "checks": {
+        "guest_running": true,
+        "world_error_zero": true,
+        "hud_error_zero": true,
+        "overlay_within_reservation": true,
+        "expected_pause": true,
+        "progress": true,
+        "steered": true,
+        "no_respawn": true,
+        "grounded": true,
+        "frame_history_available": true,
+        "frame_p95_30_target": true,
+        "sonic_rendered": true,
+        "actor_sim_sync": true,
+        "actor_position_sync": true,
+        "run_clip_visited": true,
+        "animation_transitions": true,
+        "submission_rate_30_target": true,
+        "terminal_frame_budget": true,
+        "no_draw_timeout": true,
+        "no_late_swap": true,
+        "no_dropped_physics_time": true,
+        "command_headroom": true
+      },
+      "frame_pacing": {
+        "version": 1,
+        "count": 64,
+        "total_frames_recorded": 70,
+        "last_frames": [
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 23,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 23,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 23,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 23,
+            "flush_ms": 7
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 7
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 7
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 23,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 23,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 23,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 23,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 23,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 7
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 7
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 6
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 22,
+            "flush_ms": 7
+          }
+        ],
+        "frame_ms_p50": 33,
+        "frame_ms_p95": 34,
+        "frame_ms_p99": 34,
+        "frame_ms_max": 34,
+        "scene_ms_p95": 23,
+        "sim_ms_p95": 1,
+        "flush_ms_p95": 7
+      },
+      "frame_pacing_address": "0x603e3e0",
+      "frame_pacing_method": "map",
+      "performance_frame_pacing": {
+        "recent_samples": 64,
+        "frame_ms_p50": 33,
+        "frame_ms_p95": 34,
+        "frame_ms_p99": 34,
+        "frame_ms_max": 34,
+        "scene_ms_p95": 23,
+        "independent_display_fps": null
+      },
+      "performance": {
+        "target_display_fps": 30,
+        "measured_submission_rate_hz": 30.0,
+        "terminal_frame_ms": 33,
+        "simulated_physics_hz": 60,
+        "display_cadence_independently_verified": false
+      }
+    },
+    "hud_pages": {
+      "exit": 0,
+      "frames_requested": 260,
+      "screenshots_expected": [
+        45,
+        75,
+        105,
+        135,
+        165,
+        195,
+        245,
+        259
+      ],
+      "screenshots_missing": [],
+      "boot": {
+        "magic": 1480741937,
+        "version": 1,
+        "stage": 7,
+        "error": 0,
+        "main_entries": 1,
+        "frames": 127
+      },
+      "boot_address": "0x603e7f0",
+      "boot_method": "map",
+      "sonic": {
+        "magic": 1398292803,
+        "version": 3,
+        "enabled": 1,
+        "ready": 1,
+        "error": 0,
+        "vertices": 125,
+        "faces": 159,
+        "textures": 148,
+        "joints": 11,
+        "clip": 0,
+        "ticks": 204,
+        "draws": 127,
+        "animation_ms": 1,
+        "skin_ms": 1,
+        "draw_ms": 3,
+        "pos_x": 0,
+        "pos_y": 727569,
+        "pos_z": -131072,
+        "registry_capacity": 164,
+        "init_stage": 7,
+        "vram_free": 264232,
+        "clip_mask": 25,
+        "clip_changes": 3,
+        "takeoffs": 0,
+        "landings": 1,
+        "ground_ticks": 191,
+        "air_ticks": 13,
+        "position_m": [
+          0.0,
+          11.101821899414062,
+          -2.0
+        ]
+      },
+      "sonic_address": "0x604a680",
+      "sonic_method": "map",
+      "pc_after_run": "0x600ff30",
+      "telemetry": {
+        "magic": 1481917506,
+        "version": 3,
+        "bytes": 336,
+        "frames": 127,
+        "ticks": 204,
+        "ticks_frame": 0,
+        "dropped_ms": 0,
+        "error": 0,
+        "hud_error": 0,
+        "page": 0,
+        "geometry": 0,
+        "viewer": 1,
+        "grounded": 1,
+        "respawns": 0,
+        "pos_x": 0,
+        "pos_y": 643985,
+        "pos_z": -131072,
+        "vel_x": 0,
+        "vel_y": 0,
+        "vel_z": 0,
+        "normal_x": 0,
+        "normal_y": 65290,
+        "normal_z": -5665,
+        "eye_x": 4915200,
+        "eye_y": 6225920,
+        "eye_z": -2293760,
+        "target_x": 0,
+        "target_y": 196608,
+        "target_z": -4325376,
+        "input_x": 0,
+        "input_z": 0,
+        "held": 0,
+        "pressed": 0,
+        "analog_valid": 0,
+        "analog_x": 0,
+        "analog_y": 0,
+        "jump_pending": 0,
+        "ray_valid": 1,
+        "ray_hit": 1,
+        "ray_face": 0,
+        "ray_origin_x": 0,
+        "ray_origin_y": 686584,
+        "ray_origin_z": -131072,
+        "ray_point_x": 0,
+        "ray_point_y": 643985,
+        "ray_point_z": -131072,
+        "ray_normal_x": 0,
+        "ray_normal_y": 65290,
+        "ray_normal_z": -5665,
+        "ray_length": 98303,
+        "ray_distance": 42599,
+        "frame_ms": 33,
+        "submit_x10": 300,
+        "sim_ms": 0,
+        "camera_ms": 0,
+        "scene_ms": 22,
+        "flush_ms": 4,
+        "hud_ms": 0,
+        "submitted": 263,
+        "flushed": 263,
+        "culled": 144,
+        "clipped": 0,
+        "skipped": 0,
+        "rejected": 0,
+        "blocked": 0,
+        "world_commands": 263,
+        "command_capacity": 2048,
+        "hud_reserved": 0,
+        "hud_used": 0,
+        "frame_stats_valid": 1,
+        "late_swaps": 0,
+        "draw_waits": 0,
+        "draw_timeouts": 0,
+        "vram_free": 264232,
+        "paused": 0,
+        "steps": 0,
+        "ray_tick": 204,
+        "ray_sampled": 0,
+        "sweep_queries": 0,
+        "sweep_hits": 0,
+        "jumps": 0,
+        "landings": 1,
+        "snapshot_begin": 127,
+        "snapshot_end": 127,
+        "position_m": [
+          0.0,
+          9.826431274414062,
+          -2.0
+        ],
+        "velocity_m_s": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "submission_rate_hz": 30.0
+      },
+      "telemetry_address": "0x603efb8",
+      "address_method": "map",
+      "checks": {
+        "guest_running": true,
+        "world_error_zero": true,
+        "hud_error_zero": true,
+        "overlay_within_reservation": true,
+        "expected_pause": true,
+        "frame_history_available": true,
+        "frame_p95_30_target": true,
+        "sonic_rendered": true,
+        "actor_sim_sync": true,
+        "actor_position_sync": true,
+        "submission_rate_30_target": true,
+        "terminal_frame_budget": true,
+        "no_draw_timeout": true,
+        "no_late_swap": true,
+        "no_dropped_physics_time": true,
+        "command_headroom": true
+      },
+      "frame_pacing": {
+        "version": 1,
+        "count": 64,
+        "total_frames_recorded": 127,
+        "last_frames": [
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 20,
+            "flush_ms": 5
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 1,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 22,
+            "flush_ms": 3
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 22,
+            "flush_ms": 3
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 22,
+            "flush_ms": 3
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 22,
+            "flush_ms": 3
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 22,
+            "flush_ms": 3
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 22,
+            "flush_ms": 3
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 22,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 34,
+            "sim_ms": 0,
+            "scene_ms": 21,
+            "flush_ms": 4
+          },
+          {
+            "frame_ms": 33,
+            "sim_ms": 0,
+            "scene_ms": 22,
+            "flush_ms": 4
+          }
+        ],
+        "frame_ms_p50": 33,
+        "frame_ms_p95": 34,
+        "frame_ms_p99": 34,
+        "frame_ms_max": 34,
+        "scene_ms_p95": 22,
+        "sim_ms_p95": 1,
+        "flush_ms_p95": 5
+      },
+      "frame_pacing_address": "0x603e3e0",
+      "frame_pacing_method": "map",
+      "performance_frame_pacing": {
+        "recent_samples": 64,
+        "frame_ms_p50": 33,
+        "frame_ms_p95": 34,
+        "frame_ms_p99": 34,
+        "frame_ms_max": 34,
+        "scene_ms_p95": 22,
+        "independent_display_fps": null
+      },
+      "performance": {
+        "target_display_fps": 30,
+        "measured_submission_rate_hz": 30.0,
+        "terminal_frame_ms": 33,
+        "simulated_physics_hz": 60,
+        "display_cadence_independently_verified": false
+      }
+    }
+  },
   "comparisons": {},
   "sonic_asset_present": true,
   "sonic_asset_dir": "assets/sonic-r/lod-160",
@@ -23,8 +2397,10 @@
   },
   "probe_sha256": "d0c29fe9865aeae642fd3d6040dfefd41c47fb30d5c7af39d592423098513391",
   "bios_sha256": "96e106f740ab448cf89f0dd49dfbac7fe5391cb6bd6e14ad5e3061c13330266f",
-  "build_exit": 2,
-  "failures": [
-    "build failed; see build.log"
-  ]
+  "build_exit": 0,
+  "app_sha256": "4d1f0e50065571d5cd5ebad3ac95e0cdb4015b4df1798dfa39f4516769ccc0de",
+  "cue_sha256": "1fc5c7464c17d92e90f8fb1f302ad5c9aa6639c23d04c2b674ac8f9d1e08bdba",
+  "bin_sha256": "96cdee951852f36bf98c67253fa1b3919a34010c57dbb299a9d2976c8ecf4511",
+  "iso_sha256": "613d710386dbd0be4caf052a36398acd8c27b40032159bd1389ee44d6d6d6e72",
+  "failures": []
 }
