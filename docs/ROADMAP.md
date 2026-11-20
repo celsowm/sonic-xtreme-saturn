@@ -1,6 +1,6 @@
 # Technical roadmap
 
-Baseline inspected: LibSaturn af86f8518f0d014f2a752ca43035d2278bc9bf8f. Target stock Saturn, NTSC 320x224 and 30 displayed FPS as initial goals (not measured). PAL and optional RAM cart enhancements follow stock qualification. Prefer bounded data and fixed-point math; no dynamic allocation in frame hot paths.
+Baseline inspected: LibSaturn af86f8518f0d014f2a752ca43035d2278bc9bf8f. **Target stock Saturn, NTSC 320x224 at a stable 30 displayed FPS**, with gameplay physics at a fixed 60 Hz. The goal is an intentionally 30 FPS game, not a temporary concession on the way to 60 FPS. Display FPS has not been independently verified on hardware. PAL and optional RAM cart enhancements follow stock qualification. Prefer bounded data and fixed-point math; no dynamic allocation in frame hot paths.
 
 ## P0: bootstrap
 Installed CMake package (LibSaturn::Saturn, libsaturn_configure_executable, libsaturn_add_disc); smoke test using saturn/app.h and VDP1 rectangle. Verify ELF/map, BIN/CUE, launch in Ymir and Mednafen. Pin the actual SDK revision in evidence.
@@ -45,6 +45,16 @@ Third-person chase, speed-aware look-ahead, obstruction sweeps, volume constrain
 
 ## P4: action stage
 Rings, springs, dash panels, original enemy proxies, homing target scoring, checkpoints, damage/recovery, goal, timer and restart. Stable semantic entity IDs, sector reload rules and replay tests. One polished 3–5 minute target course before new zones. Avoid obligatory scripted movement in normal gameplay.
+
+## Performance target (decision: stable 30 FPS)
+
+The project owner selected **30 FPS** as the definitive visual target on the stock Saturn, including completed and visually rich scenarios. Do not sacrifice the final course, textures, visual effects or readable Sonic animations merely to chase 60 FPS. A 60 Hz **fixed simulation** is retained for movement/collision/input, independent of the 30 Hz rendering cadence (nominally two simulation ticks per rendered frame).
+
+- **Frame budget:** 33.33 ms per presented frame, *including* world/character skinning, camera, scene transform/sort, VDP1 submission/draw, HUD, audio contention and system overhead. Aim below roughly 28–30 ms in representative heavy scenes to leave a small 3–5 ms safety margin for spikes; that margin is a development goal, not a measured result.
+- **Frame pacing:** prefer a regular two-field NTSC presentation cadence; investigate stutter, large p95/p99 frame times, dropped/late swaps and uneven camera motion before lowering the graphics budget.
+- **Acceptance:** measure a route with dense scenery, maximum expected actors/effects, busy camera views, running/jumping and HUD enabled/disabled. Compare sustained cadence, frame-time distribution, face/command counts, VDP1/VDP2/WRAM budgets and physics replay determinism. Qualify on Ymir and Mednafen, and independently verify displayed frames on physical Saturn; the XTDB `submission_rate_hz` field is a **submission rate**, not proof of actual display FPS.
+- **Current evidence:** the repository's Sonic R LOD-160 single-case Ymir idle probe passed at about 30 scene submissions/s, with 159 faces, 125 skinned vertices and 148 textures, but this is *not* a stress test of a finished level. The earlier greybox/proxy rendering at 60 submissions/s is historical headroom evidence, **not a target**.
+- Prioritize stable gameplay and better visuals over speculative simplification. Only create or select more aggressive LODs when worst-case scene measurements or VRAM constraints show they are needed.
 
 ## P5: production
 Use HLOD and sector residency, VDP2 sky/ground/water where appropriate, audio/music through existing music.h and disc scheduler, prefetch around camera routes. Measure contention during transitions; no required cart. Maintain per-pool memory ledger (WRAM-H/L, VDP1, VDP2, SCSP). Compare overdraw, command count, frame-time percentiles, audio underruns and dropped frames at repeatable route checkpoints. Validate hardware timing independently.
