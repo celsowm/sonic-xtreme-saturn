@@ -54,6 +54,7 @@ typedef struct {
     sat_vdp1_texture_t native_textures[SONIC_TEXTURE_COUNT];
     sat_scene3d_material_t materials[SONIC_TEXTURE_COUNT];
     sat_scene3d_instance_t instance;
+    sat_scene3d_instance_binding_t immutable_binding;
     sat_aabb3_t bounds;
     uint8_t current_clip,ready,was_grounded,landing_ticks;
 } sonic_actor_t;
@@ -130,6 +131,15 @@ sat_result_t xtreme_sonic_init(void) {
     actor.instance.cull_backfaces=1u;
     actor.instance.world=&actor.world;
     actor.instance.bounds=&actor.bounds;
+    /* Faces, indices and all indexed8 materials remain immutable for the
+     * lifetime of the character. Validate that binding once at load rather
+     * than inspecting 281 material descriptors on every frame. Geometry and
+     * bounds remain animated and are updated independently each frame. */
+    rc=sat_scene3d_instance_binding_init(&actor.immutable_binding,
+        &actor.mesh,actor.materials,SONIC_TEXTURE_COUNT,
+        sonic_asset.face_texture_indices);
+    if(rc!=SAT_OK)return fail(rc);
+    actor.instance.validated_binding=&actor.immutable_binding;
     actor.ready=1u;
     xtreme_sonic_debug.ready=1u;
     xtreme_sonic_debug.init_stage=7u;
