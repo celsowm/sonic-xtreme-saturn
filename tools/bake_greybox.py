@@ -19,6 +19,8 @@ LIMIT = Decimal(256)
 PALETTE = {
     "main_route": (0, 3),
     "upper_route": (1, 4),
+    "river_route": (0, 3),
+    "ruins_route": (2, 4),
     "trunk": (2, 4),
     "canopy": (3, 3),
     "rock": (2, 4),
