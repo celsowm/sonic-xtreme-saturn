@@ -33,3 +33,9 @@ cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && python3 scripts/qualify-ym
 ```
 
 The result in `latest/idle/boot-telemetry.json`, `latest/idle/sonic-telemetry.json` and `latest/summary.json` distinguishes a startup, asset, texture, or renderer failure without exposing any private source data. Fix that concrete failure before rerunning all eleven replays.
+
+## First working Sonic probe and frame-time baseline
+
+The first private-asset idle Ymir qualification at game commit `44bc3bf`, SDK `08ad63b`, returned PASS with `SAT_OK`, 189 skinned vertices, 286 source faces, 281 material textures, 11 joints, 61 scene submissions and 122 animation ticks, at 320x224. It observed ~30.0 scene submissions/s (33 ms/frame), scene preparation 18 ms, instance submission 7 ms, skinning 1 ms, animation 1 ms, painter flush 4 ms, and 249,504 free VDP1 VRAM bytes. The remaining ten Ymir cases were **not** run with the skinned character yet. Screenshots prove a visible Sonic and Jade Gully but not 60 FPS, gameplay animation transitions, or full-course compatibility.
+
+A small, no-asset-rebake runtime optimization now prevalidates the immutable Sonic face/material binding once at initialization with `sat_scene3d_instance_binding_init`. It is still pending a new measured Ymir replay; never claim an improvement until telemetry confirms it. The Mac harness also accepts `XTREME_SONIC_DIR=/absolute/local/asset/dir` to compare alternative private generated LODs without overwriting the original GLB or C files. The compiler propagates that path into the fresh CMake configuration. Candidate tests must use `--require-sonic` and verify the private source hashes in their summary.
