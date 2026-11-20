@@ -1,12 +1,12 @@
-COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '180', '--out', '<GAME>/build/ymir-evidence-bfzxeokm/paused/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-bfzxeokm/paused/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-bfzxeokm/paused/wram-high.bin', '--screenshot', '90:<GAME>/build/ymir-evidence-bfzxeokm/paused/frame-0090.png', '--screenshot', '118:<GAME>/build/ymir-evidence-bfzxeokm/paused/frame-0118.png', '--screenshot', '165:<GAME>/build/ymir-evidence-bfzxeokm/paused/frame-0165.png', '--screenshot', '179:<GAME>/build/ymir-evidence-bfzxeokm/paused/frame-0179.png']
-[probe] loaded 9 pad script entries from <GAME>/build/ymir-evidence-bfzxeokm/paused/input.pad
-[probe] frame 90 -> <GAME>/build/ymir-evidence-bfzxeokm/paused/frame-0090.png (320x224) audio 0
-[probe] frame 118 -> <GAME>/build/ymir-evidence-bfzxeokm/paused/frame-0118.png (320x224) audio 0
-[probe] frame 165 -> <GAME>/build/ymir-evidence-bfzxeokm/paused/frame-0165.png (320x224) audio 0
-[probe] frame 179 -> <GAME>/build/ymir-evidence-bfzxeokm/paused/frame-0179.png (320x224) audio 0
-wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-bfzxeokm/paused/wram-high.bin
+COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '180', '--out', '<GAME>/build/ymir-evidence-o3vj5wj4/paused/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-o3vj5wj4/paused/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-o3vj5wj4/paused/wram-high.bin', '--screenshot', '90:<GAME>/build/ymir-evidence-o3vj5wj4/paused/frame-0090.png', '--screenshot', '118:<GAME>/build/ymir-evidence-o3vj5wj4/paused/frame-0118.png', '--screenshot', '165:<GAME>/build/ymir-evidence-o3vj5wj4/paused/frame-0165.png', '--screenshot', '179:<GAME>/build/ymir-evidence-o3vj5wj4/paused/frame-0179.png']
+[probe] loaded 9 pad script entries from <GAME>/build/ymir-evidence-o3vj5wj4/paused/input.pad
+[probe] frame 90 -> <GAME>/build/ymir-evidence-o3vj5wj4/paused/frame-0090.png (320x224) audio 0
+[probe] frame 118 -> <GAME>/build/ymir-evidence-o3vj5wj4/paused/frame-0118.png (320x224) audio 0
+[probe] frame 165 -> <GAME>/build/ymir-evidence-o3vj5wj4/paused/frame-0165.png (320x224) audio 0
+[probe] frame 179 -> <GAME>/build/ymir-evidence-o3vj5wj4/paused/frame-0179.png (320x224) audio 0
+wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-o3vj5wj4/paused/wram-high.bin
 misaligned data accesses: master 0, slave 0
-probe: wrote <GAME>/build/ymir-evidence-bfzxeokm/paused/probe.json after 180 frames
+probe: wrote <GAME>/build/ymir-evidence-o3vj5wj4/paused/probe.json after 180 frames
 info  | VDP-Config       | Switched to Software VDP renderer
 debug | SWRender-VDP1    | Enabling threaded VDP1 rendering
 debug | SWRender-VDP2    | Enabling threaded VDP2 rendering

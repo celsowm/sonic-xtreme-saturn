@@ -3,7 +3,7 @@ COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 08ad63b5923c97e498078628192a64ad66ce50a2
 .....
 ----------------------------------------------------------------------
-Ran 5 tests in 0.000s
+Ran 5 tests in 0.001s
 
 OK
 Info: Saved as "jade_gully.blend"
@@ -220,22 +220,25 @@ ninja: no work to do.
 -- The ASM compiler identification is GNU
 -- Found assembler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc
 -- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
--- Configuring done (0.6s)
+-- Private Sonic R actor: enabled (local-only)
+-- Configuring done (0.5s)
 -- Generating done (0.0s)
 -- Build files have been written to: <GAME>/build/game
 [0/2] Re-checking globbed directories...
-[1/6] Generating generated/greybox.h, generated/collision.h
-[2/6] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
-[3/6] Building C object CMakeFiles/xtreme.dir/src/main.c.obj
-[4/6] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
+[1/8] Generating generated/greybox.h, generated/collision.h
+[2/8] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
+[3/8] Building C object CMakeFiles/xtreme.dir/src/sonic_actor.c.obj
+[4/8] Building C object CMakeFiles/xtreme.dir/assets/private/sonic-r/saturn/sonic.c.obj
+[5/8] Building C object CMakeFiles/xtreme.dir/src/main.c.obj
+[6/8] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
-[5/6] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 89476 initialized bytes match ELF
+[7/8] Creating Saturn disc image xtreme
+-- [boot-memory] _start=0x06004000, 254144 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 89476, 'flags': 0, 'record_offset': 37092} IP observations=[]
--- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 243 MODE1/2352 sectors
--- [check] disc image OK: 243 MODE1/2352 sectors
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 254144, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 324 MODE1/2352 sectors
+-- [check] disc image OK: 324 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
 [xtreme] Disc: <GAME>/build/game/disc/xtreme.cue
 [xtreme] Blender: <GAME>/build/jade-gully/jade_gully.blend

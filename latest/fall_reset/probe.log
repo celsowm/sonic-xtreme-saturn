@@ -1,14 +1,14 @@
-COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '400', '--out', '<GAME>/build/ymir-evidence-bfzxeokm/fall_reset/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-bfzxeokm/fall_reset/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-bfzxeokm/fall_reset/wram-high.bin', '--screenshot', '80:<GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0080.png', '--screenshot', '150:<GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0150.png', '--screenshot', '240:<GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0240.png', '--screenshot', '300:<GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0300.png', '--screenshot', '345:<GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0345.png', '--screenshot', '399:<GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0399.png']
-[probe] loaded 7 pad script entries from <GAME>/build/ymir-evidence-bfzxeokm/fall_reset/input.pad
-[probe] frame 80 -> <GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0080.png (320x224) audio 0
-[probe] frame 150 -> <GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0150.png (320x224) audio 0
-[probe] frame 240 -> <GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0240.png (320x224) audio 0
-[probe] frame 300 -> <GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0300.png (320x224) audio 0
-[probe] frame 345 -> <GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0345.png (320x224) audio 0
-[probe] frame 399 -> <GAME>/build/ymir-evidence-bfzxeokm/fall_reset/frame-0399.png (320x224) audio 0
-wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-bfzxeokm/fall_reset/wram-high.bin
+COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '400', '--out', '<GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/wram-high.bin', '--screenshot', '80:<GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0080.png', '--screenshot', '150:<GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0150.png', '--screenshot', '240:<GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0240.png', '--screenshot', '300:<GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0300.png', '--screenshot', '345:<GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0345.png', '--screenshot', '399:<GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0399.png']
+[probe] loaded 7 pad script entries from <GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/input.pad
+[probe] frame 80 -> <GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0080.png (320x224) audio 0
+[probe] frame 150 -> <GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0150.png (320x224) audio 0
+[probe] frame 240 -> <GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0240.png (320x224) audio 0
+[probe] frame 300 -> <GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0300.png (320x224) audio 0
+[probe] frame 345 -> <GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0345.png (320x224) audio 0
+[probe] frame 399 -> <GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/frame-0399.png (320x224) audio 0
+wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/wram-high.bin
 misaligned data accesses: master 0, slave 0
-probe: wrote <GAME>/build/ymir-evidence-bfzxeokm/fall_reset/probe.json after 400 frames
+probe: wrote <GAME>/build/ymir-evidence-o3vj5wj4/fall_reset/probe.json after 400 frames
 info  | VDP-Config       | Switched to Software VDP renderer
 debug | SWRender-VDP1    | Enabling threaded VDP1 rendering
 debug | SWRender-VDP2    | Enabling threaded VDP2 rendering
