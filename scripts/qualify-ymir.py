@@ -258,6 +258,7 @@ def main():
     p.add_argument("--probe",type=Path);p.add_argument("--bios",type=Path)
     p.add_argument("--case",action="append",choices=[c[0] for c in CASES])
     p.add_argument("--timeout",type=int,default=600)
+    p.add_argument("--require-sonic",action="store_true",help="fail if private Sonic R C/H/SKA are missing")
     p.add_argument("--no-publish",action="store_true",help="keep ZIP local instead of publishing to the public GitHub evidence branch")
     p.add_argument("--publish-latest",action="store_true",help="retry GitHub push of the newest local return ZIP without rebuilding")
     a=p.parse_args()
@@ -283,6 +284,8 @@ def main():
     failures=[]
     publish_failed=False
     try:
+        if a.require_sonic and not sonic_present:
+            raise ValueError("Sonic R generated C/H/SKA not found under assets/private/sonic-r/saturn")
         if not probe.is_file() or not os.access(probe,os.X_OK):raise ValueError(f"Ymir probe missing: {probe}; set YMIR_PROBE")
         if not bios.is_file() or bios.stat().st_size!=524288:raise ValueError(f"512 KiB BIOS missing: {bios}; set LIBSATURN_BIOS")
         summary.update(probe_sha256=hash_file(probe),bios_sha256=hash_file(bios))
