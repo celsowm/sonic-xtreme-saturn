@@ -27,7 +27,7 @@ NAMES = ("magic version bytes frames ticks ticks_frame dropped_ms error hud_erro
          "frame_ms submit_x10 sim_ms camera_ms scene_ms flush_ms hud_ms "
          "submitted flushed culled clipped skipped rejected blocked world_commands command_capacity "
          "hud_reserved hud_used frame_stats_valid late_swaps draw_waits draw_timeouts vram_free "
-         "paused steps ray_tick ray_sampled").split()
+         "paused steps ray_tick ray_sampled sweep_queries sweep_hits jumps landings snapshot_begin snapshot_end").split()
 SIGNED = {"error", "hud_error", "input_x", "input_z", "ray_length", "ray_distance"} | {
     f"{prefix}_{axis}" for prefix in ("pos","vel","normal","eye","target","ray_origin","ray_point","ray_normal")
     for axis in "xyz"
@@ -38,8 +38,10 @@ def decode(raw, offset=0):
     if len(raw) < offset+SIZE or offset < 0:
         raise ValueError("truncated telemetry")
     values = dict(zip(NAMES, struct.unpack_from(">"+str(len(NAMES))+"I", raw, offset)))
-    if (values["magic"], values["version"], values["bytes"]) != (MAGIC, 2, SIZE):
-        raise ValueError("telemetry header mismatch (expected XTDB v2)")
+    if (values["magic"], values["version"], values["bytes"]) != (MAGIC, 3, SIZE):
+        raise ValueError("telemetry header mismatch (expected XTDB v3)")
+    if not values["frames"] or values["snapshot_begin"]!=values["snapshot_end"] or values["snapshot_begin"]!=values["frames"]:
+        raise ValueError("uncommitted telemetry snapshot")
     for k in SIGNED:
         if values[k] >= 2**31:
             values[k] -= 2**32
@@ -56,7 +58,7 @@ def locate(raw, map_paths):
             off = addr-0x06000000
             return decode(raw,off),addr,"map"
     # Unique fully validated header, never guess if multiple matches.
-    header = struct.pack(">III", MAGIC,2,SIZE)
+    header = struct.pack(">III", MAGIC,3,SIZE)
     found = [m.start() for m in re.finditer(re.escape(header),raw) if m.start()%4==0]
     if len(found)!=1:
         raise ValueError(f"expected unique telemetry header, got {len(found)}")
@@ -99,6 +101,9 @@ STEP=BASE+[(190,"R",6)]
 JUMP=STEP+[(220,"A",6),(240,"R",6),(270,"L",6),(290,"UP",45)]
 CASES=[
     ("idle",130,[],[40,90,129]),
+    ("idle_long",280,[],[130,279]),
+    ("jump_in_place",200,[(65,"A",6)],[64,72,84,105,150,199]),
+    ("curve_route",200,[(65,"UP",28),(93,"UP+RIGHT",38),(131,"UP",12)],[64,95,125,150,199]),
     ("paused",180,BASE,[90,118,165,179]),
     ("one_step",215,STEP,[189,205,214]),
     ("jump_resume",365,JUMP,[239,255,275,305,340,364]),
@@ -109,10 +114,16 @@ CASES=[
 ]
 
 def checks(name,t):
-    return {"guest_running":t["frames"]>0 and t["ticks"]>0,
-            "world_error_zero":t["error"]==0,"hud_error_zero":t["hud_error"]==0,
-            "overlay_within_reservation":t["hud_used"]<=t["hud_reserved"],
-            "expected_pause":t["paused"]==1 if name in ("paused","one_step") else t["paused"]==0}
+    out={"guest_running":t["frames"]>0 and t["ticks"]>0,
+         "world_error_zero":t["error"]==0,"hud_error_zero":t["hud_error"]==0,
+         "overlay_within_reservation":t["hud_used"]<=t["hud_reserved"],
+         "expected_pause":t["paused"]==1 if name in ("paused","one_step") else t["paused"]==0}
+    if name=="jump_in_place":
+        out.update(jump_observed=t["jumps"]>=1,landed=t["landings"]>=2 and t["grounded"]==1,no_respawn=t["respawns"]==0)
+    if name=="fall_reset":out.update(respawn_observed=t["respawns"]>=2)
+    if name=="curve_route":out.update(progress=t["pos_z"]<-24*65536,no_respawn=t["respawns"]==0,grounded=t["grounded"]==1)
+    return out
+
 
 def sanitize_text(work, bios, probe):
     # Evidence is destined for a public repository. Strip known local paths.
@@ -283,6 +294,7 @@ def main():
                 outcome=fn(*(cases[n]["telemetry"] for n in names))
                 summary["comparisons"][label]=outcome
                 if not outcome:failures.append(label)
+        compare("idle_no_drift",["idle","idle_long"],lambda x,y:all(x[k]==y[k] for k in ("pos_x","pos_y","pos_z","vel_x","vel_y","vel_z","grounded")))
         compare("paused_to_one_step",["paused","one_step"],lambda x,y:y["ticks"]-x["ticks"]==1 and y["steps"]-x["steps"]==1)
         compare("hud_on_off_terminal_state",["hud_on_route","hud_off_route"],lambda x,y:y["page"]==0 and x["page"]!=0 and all(x[k]==y[k] for k in ("ticks","pos_x","pos_y","pos_z","vel_x","vel_y","vel_z","grounded")))
         # Different observed field cadence can invalidate HUD equivalence; report, don't hide it.
