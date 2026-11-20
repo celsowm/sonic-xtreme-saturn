@@ -8,6 +8,18 @@ Unofficial third-person 3D action platformer concept for Sega Saturn, inspired b
 
 Built on [LibSaturn](https://github.com/celsowm/libsaturn) and [Blender Toolkit](https://github.com/celsowm/libsaturn-blender).
 
+## Jade Gully — experimental Action Adventure layout
+
+The original, Ymir-qualified greybox remains the default. The alternative [Action Adventure stage design](docs/JADE_GULLY_ADVENTURE.md) uses a branching 3D map with forest speed route, upper canopy ridge, exploratory river basin, temple ascent and two broad walkable clearings. **Nine real Kenney CC0 low-poly environment models** (palms, rocks, vegetation, bridge, cliff and ruins) are checked in at [`assets/kenney/`](assets/kenney/ATTRIBUTION.md), with source/license documentation. Blender renders/deforms selected authored GLB props offline; the Saturn binary never loads GLBs at runtime.
+
+Try the new stage separately on a Mac with the established SDK, Blender and Ymir probe:
+
+```sh
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/qualify-jade-adventure-mac.sh
+```
+
+This passes `XTREME_STAGE_LAYOUT=adventure`, validates the graph and per-asset face limits, compiles the alternative stage into a new disc and automatically pushes sanitized screenshots/diagnostics to `ymir-evidence`. The 30 scene submissions/s/p95 target applies, but the **new visual stage has not yet been qualified on Saturn**. To return to the qualified classic stage, unset `XTREME_STAGE_LAYOUT` and run the normal build/probe. Gameplay rings, springs and checkpoints are still stage markers, not implemented collectible/interactive systems.
+
 ## Mac quick start
 
 From this checkout inside ~/dev: `bash scripts/run-mac.sh` (or `--build-only`). See [controller notes](docs/CONTROLLER.md). The automated Ymir harness (`python3 scripts/qualify-ymir.py`) publishes logs, screenshots and telemetry in the separate `ymir-evidence` GitHub branch.
