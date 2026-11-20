@@ -34,6 +34,38 @@ SIGNED = {"error", "hud_error", "input_x", "input_z", "ray_length", "ray_distanc
 }
 SIZE = len(NAMES)*4
 
+SONIC_NAMES = ("magic version enabled ready error vertices faces textures joints "
+               "clip ticks draws animation_ms skin_ms draw_ms pos_x pos_y pos_z").split()
+SONIC_SIZE = len(SONIC_NAMES) * 4
+
+def decode_sonic(raw, offset):
+    if offset < 0 or offset + SONIC_SIZE > len(raw):
+        raise ValueError("Sonic telemetry outside WRAM-H")
+    values = dict(zip(SONIC_NAMES, struct.unpack_from(">"+str(len(SONIC_NAMES))+"I",raw,offset)))
+    if values["magic"] != 0x53584143 or values["version"] != 1 or not values["enabled"]:
+        raise ValueError("invalid SXAC v1 character telemetry")
+    for k in ("pos_x","pos_y","pos_z"):
+        if values[k] >= 2**31: values[k] -= 2**32
+    values["position_m"] = [values["pos_"+a]/65536 for a in "xyz"]
+    return values
+
+def locate_sonic(raw, maps):
+    for p in maps:
+        m = re.search(r"0x([0-9a-fA-F]+)\s+_?xtreme_sonic_debug\b", p.read_text(errors="replace"))
+        if m:
+            addr = int(m[1],16)
+            return decode_sonic(raw,addr-0x06000000),addr,"map"
+    header = struct.pack(">II",0x53584143,1)
+    found = []
+    for m in re.finditer(re.escape(header),raw):
+        if m.start()%4:continue
+        try: found.append((m.start(),decode_sonic(raw,m.start())))
+        except (ValueError,struct.error):continue
+    if len(found)!=1:raise ValueError(f"expected unique Sonic telemetry header, got {len(found)}")
+    off,values=found[0]
+    return values,0x06000000+off,"header_scan"
+
+
 def decode(raw, offset=0):
     if len(raw) < offset+SIZE or offset < 0:
         raise ValueError("truncated telemetry")
@@ -242,6 +274,12 @@ def main():
     summary={"status":"incomplete","game_commit":git(ROOT,"rev-parse","HEAD"),"sdk_commit":git(sdk,"rev-parse","HEAD"),
              "game_dirty":git(ROOT,"status","--porcelain","--untracked-files=no"),"sdk_dirty":git(sdk,"status","--porcelain","--untracked-files=no"),
              "boot":"Ymir injection via CUE + app.bin, not optical boot","cases":{},"comparisons":{}}
+    sonic_assets=ROOT/"assets/private/sonic-r/saturn"
+    sonic_present=all((sonic_assets/f).is_file() for f in ("sonic.c","sonic.h","sonic.ska"))
+    summary["private_sonic_present"]=sonic_present
+    if sonic_present:
+        summary["private_sonic_sha256"]=hash_file(sonic_assets/"sonic.ska")
+        summary["private_sonic_source_sha256"]=hash_file(sonic_assets/"sonic.c")
     failures=[]
     publish_failed=False
     try:
@@ -284,6 +322,19 @@ def main():
                 raw=wram.read_bytes()
                 t,addr,method=locate(raw,maps)
                 result.update(telemetry=t,telemetry_address=hex(addr),address_method=method,checks=checks(name,t))
+                if sonic_present:
+                    try:
+                        sonic,character_addr,character_method=locate_sonic(raw,maps)
+                        result["sonic"]=sonic
+                        result["sonic_address"]=hex(character_addr)
+                        result["sonic_method"]=character_method
+                        result["checks"]["sonic_rendered"]=(sonic["ready"]==1 and
+                            sonic["error"]==0 and sonic["faces"]>0 and
+                            sonic["vertices"]>0 and sonic["ticks"]>0 and sonic["draws"]>0)
+                        (d/"sonic-telemetry.json").write_text(json.dumps(sonic,indent=2)+"\\n")
+                    except (ValueError,OSError,struct.error) as exc:
+                        result["checks"]["sonic_rendered"]=False
+                        result["sonic_decode_error"]=str(exc)
                 (d/"telemetry.json").write_text(json.dumps(t,indent=2)+"\n")
                 off=addr-0x06000000
                 (d/"telemetry.bin").write_bytes(raw[off:off+SIZE])
