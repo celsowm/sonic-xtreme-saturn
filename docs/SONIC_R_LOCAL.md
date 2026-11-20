@@ -39,3 +39,15 @@ The result in `latest/idle/boot-telemetry.json`, `latest/idle/sonic-telemetry.js
 The first private-asset idle Ymir qualification at game commit `44bc3bf`, SDK `08ad63b`, returned PASS with `SAT_OK`, 189 skinned vertices, 286 source faces, 281 material textures, 11 joints, 61 scene submissions and 122 animation ticks, at 320x224. It observed ~30.0 scene submissions/s (33 ms/frame), scene preparation 18 ms, instance submission 7 ms, skinning 1 ms, animation 1 ms, painter flush 4 ms, and 249,504 free VDP1 VRAM bytes. The remaining ten Ymir cases were **not** run with the skinned character yet. Screenshots prove a visible Sonic and Jade Gully but not 60 FPS, gameplay animation transitions, or full-course compatibility.
 
 A small, no-asset-rebake runtime optimization now prevalidates the immutable Sonic face/material binding once at initialization with `sat_scene3d_instance_binding_init`. It is still pending a new measured Ymir replay; never claim an improvement until telemetry confirms it. The Mac harness also accepts `XTREME_SONIC_DIR=/absolute/local/asset/dir` to compare alternative private generated LODs without overwriting the original GLB or C files. The compiler propagates that path into the fresh CMake configuration. Candidate tests must use `--require-sonic` and verify the private source hashes in their summary.
+
+## Measured immutable binding result and LOD experiment
+
+The `c5be6d2` Ymir run with original 286 faces passed `idle`: 61 completed frames, 120 physics ticks, 122 animation ticks, 281 texture materials, 249,504 bytes free VDP1 VRAM, 30.0 submissions/s and 33 ms terminal frame duration. Character submission went from 7 to 6 ms, scene preparation from 18 to 17 ms; **frame rate did not improve**. 17 ms spent in scene preparation alone is above the 60 Hz 16.67 ms budget, so binding validation by itself cannot achieve 60 FPS.
+
+The importer supports skeletal `--max-triangles` with joint/weight preservation and `--skeletal-surface-bake` to transfer original surface detail after decimation. The local-only experiment script `scripts/qualify-sonic-lod-mac.sh` regenerates a separate private variant (default 160 triangles), checks exported face count, selects the variant via `XTREME_SONIC_DIR`, builds and runs only the `idle` Ymir case. It **never replaces the original 286-face generated asset**. It also leaves the original `source/sonic.glb` intact. All generated variant bytes remain below ignored `assets/private/`.
+
+```sh
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/qualify-sonic-lod-mac.sh
+```
+
+Compare the variant `sonic.faces`, `sonic.textures`, `sonic.skin_ms`, `sonic.draw_ms`, `telemetry.scene_ms`, `telemetry.flush_ms`, `telemetry.submission_rate_hz` and `telemetry.vram_free` with the 286-face baseline, plus the actual screenshot silhouette. The triangle cap can be supplied as an argument (80..285), e.g. `bash scripts/qualify-sonic-lod-mac.sh 120`. **The LOD variant has not been run on the user's Mac yet.** A lower triangle count alone is not proof of higher frame rate or acceptable visual quality. Use a separately verified new Ymir evidence commit for acceptance.
