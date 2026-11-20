@@ -550,5 +550,39 @@
     "texture_vram_reserved_for_actor_bytes": 148000,
     "full_stage_not_yet_qualified": true
   },
-  "notes": "Authoring plan for a new independent playable layout. Existing qualified main/upper collision remains untouched; new branches and imported CC0 props must be validated in Blender and Ymir before acceptance."
+  "notes": "Authoring plan for a new independent playable layout. Existing qualified main/upper collision remains untouched; new branches and imported CC0 props must be validated in Blender and Ymir before acceptance. Two open, walkable clearing pads attached to river and temple routes; skirts only decorative.",
+  "clearings": [
+    {
+      "id": "river_basin",
+      "route": "river",
+      "center": [
+        23,
+        57,
+        -1
+      ],
+      "half_extents": [
+        9,
+        7
+      ],
+      "depth_m": 4,
+      "collision": true,
+      "theme": "main"
+    },
+    {
+      "id": "temple_court",
+      "route": "ruins",
+      "center": [
+        -18,
+        122,
+        8
+      ],
+      "half_extents": [
+        7,
+        6
+      ],
+      "depth_m": 5,
+      "collision": true,
+      "theme": "ruins"
+    }
+  ]
 }
