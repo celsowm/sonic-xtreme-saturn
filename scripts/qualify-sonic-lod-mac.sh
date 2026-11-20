@@ -21,25 +21,47 @@ mkdir -p "$OUT"
 cd "$ROOT"
 printf '[sonic-lod] Source (private): %s\n' "$ORIGINAL"
 printf '[sonic-lod] Target: %s triangles; SDK: %s\n' "$TRIS" "$SDK"
-"$PY" "$SDK/tools/import_model.py" \
-  --input "$ORIGINAL" \
-  --out-prefix "$OUT/sonic" \
-  --symbol sonic \
-  --target skeletal \
-  --skeletal-binary "$OUT/sonic.ska" \
-  --animation idle,highspeed,jump,falling,landing,brake,turn_left,turn_right \
-  --loop-clips idle,highspeed,falling \
-  --animation-fps 30 \
-  --scale 0.03265 \
-  --max-triangles "$TRIS" \
-  --quality conservative \
-  --skeletal-surface-bake \
-  --texture-scale 0.25 \
-  --max-texture-width 64 \
-  --max-texture-height 64 \
-  --sampling area \
-  --texture-format indexed8 \
-  --report "$OUT/report.json" 2>&1 | tee "$OUT/import.log"
+# Simplification can enlarge UV footprints while reducing triangle count.
+# Retry only known face-size/total VDP1-budget failures, preserving animations.
+IMPORTED=0
+: > "$OUT/import.log"
+for TEX_SCALE in 0.25 0.1875 0.125 0.09375 0.0625 0.03125; do
+  rm -f "$OUT/sonic.c" "$OUT/sonic.h" "$OUT/sonic.ska" "$OUT/report.json"
+  echo "[sonic-lod] Trying texture-scale=$TEX_SCALE, max-face=96x96" | tee -a "$OUT/import.log"
+  if "$PY" "$SDK/tools/import_model.py" \
+    --input "$ORIGINAL" \
+    --out-prefix "$OUT/sonic" \
+    --symbol sonic \
+    --target skeletal \
+    --skeletal-binary "$OUT/sonic.ska" \
+    --animation idle,highspeed,jump,falling,landing,brake,turn_left,turn_right \
+    --loop-clips idle,highspeed,falling \
+    --animation-fps 30 \
+    --scale 0.03265 \
+    --max-triangles "$TRIS" \
+    --quality conservative \
+    --skeletal-surface-bake \
+    --texture-scale "$TEX_SCALE" \
+    --max-texture-width 96 \
+    --max-texture-height 96 \
+    --sampling area \
+    --texture-format indexed8 \
+    --report "$OUT/report.json" >"$OUT/import-attempt.log" 2>&1; then
+    cat "$OUT/import-attempt.log" | tee -a "$OUT/import.log"
+    echo "[sonic-lod] Texture bake succeeded at scale=$TEX_SCALE" | tee -a "$OUT/import.log"
+    printf '%s\n' "$TEX_SCALE" > "$OUT/selected-texture-scale.txt"
+    IMPORTED=1
+    break
+  fi
+  tail -n 12 "$OUT/import-attempt.log" | tee -a "$OUT/import.log"
+  if grep -Eq 'needs [0-9]+x[0-9]+ but the limit is|skeletal texture budget:' "$OUT/import-attempt.log"; then
+    echo "[sonic-lod] Texture resolution/budget gate; trying a lower scale" | tee -a "$OUT/import.log"
+  else
+    die "Importer failed for a non-texture-budget reason; see $OUT/import-attempt.log"
+  fi
+done
+(( IMPORTED == 1 )) || die "No texture scale fits the VDP1 budget; inspect $OUT/import.log"
+
 for item in sonic.c sonic.h sonic.ska report.json; do
   [[ -s "$OUT/$item" ]] || die "missing or empty generated $item"
 done
