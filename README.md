@@ -8,7 +8,7 @@ Built on [LibSaturn](https://github.com/celsowm/libsaturn) and [Blender Toolkit]
 
 ## Mac quick start
 
-From this checkout inside ~/dev: `bash scripts/run-mac.sh` (or `--build-only`). See [controller notes](docs/CONTROLLER.md).
+From this checkout inside ~/dev: `bash scripts/run-mac.sh` (or `--build-only`). See [controller notes](docs/CONTROLLER.md). For a return ZIP with logs and F9 screenshots, use `bash scripts/capture-mac.sh`; see [debug capture](docs/DEBUG_CAPTURE.md).
 
 ## Build and inspect Jade Gully
 

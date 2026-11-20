@@ -42,6 +42,8 @@ echo "[xtreme] SDK source: $SDK_SOURCE"
 git -C "$SDK_SOURCE" rev-parse HEAD
 python3 -m unittest discover -s tests
 cc -std=c11 -Wall -Wextra -Werror -I "$SDK_SOURCE/include" -I src src/controller.c tests/test_controller.c -o build/controller-test
+cc -std=c11 -Wall -Wextra -Werror -I src tests/test_debug_clock.c -o build/debug-clock-test
+build/debug-clock-test
 build/controller-test
 "$BLENDER" --background --factory-startup --python-exit-code 1 --python tools/create_jade_gully.py -- "$PINNED" "$ROOT/build/jade-gully"
 cmake -S "$SDK_SOURCE" -B "$SDK_BUILD" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$SDK_SOURCE/cmake/toolchains/sh2eb-elf.cmake" -DLIBSATURN_BUILD_TESTS=OFF -DLIBSATURN_INSTALL=ON

@@ -10,6 +10,8 @@ Original Blender test course: descent, ramp, bank, loop, gap and checkpoint. Exp
 
 ## P1.5: debug HUD and reproducible diagnostics (blocking P2 qualification)
 
+Single-step and Mac evidence capture implemented: [DEBUG_CAPTURE.md](DEBUG_CAPTURE.md). Host clock tests, persistent last-ray snapshot and telemetry v2; L pause, R single-step in play mode. Emulator validation remains pending.
+
 Initial implementation in commit e6d7d464f875b8f0b87284ebe27f0eccc5b72a9c: compact, physics, camera/input, renderer/timing, memory/assets and off; Y cycles pages, Z toggles ray/normal/velocity screen-space overlay. Uses SDK HUD/font, reserves at most 456 glyph commands plus three lines, starts final overlay after scene flush. Versioned telemetry symbol `xtreme_debug` (magic XTDB, version 1, byte size, 32-bit big-endian fields; layout in src/main.c). Phase timings in ms, submission rate multiplied by ten; not display FPS. Ray counters valid only when queried that frame; respawns inferred on fall return and counted on manual reset. VDP1 texture bytes free is actual; other memory pools are N/A. No changes to the controller algorithm. Pending: emulator qualification, independent display timing, release compile-out, pause/single step, complete collision draw, replay and ZIP automation.
 
 Test with `bash scripts/run-mac.sh`; capture every page, toggle Z on a slope and while landing, compare with HUD off, report error/command budgets. Do not consider this gate passed until screenshots and repeatable tests confirm it.
@@ -17,7 +19,7 @@ First Mednafen screenshot supplied on 2026-11-20 shows the greybox and markers r
 
 Use the existing SDK `saturn/hud.h`, `sat_hud_init_default`, `sat_hud_text/value/bar`, `saturn/time.h` and scene counters, not a second HUD engine. Reserve VDP1 overlay commands in sat_scene_begin before world submission; draw after scene flush and before frame end. Measure glyph/command usage, cap lines and text length (8x8 font, 320x224), reserve only the selected page's worst-case budget and treat diagnostic overflow as a distinct error. Keep normal gameplay HUD separate.
 
-Proposed controls (currently unused): Y cycles OFF -> compact -> physics -> camera/input -> renderer/timing -> memory/assets; Z toggles optional world debug geometry (bounded). X remains camera inspection. Optional pause/single simulation tick via a debug-only chord to be chosen after controller mapping; resume clears time accumulator, not player state. Compact view defaults ON in debug builds; release defaults OFF and can compile diagnostics out.
+Debug controls: Y cycles OFF -> compact -> physics -> camera/input -> renderer/timing -> memory/assets; Z toggles optional world debug geometry (bounded). X remains camera inspection. L toggles pause and R advances one simulation tick in play mode; resume clears time accumulator, not player state. Compact view defaults ON in debug builds; release defaults OFF and can compile diagnostics out.
 
 | Page | Data and units |
 | --- | --- |

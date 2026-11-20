@@ -1,0 +1,9 @@
+# Debug capture and single step
+
+On Mac, use `bash scripts/capture-mac.sh` instead of run-mac.sh. It builds and runs the same Mednafen launcher, logs console output and source revisions/dirty tracked files, collects new xtreme*.png F9 screenshots from the configured Mednafen snap directory, and writes an xtreme-return timestamped ZIP when the emulator closes. On failed builds the ZIP contains logs but not stale maps. No disc, BIOS or ROM included. Logs may contain local paths; inspect before sharing. If your emulator uses a different screenshot filename or directory, copy screenshots manually. `--build-only` works too.
+
+Game controls (normal play): L toggles pause, R advances exactly one 60 Hz simulation tick when paused, D-pad/analog sets direction, A/C buffers jump for next tick, B resets. L/R still control altitude in X viewer mode. Y changes HUD page and Z vectors regardless of pause. Pause discards wall-clock backlog; no physics elapsed during pause or viewer. Holding R does not repeat; press again for another tick. A/C before R or simultaneously queues jump. Toggling pause clears buffered jump. HUD still refreshes.
+
+Telemetry v2 appends paused, steps, ray_tick, ray_sampled to v1 block. Last ray remains visible across frozen frames, sample tick and NEW flag indicate staleness; reset invalidates it. No raw memory export by Mednafen yet. The clock helper is tested on host with cadence, pause, single-step, suspend, catch-up cap. Target acceptance pending.
+
+Capture compact idle, physics paused on ramp (L), press R three times and capture each tick, jump with A then R and advance through landing, renderer HUD on/off, fork and fall/respawn. Close emulator to assemble ZIP. Compare tick index and positions; note any failures. Separate Ymir WRAM dump and real-hardware tests remain open.
