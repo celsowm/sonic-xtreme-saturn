@@ -13,7 +13,17 @@ MAX_VERTICES = 2048
 MAX_FACES = 256
 MAX_ENTITIES = 64
 LIMIT = Decimal(256)
-PALETTE = {"main_route": 0, "upper_route": 1}
+# A pair per object group: alternating faces get subtly different shades.
+# Decorative geometry is presentation-only; its semantic groups never appear
+# in the collision mesh. Indices must match src/main.c colors[].
+PALETTE = {
+    "main_route": (0, 3),
+    "upper_route": (1, 4),
+    "trunk": (2, 4),
+    "canopy": (3, 3),
+    "rock": (2, 4),
+    "water": (5, 5),
+}
 KINDS = ("player_spawn", "ring", "spring", "checkpoint", "enemy", "goal", "camera_anchor", "prop")
 
 def fixed(value):
@@ -52,7 +62,7 @@ def parse_obj(raw):
                 raise ValueError("invalid face indices")
             # The SDK uses cross(D-A,B-A), opposite ordinary OBJ normal.
             # Triangulate the ribbon/boxes so non-planar quads cannot warp.
-            color = next((p + serial % 2 * 3 for suffix, p in PALETTE.items() if group.endswith("_" + suffix)), 2)
+            color = next((pair[serial % 2] for suffix, pair in PALETTE.items() if group.endswith("_" + suffix)), 2)
             for k in range(1, len(indices) - 1):
                 a, b, c = (indices[0], indices[k+1], indices[k])
                 u = tuple(vertices[b][i] - vertices[a][i] for i in range(3))
