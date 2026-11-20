@@ -65,6 +65,18 @@ def validate(data, asset_root=None):
         if e["zone"] not in zone_ids:raise ValueError("unknown entity zone")
     if sum(e["kind"]=="player_spawn" for e in entities)!=1 or sum(e["kind"]=="goal" for e in entities)!=1:
         raise ValueError("one spawn and one goal required")
+    clearings=data.get("clearings",[])
+    if len(clearings)>4 or len({c["id"] for c in clearings})!=len(clearings):
+        raise ValueError("invalid clearing count/IDs")
+    for pad in clearings:
+        if not pad.get("collision") or pad["route"] not in routes:
+            raise ValueError("clearing requires a connected collision route")
+        center=point(pad["center"])
+        if center not in routes[pad["route"]]:
+            raise ValueError("clearing must attach to a real route station")
+        if len(pad["half_extents"])!=2 or not all(3<=v<=12 for v in pad["half_extents"]):
+            raise ValueError("clearing dimensions out of range")
+        if not 2<=pad["depth_m"]<=10:raise ValueError("clearing cliff depth")
     props=data["set_dressing"]
     if len({x["id"] for x in props})!=len(props):
         raise ValueError("duplicate prop ID")
@@ -83,7 +95,8 @@ def validate(data, asset_root=None):
     if used_budget>limit:raise ValueError("prop budget exceeded")
     segments=sum(len(x["stations"])-1 for x in paths)
     # One paper-thin waterfall: two tris, purely visual.
-    estimated_render_faces=segments*6+used_budget+2
+    # Walkable clearing quad (2 triangles) + 4 visual skirt quads (8).
+    estimated_render_faces=segments*6+used_budget+2+10*len(clearings)
     if estimated_render_faces>data["budgets"]["render_faces_max"]:
         raise ValueError("render budget exceeded: routes+cliff skirts+props")
     if data["budgets"]["render_faces_max"]>256:
@@ -93,6 +106,7 @@ def validate(data, asset_root=None):
         "zones":len(zone_ids),
         "entities":len(entities),
         "props":len(props),
+        "walkable_clearings":len(clearings),
         "path_segments":segments,
         "corridor_triangles":segments*2,
         "cliff_triangles":segments*4,
