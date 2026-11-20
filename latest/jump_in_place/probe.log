@@ -1,0 +1,53 @@
+COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '200', '--out', '<GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/wram-high.bin', '--screenshot', '64:<GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0064.png', '--screenshot', '72:<GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0072.png', '--screenshot', '84:<GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0084.png', '--screenshot', '105:<GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0105.png', '--screenshot', '150:<GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0150.png', '--screenshot', '199:<GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0199.png']
+[probe] loaded 3 pad script entries from <GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/input.pad
+[probe] frame 64 -> <GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0064.png (320x224) audio 0
+[probe] frame 72 -> <GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0072.png (320x224) audio 0
+[probe] frame 84 -> <GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0084.png (320x224) audio 0
+[probe] frame 105 -> <GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0105.png (320x224) audio 0
+[probe] frame 150 -> <GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0150.png (320x224) audio 0
+[probe] frame 199 -> <GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/frame-0199.png (320x224) audio 0
+wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/wram-high.bin
+misaligned data accesses: master 0, slave 0
+probe: wrote <GAME>/build/ymir-evidence-j5lxrnde/jump_in_place/probe.json after 200 frames
+info  | VDP-Config       | Switched to Software VDP renderer
+debug | SWRender-VDP1    | Enabling threaded VDP1 rendering
+debug | SWRender-VDP2    | Enabling threaded VDP2 rendering
+debug | SWRender-VDP1    | Disabling threaded VDP1 rendering
+debug | SWRender-VDP2    | Disabling threaded VDP2 rendering
+info  | CDDev-Image      | Filesystem built successfully
+debug | SMPC             | Setting area code to 1
+debug | SMPC             | Processing RESDISA
+debug | SMPC             | Processing RESENAB
+debug | SMPC             | Processing SNDOFF
+debug | SMPC             | Processing SNDON
+info  | SCSP             | MC68EC00 processor enabled
+debug | CDBlock          | Aborting transfer
+info  | CDBlock          | Get copy error command is unimplemented
+debug | CDBlock          | Clearing all buffer partitions
+debug | CDBlock          | Clearing all partition output connectors
+debug | CDBlock          | Clearing all filter conditions
+debug | CDBlock          | Clearing all filter input connectors
+debug | CDBlock          | Clearing all filter pass output connectors
+debug | CDBlock          | Clearing all filter fail output connectors
+debug | CDBlock          | Sector lengths: get=2048 put=2048
+debug | CDBlock          | Aborting transfer
+debug | CDBlock          | Aborting transfer
+info  | CDBlock          | Get copy error command is unimplemented
+debug | CDBlock          | Clearing all buffer partitions
+debug | CDBlock          | Clearing all partition output connectors
+debug | CDBlock          | Clearing all filter conditions
+debug | CDBlock          | Clearing all filter input connectors
+debug | CDBlock          | Clearing all filter pass output connectors
+debug | CDBlock          | Clearing all filter fail output connectors
+debug | CDBlock          | Sector lengths: get=2048 put=2048
+debug | SMPC             | Processing RESDISA
+debug | SH2-M-Reg        | [PC = 060F20D6] Unhandled 8-bit on-chip register write to 002 = 0
+debug | SH2-M-Reg        | [PC = 060F20DC] Unhandled 8-bit on-chip register write to 000 = 80
+debug | SH2-M-Reg        | [PC = 060F20E2] Unhandled 8-bit on-chip register write to 001 = 10
+debug | SH2-M-Reg        | [PC = 060F220E] Unhandled 8-bit on-chip register read from 002
+debug | SH2-M-Reg        | [PC = 060F2218] Unhandled 8-bit on-chip register write to 002 = 20
+debug | SH2-M-Reg        | [PC = 060F218C] Unhandled 8-bit on-chip register write to 004 = 0
+debug | SMPC             | Processing RESENAB
+info  | VDP2             | Screen resolution set to 320x224
+info  | VDP2             | Non-interlace mode
+info  | VDP2             | Dot clock mult = 4, display ON
