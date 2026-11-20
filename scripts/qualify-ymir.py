@@ -114,11 +114,73 @@ def checks(name,t):
             "overlay_within_reservation":t["hud_used"]<=t["hud_reserved"],
             "expected_pause":t["paused"]==1 if name in ("paused","one_step") else t["paused"]==0}
 
+def sanitize_text(work, bios, probe):
+    # Evidence is destined for a public repository. Strip known local paths.
+    replacements = [(str(bios), "<BIOS>"), (str(probe), "<YMIR_PROBE>"),
+                    (str(ROOT), "<GAME>"), (str(DEV), "<DEV>"), (str(Path.home()), "<HOME>")]
+    replacements.sort(key=lambda item: len(item[0]), reverse=True)
+    for f in work.rglob("*"):
+        if not f.is_file() or f.suffix not in (".json", ".log", ".map", ".h", ".pad", ".txt"):
+            continue
+        original=f.read_text(encoding="utf-8",errors="replace")
+        cleaned=original
+        for source,replacement in replacements:
+            if source and source!="/":cleaned=cleaned.replace(source,replacement)
+        if cleaned!=original:f.write_text(cleaned,encoding="utf-8")
+
+def publish(archive, work, summary):
+    """Push a standalone evidence tree. Never check out or modify main."""
+    branch="ymir-evidence"
+    ref="refs/heads/"+branch
+    url=subprocess.check_output(["git","-C",str(ROOT),"remote","get-url","origin"],text=True).strip()
+    allowed=("https://github.com/celsowm/sonic-xtreme-saturn.git",
+             "https://github.com/celsowm/sonic-xtreme-saturn",
+             "git@github.com:celsowm/sonic-xtreme-saturn.git",
+             "git@github.com:celsowm/sonic-xtreme-saturn",
+             "ssh://git@github.com/celsowm/sonic-xtreme-saturn.git",
+             "ssh://git@github.com/celsowm/sonic-xtreme-saturn")
+    if url.rstrip("/") not in allowed:
+        raise RuntimeError("origin is not celsowm/sonic-xtreme-saturn; refusing public upload")
+    if archive.stat().st_size >= 95*1024*1024:
+        raise RuntimeError("ZIP exceeds safe GitHub Git size threshold; retained locally")
+    def cmd(*args,env=None,data=None):
+        return subprocess.check_output(["git","-C",str(ROOT),*args],input=data,env=env,stderr=None).decode().strip()
+    # Use an isolated temporary index and git plumbing, not the developer's
+    # working tree/index. Existing evidence branch history is retained.
+    remote=cmd("ls-remote","--heads","origin",ref)
+    parent=None
+    if remote:
+        cmd("fetch","--no-tags","origin",ref)
+        parent=cmd("rev-parse","FETCH_HEAD")
+    with tempfile.TemporaryDirectory(prefix="xtreme-evidence-index-") as tmp:
+        env=dict(os.environ,GIT_INDEX_FILE=str(Path(tmp)/"index"))
+        cmd("read-tree","--empty",env=env)
+        def add(name,src):
+            blob=cmd("hash-object","-w","--",str(src),env=env)
+            cmd("update-index","--add","--cacheinfo","100644",blob,name,env=env)
+        add("latest/return.zip",archive)
+        add("latest/summary.json",work/"summary.json")
+        # Small readable files alongside the ZIP let a chat agent retrieve
+        # results directly with the GitHub connector instead of parsing ZIP.
+        for f in sorted(work.rglob("*")):
+            if f.is_file() and f.suffix in (".png",".json",".log",".pad") and f.name!="summary.json":
+                add("latest/"+f.relative_to(work).as_posix(),f)
+        tree=cmd("write-tree",env=env)
+        args=["commit-tree",tree]
+        if parent:args += ["-p",parent]
+        commit=cmd(*args,"-m","Ymir evidence "+summary["game_commit"][:12]+" "+summary["status"],env=env)
+        # A normal non-force push rejects concurrent, divergent publications.
+        subprocess.run(["git","-C",str(ROOT),"push","origin",commit+":"+ref],check=True)
+    print("[xtreme] GitHub ZIP: https://github.com/celsowm/sonic-xtreme-saturn/blob/"+commit+"/latest/return.zip",flush=True)
+    print("[xtreme] Results: https://github.com/celsowm/sonic-xtreme-saturn/tree/ymir-evidence/latest",flush=True)
+    print("[xtreme] Evidence commit: "+commit,flush=True)
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--probe",type=Path);p.add_argument("--bios",type=Path)
     p.add_argument("--case",action="append",choices=[c[0] for c in CASES])
     p.add_argument("--timeout",type=int,default=600)
+    p.add_argument("--no-publish",action="store_true",help="keep ZIP local instead of publishing to the public GitHub evidence branch")
     a=p.parse_args()
     sdk=Path(os.environ.get("LIBSATURN_SOURCE",str(DEV/"lib-saturn"))).expanduser()
     if not (sdk/"CMakeLists.txt").exists(): sdk=DEV/"libsaturn"
@@ -198,11 +260,17 @@ def main():
     finally:
         summary["failures"]=failures
         (work/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")
+        sanitize_text(work,bios,probe)
         with zipfile.ZipFile(archive,"w",zipfile.ZIP_DEFLATED,compresslevel=6) as z:
             for f in sorted(work.rglob("*")):
                 if f.is_file() and f.name!="wram-high.bin":z.write(f,f.relative_to(work))
         print(f"\n[xtreme] {summary['status']}: {archive}",flush=True)
-        print("[xtreme] Send this ZIP in chat; review logs for local paths first.",flush=True)
+        if not a.no_publish:
+            try:
+                publish(archive,work,summary)
+            except (OSError,RuntimeError,subprocess.CalledProcessError) as exc:
+                print(f"[xtreme] GitHub publish failed: {type(exc).__name__}. ZIP retained: {archive}",file=sys.stderr,flush=True)
+                return 2
     return 0 if summary["status"]=="pass" else 1
 
 if __name__=="__main__":
