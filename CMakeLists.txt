@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.24)
+project(xtreme LANGUAGES C)
+find_package(LibSaturn 0.1 CONFIG REQUIRED)
+add_executable(xtreme src/main.c)
+target_link_libraries(xtreme PRIVATE LibSaturn::Saturn)
+libsaturn_configure_executable(xtreme)
+libsaturn_add_disc(xtreme)

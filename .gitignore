@@ -1,0 +1,13 @@
+/build/
+/build-*/
+/assets/private/
+/assets/imported/
+/bios/
+/roms/
+*.blend1
+*.cue
+*.iso
+*.bin
+*.elf
+*.map
+.env
