@@ -6,6 +6,9 @@
 #include "collision.h"
 #include "controller.h"
 #include <saturn/time.h>
+#include <saturn/hud.h>
+#include <saturn/fmt.h>
+#include <saturn/vdp1.h>
 
 #define WIDTH 320u
 #define HEIGHT 224u
@@ -25,6 +28,30 @@ static sat_mesh_t ground = {
     COLLISION_FACE_COUNT, COLLISION_FACE_COUNT
 };
 static uint8_t viewer;
+enum { DBG_OFF, DBG_COMPACT, DBG_PHYSICS, DBG_CAMERA, DBG_RENDER, DBG_MEMORY, DBG_COUNT };
+static unsigned page=DBG_COMPACT, vectors;
+static sat_ascii_font_t debug_font;
+static sat_hud_t debug_hud;
+/* Versioned 32-bit big-endian words; raw positions/velocities Q16.16. */
+typedef struct {
+    uint32_t magic,version,bytes,frames,ticks,ticks_frame,dropped_ms;
+    int32_t error,hud_error;
+    uint32_t page,geometry,viewer,grounded,respawns;
+    int32_t pos[3],vel[3],normal[3],eye[3],target[3];
+    int32_t input_x,input_z;
+    uint32_t held,pressed,analog_valid,analog_x,analog_y,jump_pending;
+    uint32_t ray_valid,ray_hit,ray_face;
+    int32_t ray_origin[3],ray_point[3],ray_normal[3],ray_length,ray_distance;
+    uint32_t frame_ms,submit_x10,sim_ms,camera_ms,scene_ms,flush_ms,hud_ms;
+    uint32_t submitted,flushed,culled,clipped,skipped,rejected,blocked;
+    uint32_t world_commands,command_capacity,hud_reserved,hud_used;
+    uint32_t frame_stats_valid,late_swaps,draw_waits,draw_timeouts,vram_free;
+} xtreme_debug_t;
+volatile xtreme_debug_t xtreme_debug;
+static uint32_t rate_start,rate_frames;
+static void debug_vec(volatile int32_t d[3],const sat_vec3_t* v){
+    d[0]=v->x;d[1]=v->y;d[2]=v->z;
+}
 volatile uint32_t xtreme_ticks;
 volatile uint32_t xtreme_dropped_ms;
 volatile uint32_t xtreme_grounded;
@@ -34,12 +61,18 @@ static int ground_query(void* ctx,const sat_vec3_t* origin,sat_fx16_t length,
     sat_mesh_t* mesh=ctx;
     sat_ray3_t ray={*origin,{0,-SAT_FX16_ONE,0},length};
     sat_hit3_t hit;
+    xtreme_debug.ray_valid=1;xtreme_debug.ray_hit=0;xtreme_debug.ray_face=0xffffu;
+    debug_vec(xtreme_debug.ray_origin,origin);xtreme_debug.ray_length=length;
     if (!sat_raycast_mesh(mesh,&ray,&hit)) return 0;
+    xtreme_debug.ray_hit=1;xtreme_debug.ray_face=hit.face;
+    xtreme_debug.ray_distance=origin->y-hit.point.y;
+    debug_vec(xtreme_debug.ray_point,&hit.point);
     *point=hit.point;
     *normal=hit.normal;
     if (normal->y<0) {
         normal->x=-normal->x; normal->y=-normal->y; normal->z=-normal->z;
     }
+    debug_vec(xtreme_debug.ray_normal,normal);
     return 1;
 }
 static sat_result_t follow_player(void) {
@@ -55,12 +88,15 @@ static xtreme_input_t sample_input(const sat_pad_state_t* pad) {
     in.x=127*(!!(pad->held&SAT_PAD_RIGHT)-!!(pad->held&SAT_PAD_LEFT));
     in.z=127*(!!(pad->held&SAT_PAD_DOWN)-!!(pad->held&SAT_PAD_UP));
     sat_analog_state_t analog={0};
+    xtreme_debug.analog_valid=0;
     if (sat_pad_analog(0,0,&analog)==SAT_OK && analog.axis_count>=2) {
+        xtreme_debug.analog_valid=1;xtreme_debug.analog_x=analog.x;xtreme_debug.analog_y=analog.y;
         int x=(int)analog.x-128,z=(int)analog.y-128;
         if (x>12 || x<-12 || z>12 || z<-12) {
             in.x=(int16_t)x; in.z=(int16_t)z;
         }
     }
+    xtreme_debug.input_x=in.x;xtreme_debug.input_z=in.z;
     return in;
 }
 /* Inspectable, not a frame-rate claim. */
@@ -149,13 +185,148 @@ static sat_result_t draw_player(void) {
     q.v[3]=(sat_vec3_t){p.x,p.y,p.z-r};
     return submit(&q,SAT_RGB555(5,18,31));
 }
+/* One glyph can consume one command. Reserve worst-case rows, not estimates. */
+#define DMAX 38u
+static const uint8_t debug_rows[DBG_COUNT]={0,5,12,9,12,7};
+static unsigned debug_row;
+static uint16_t debug_budget(void){
+    return (uint16_t)(debug_rows[page]*DMAX+(vectors?3u:0u));
+}
+#define DTRY(e) do{sat_result_t st=(e);if(st!=SAT_OK)return st;}while(0)
+static sat_result_t dline(const char* s){
+    unsigned n=0;
+    while(s[n]){if(n>=DMAX)return SAT_ERR_CAPACITY;++n;}
+    if(debug_row>=debug_rows[page])return SAT_ERR_CAPACITY;
+    return sat_hud_text(&debug_hud,s,4,4+10*(int)debug_row++);
+}
+static int dappend(char* buf,unsigned* n,const char* s){
+    while(*s){if(*n>=DMAX)return 0;buf[(*n)++]=*s++;}
+    buf[*n]=0;return 1;
+}
+static sat_result_t dpair(const char* a,uint32_t av,const char* b,uint32_t bv){
+    char buf[DMAX+1],num[SAT_FMT_U32_MAX];unsigned n=0;
+    if(!dappend(buf,&n,a)||sat_fmt_u32(av,num,sizeof(num),0)!=SAT_OK||!dappend(buf,&n,num))return SAT_ERR_CAPACITY;
+    if(b&&(!dappend(buf,&n,b)||sat_fmt_u32(bv,num,sizeof(num),0)!=SAT_OK||!dappend(buf,&n,num)))return SAT_ERR_CAPACITY;
+    return dline(buf);
+}
+static sat_result_t dsigned(const char* label,int32_t v){
+    char buf[DMAX+1],num[SAT_FMT_I32_MAX];unsigned n=0;
+    if(sat_fmt_i32(v,num,sizeof(num),0)!=SAT_OK||!dappend(buf,&n,label)||!dappend(buf,&n,num))return SAT_ERR_CAPACITY;
+    return dline(buf);
+}
+static sat_result_t dvec(const char* label,const volatile int32_t v[3],int scale){
+    char buf[DMAX+1],num[SAT_FMT_FX16_MAX];unsigned n=0;
+    if(!dappend(buf,&n,label))return SAT_ERR_CAPACITY;
+    for(unsigned i=0;i<3;++i){
+        int64_t raw=(int64_t)v[i]*scale;
+        if(raw>INT32_MAX)raw=INT32_MAX;
+        if(raw<INT32_MIN)raw=INT32_MIN;
+        if(sat_fmt_fx16((int32_t)raw,1,num,sizeof(num),0)!=SAT_OK||(i&&!dappend(buf,&n," "))||!dappend(buf,&n,num))return SAT_ERR_CAPACITY;
+    }
+    return dline(buf);
+}
+static sat_vec3_t dload(const volatile int32_t v[3]){return(sat_vec3_t){v[0],v[1],v[2]};}
+static sat_result_t dsegment(const sat_vec3_t* a,const sat_vec3_t* b,uint16_t color){
+    int16_t x0,y0,x1,y1;
+    if(sat_project_to_screen(&camera.view_proj,a->x,a->y,a->z,320,224,&x0,&y0)!=SAT_OK||
+       sat_project_to_screen(&camera.view_proj,b->x,b->y,b->z,320,224,&x1,&y1)!=SAT_OK)return SAT_OK;
+    if(x0<0||x0>=320||x1<0||x1>=320||y0<0||y0>=224||y1<0||y1>=224)return SAT_OK;
+    const sat_line_cmd_t cmd={x0-160,y0-112,x1-160,y1-112,color,0};
+    return sat_vdp1_draw_line(&cmd);
+}
+static sat_result_t dgeometry(void){
+    sat_vec3_t a,b;
+    if(xtreme_debug.ray_valid){
+        a=dload(xtreme_debug.ray_origin);b=a;b.y-=xtreme_debug.ray_length;
+        if(xtreme_debug.ray_hit)b=dload(xtreme_debug.ray_point);
+        DTRY(dsegment(&a,&b,SAT_RGB555(31,4,4)));
+        if(xtreme_debug.ray_hit){
+            a=b;b.x+=xtreme_debug.ray_normal[0];b.y+=xtreme_debug.ray_normal[1];b.z+=xtreme_debug.ray_normal[2];
+            DTRY(dsegment(&a,&b,SAT_RGB555(5,31,10)));
+        }
+    }
+    a=dload(xtreme_debug.pos);a.y+=SAT_FX16_ONE;b=a;
+    b.x+=xtreme_debug.vel[0]*4;b.y+=xtreme_debug.vel[1]*4;b.z+=xtreme_debug.vel[2]*4;
+    return dsegment(&a,&b,SAT_RGB555(31,25,4));
+}
+#define DV(a,v) DTRY(dpair(a,v,0,0))
+#define DP(a,v,b,w) DTRY(dpair(a,v,b,w))
+static sat_result_t draw_debug(void){
+    if(!page&&!vectors)return SAT_OK;
+    DTRY(sat_vdp1_overlay_begin());
+    if(vectors)DTRY(dgeometry());
+    if(!page)return SAT_OK;
+    debug_row=0;
+    switch(page){
+    case DBG_COMPACT:
+        DTRY(dline("XTREME DEBUG  Y:NEXT Z:VECTORS"));
+        DTRY(dline(viewer?"VIEWER":(player.grounded?"GROUNDED":"AIRBORNE")));
+        DP("MS ",xtreme_debug.frame_ms," SUB/S X10 ",xtreme_debug.submit_x10);
+        DTRY(dvec("VEL M/S ",xtreme_debug.vel,60));
+        DTRY(dsigned("ERROR ",xtreme_debug.hud_error?xtreme_debug.hud_error:xtreme_debug.error));
+        break;
+    case DBG_PHYSICS:
+        DTRY(dline("PHYSICS  Y:NEXT Z:VECTORS"));
+        DTRY(dline(player.grounded?"GROUNDED":"AIRBORNE"));
+        DTRY(dvec("POS M ",xtreme_debug.pos,1));
+        DTRY(dvec("VEL M/S ",xtreme_debug.vel,60));
+        DTRY(dvec("NORMAL ",xtreme_debug.normal,1));
+        DTRY(dline(!xtreme_debug.ray_valid?"RAY NOT SAMPLED":(xtreme_debug.ray_hit?"RAY HIT":"RAY MISS")));
+        if(xtreme_debug.ray_valid&&xtreme_debug.ray_hit){
+            DV("FACE ",xtreme_debug.ray_face);
+            DTRY(dvec("HIT M ",xtreme_debug.ray_point,1));
+            DV("DIST MM ",(uint32_t)(((int64_t)xtreme_debug.ray_distance*1000)/65536));
+        }else DTRY(dline("FACE/DIST N/A"));
+        DP("TICK ",xtreme_debug.ticks," FRAME ",xtreme_debug.ticks_frame);
+        DP("JUMP ",xtreme_debug.jump_pending," RESET ",xtreme_debug.respawns);
+        DV("DROPPED MS ",xtreme_debug.dropped_ms);
+        break;
+    case DBG_CAMERA:
+        DTRY(dline("CAMERA / INPUT"));
+        DTRY(dline(viewer?"MODE VIEWER":"MODE CHASE"));
+        DTRY(dvec("EYE ",xtreme_debug.eye,1));DTRY(dvec("TARGET ",xtreme_debug.target,1));
+        DP("HELD ",xtreme_debug.held," PRESS ",xtreme_debug.pressed);
+        if(xtreme_debug.analog_valid){DP("ANALOG X ",xtreme_debug.analog_x," Y ",xtreme_debug.analog_y);}
+        else DTRY(dline("ANALOG N/A"));
+        DTRY(dsigned("INPUT X ",xtreme_debug.input_x));DTRY(dsigned("INPUT Z ",xtreme_debug.input_z));
+        DTRY(dline("OCCLUSION N/A"));break;
+    case DBG_RENDER:
+        DTRY(dline("RENDER / TIMING"));
+        DP("MS ",xtreme_debug.frame_ms," SUB/S X10 ",xtreme_debug.submit_x10);
+        DP("FACES ",xtreme_debug.submitted," FLUSH ",xtreme_debug.flushed);
+        DP("CULLED ",xtreme_debug.culled," CLIP ",xtreme_debug.clipped);
+        DP("SKIP ",xtreme_debug.skipped," REJECT ",xtreme_debug.rejected);
+        DV("BUDGET BLOCK ",xtreme_debug.blocked);
+        DP("WORLD CMD ",xtreme_debug.world_commands," CAP ",xtreme_debug.command_capacity);
+        DP("HUD RES ",xtreme_debug.hud_reserved," PREV USED ",xtreme_debug.hud_used);
+        DP("SIM MS ",xtreme_debug.sim_ms," CAM ",xtreme_debug.camera_ms);
+        DP("SCENE MS ",xtreme_debug.scene_ms," FLUSH ",xtreme_debug.flush_ms);
+        DV("PREV HUD MS ",xtreme_debug.hud_ms);
+        if(xtreme_debug.frame_stats_valid){DP("LATE ",xtreme_debug.late_swaps," TIMEOUT ",xtreme_debug.draw_timeouts);}
+        else { DTRY(dline("FRAME STATS N/A")); }
+        break;
+    case DBG_MEMORY:
+        DTRY(dline("MEMORY / ASSETS"));
+        DV("VDP1 TEX FREE B ",xtreme_debug.vram_free);
+        DP("RENDER ",STAGE_FACE_COUNT," COLL ",COLLISION_FACE_COUNT);
+        DV("ENTITIES ",STAGE_ENTITY_COUNT);
+        DTRY(dline("WRAM-H/L N/A"));DTRY(dline("VDP2/SCSP N/A"));DTRY(dline("SECTOR/LOD/STREAM N/A"));break;
+    default:return SAT_ERR_INVALID_ARG;
+    }
+    return SAT_OK;
+}
 static int fail(sat_result_t status) {
     xtreme_error = (int32_t)status;
+    xtreme_debug.error=status;
     return 1;
 }
 int main(void) {
     sat_result_t rc = sat_app_init_default();
     if (rc != SAT_OK) return fail(rc);
+    xtreme_debug.magic=0x58544442u;xtreme_debug.version=1;
+    xtreme_debug.bytes=sizeof(xtreme_debug);
+    rc=sat_hud_init_default(&debug_hud,&debug_font);
+    if(rc!=SAT_OK)return fail(rc);
     rc = sat_scene_init(&scene,faces,keys,order,CAPACITY);
     if (rc != SAT_OK) return fail(rc);
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i)
@@ -163,6 +334,7 @@ int main(void) {
     rc=follow_player();
     if (rc!=SAT_OK) return fail(rc);
     uint32_t last=sat_time_ms(), accumulator=0;
+    rate_start=last;
     uint8_t jump_pending=0;
     for (;;) {
         sat_pad_state_t pad = {0};
@@ -176,45 +348,99 @@ int main(void) {
         const uint32_t now=sat_time_ms();
         uint32_t elapsed=now-last;
         last=now;
+        xtreme_debug.frame_ms=elapsed;
+        if(now-rate_start>=1000u){
+            xtreme_debug.submit_x10=(uint32_t)(((uint64_t)(xtreme_frames-rate_frames)*10000u)/(now-rate_start));
+            rate_start=now;rate_frames=xtreme_frames;
+        }
+        if(pad.pressed&SAT_PAD_Y)page=(page+1u)%DBG_COUNT;
+        if(pad.pressed&SAT_PAD_Z)vectors^=1u;
+        xtreme_debug.page=page;xtreme_debug.geometry=vectors;
+        xtreme_debug.held=pad.held;xtreme_debug.pressed=pad.pressed;
+        xtreme_debug.ticks_frame=0;xtreme_debug.sim_ms=0;xtreme_debug.ray_valid=0;
+        xtreme_debug.analog_valid=0;xtreme_debug.input_x=0;xtreme_debug.input_z=0;
         if (pad.pressed&SAT_PAD_X) {
             viewer^=1;
             accumulator=0; jump_pending=0; elapsed=0;
             if (viewer) { rc=set_view(1); if(rc!=SAT_OK) return fail(rc); }
         }
+        uint32_t camera_start=sat_time_ms();
         if (viewer) rc=navigate(&pad);
         else {
             if (pad.pressed&SAT_PAD_B) {
                 xtreme_reset(&player,&player.spawn);
+                ++xtreme_debug.respawns;
                 accumulator=0; jump_pending=0; elapsed=0;
             }
             if (pad.pressed&(SAT_PAD_A|SAT_PAD_C)) jump_pending=1;
             if (elapsed>100u) { xtreme_dropped_ms+=elapsed-100u; elapsed=100u; }
             accumulator+=elapsed*60u;
             xtreme_input_t in=sample_input(&pad);
+            const uint32_t sim_start=sat_time_ms();
             while(accumulator>=1000u) {
                 in.jump=jump_pending;
                 jump_pending=0;
+                const sat_vec3_t before=player.feet;
                 xtreme_tick(&player,in,ground_query,&ground);
+                if(player.feet.x==player.spawn.x&&player.feet.y==player.spawn.y&&player.feet.z==player.spawn.z&&
+                   (before.x!=player.spawn.x||before.y!=player.spawn.y||before.z!=player.spawn.z)&&!player.grounded)
+                    ++xtreme_debug.respawns;
+                ++xtreme_debug.ticks_frame;
                 accumulator-=1000u;
                 ++xtreme_ticks;
             }
             xtreme_grounded=player.grounded;
             xtreme_player_x=player.feet.x;xtreme_player_y=player.feet.y;xtreme_player_z=player.feet.z;
+            xtreme_debug.sim_ms=sat_time_ms()-sim_start;
+            camera_start=sat_time_ms();
             rc=follow_player();
         }
         if (rc != SAT_OK) return fail(rc);
-        rc = sat_scene_begin(&scene,&camera,camera.near_z,WIDTH,HEIGHT,0u);
+        xtreme_debug.camera_ms=sat_time_ms()-camera_start;
+        xtreme_debug.viewer=viewer;xtreme_debug.grounded=player.grounded;
+        xtreme_debug.ticks=xtreme_ticks;xtreme_debug.dropped_ms=xtreme_dropped_ms;xtreme_debug.jump_pending=jump_pending;
+        debug_vec(xtreme_debug.pos,&player.feet);debug_vec(xtreme_debug.vel,&player.velocity);
+        debug_vec(xtreme_debug.normal,&player.ground_normal);
+        debug_vec(xtreme_debug.eye,&camera.eye);debug_vec(xtreme_debug.target,&camera.target);
+        const uint32_t scene_start=sat_time_ms();
+        const uint16_t reserved=debug_budget();
+        xtreme_debug.hud_reserved=reserved;
+        rc = sat_scene_begin(&scene,&camera,camera.near_z,WIDTH,HEIGHT,reserved);
         if (rc != SAT_OK) return fail(rc);
         rc = draw_stage();
         if (rc != SAT_OK) return fail(rc);
         rc=draw_player();
         if (rc!=SAT_OK) return fail(rc);
-        rc = sat_scene_flush(&scene);
-        if (rc != SAT_OK) return fail(rc);
-        xtreme_world_commands = scene.world_commands;
+        const uint32_t flush_start=sat_time_ms();
+        xtreme_debug.scene_ms=flush_start-scene_start;
+        rc=sat_scene_flush(&scene);
+        xtreme_debug.flush_ms=sat_time_ms()-flush_start;
+        if(rc!=SAT_OK&&rc!=SAT_ERR_CAPACITY)return fail(rc);
+        if(rc!=SAT_OK){xtreme_debug.error=rc;xtreme_error=rc;}
+        xtreme_world_commands=scene.world_commands;
+        xtreme_debug.world_commands=scene.world_commands;
+        xtreme_debug.submitted=scene.submitted_faces;xtreme_debug.flushed=scene.flushed_faces;
+        xtreme_debug.culled=scene.culled_faces;xtreme_debug.clipped=scene.clipped_faces;
+        xtreme_debug.skipped=scene.skipped_faces;xtreme_debug.rejected=scene.rejected_faces;
+        xtreme_debug.blocked=scene.budget_blocked_faces;xtreme_debug.command_capacity=scene.commands_capacity;
+        xtreme_debug.vram_free=sat_vdp1_vram_free_bytes();
+        sat_vdp1_frame_stats_t fs={0};
+        xtreme_debug.frame_stats_valid=sat_vdp1_frame_stats(&fs)==SAT_OK;
+        if(xtreme_debug.frame_stats_valid){
+            xtreme_debug.late_swaps=fs.late_swaps;xtreme_debug.draw_waits=fs.draw_waits;xtreme_debug.draw_timeouts=fs.draw_timeouts;
+        }
+        sat_vdp1_command_stats_t pre={0},post={0};
+        const int pre_ok=sat_vdp1_command_stats(&pre)==SAT_OK;
+        const uint32_t hud_start=sat_time_ms();
+        rc=draw_debug();
+        if(rc!=SAT_OK)xtreme_debug.hud_error=rc;
+        if(sat_vdp1_command_stats(&post)==SAT_OK&&pre_ok&&post.used>=pre.used)
+            xtreme_debug.hud_used=post.used-pre.used;
+        xtreme_debug.hud_ms=sat_time_ms()-hud_start;
         rc = sat_app_frame_end();
         if (rc != SAT_OK) return fail(rc);
         ++xtreme_frames;
+        xtreme_debug.frames=xtreme_frames;
     }
     (void)sat_shutdown();
     return 0;
