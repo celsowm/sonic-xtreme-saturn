@@ -36,7 +36,21 @@ jobs:
           cmp build/jade-gully/greybox.h build/repeat/greybox.h
           cmp build/jade-gully/collision.h build/repeat/collision.h
           cc -std=c11 -Wall -Wextra -Werror -fsyntax-only -I sdk-source/include -I build/jade-gully src/main.c
+      - run: |
+          python tools/validate_adventure_layout.py
+          blender --background --factory-startup --python-exit-code 1 --python tools/create_jade_gully_adventure.py -- toolkit build/jade-adventure
+          blender --background --factory-startup --python-exit-code 1 --python tools/create_jade_gully_adventure.py -- toolkit build/jade-adventure-repeat
+          for file in jade_gully.json jade_gully.render.obj jade_gully.collision.obj; do
+            cmp "build/jade-adventure/$file" "build/jade-adventure-repeat/$file"
+          done
+          python toolkit/tools/validate_scene.py build/jade-adventure/jade_gully.json
+          python tools/bake_greybox.py build/jade-adventure/jade_gully.render.obj build/jade-adventure/jade_gully.json build/jade-adventure/greybox.h --collision build/jade-adventure/jade_gully.collision.obj --collision-output build/jade-adventure/collision.h
+          cc -std=c11 -Wall -Wextra -Werror -fsyntax-only -I sdk-source/include -I build/jade-adventure src/main.c
       - uses: actions/upload-artifact@v4
         with:
           name: jade-gully-greybox
           path: build/jade-gully/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jade-gully-adventure-authoring
+          path: build/jade-adventure/
