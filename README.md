@@ -2,13 +2,15 @@
 
 Unofficial original third-person 3D action platformer concept for Sega Saturn, inspired by Sonic X-treme and Sonic Adventure. Not affiliated with Sega; no proprietary assets included.
 
-**Status:** initial native 3D movement prototype; target build and emulator validation pending. Not a complete game.
+**Status:** native Jade Gully greybox and controller have passed 11 Ymir probe scenarios. Optional locally generated Sonic R skeletal actor integration is implemented but awaits Mac build and emulator qualification. Not a complete game.
 
 Built on [LibSaturn](https://github.com/celsowm/libsaturn) and [Blender Toolkit](https://github.com/celsowm/libsaturn-blender).
 
 ## Mac quick start
 
-From this checkout inside ~/dev: `bash scripts/run-mac.sh` (or `--build-only`). See [controller notes](docs/CONTROLLER.md). For a return ZIP with logs and F9 screenshots, use `bash scripts/capture-mac.sh`; see [debug capture](docs/DEBUG_CAPTURE.md).
+From this checkout inside ~/dev: `bash scripts/run-mac.sh` (or `--build-only`). See [controller notes](docs/CONTROLLER.md). The automated Ymir harness (`python3 scripts/qualify-ymir.py`) publishes logs, screenshots and telemetry in the separate `ymir-evidence` GitHub branch.
+
+If `assets/private/sonic-r/saturn/sonic.c` and `sonic.h` exist, CMake automatically builds the skinned and animated Sonic prototype instead of the blue diamond. **No private asset files are committed or uploaded.** To explicitly verify that the character is actually rendering, run `python3 scripts/qualify-ymir.py --require-sonic`. See [local Sonic R integration](docs/SONIC_R_LOCAL.md). GitHub evidence screenshots are public; only use assets you are authorized to publish images of.
 
 ## Build and inspect Jade Gully
 
