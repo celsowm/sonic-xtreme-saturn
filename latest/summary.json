@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "game_commit": "9ba68de325844ffcd12c7ea75f1be46d8a897f6c",
+  "game_commit": "3bd8684ccd3dda5ff6a8a05d304420164ff82c59",
   "sdk_commit": "08ad63b5923c97e498078628192a64ad66ce50a2",
   "game_dirty": "",
   "sdk_dirty": "M docs/WATER_BENCHMARKS.md\n M examples/water_lab/main.c\n M harness/run-water-lab.sh\n M harness/tests/test_water_lab.py\n M src/core/math3d/logic.hpp\n M tests/host/test_math3d_logic.cpp",
@@ -23,7 +23,7 @@
         "main_entries": 1,
         "frames": 62
       },
-      "boot_address": "0x603cd14",
+      "boot_address": "0x603cd84",
       "boot_method": "map",
       "sonic": {
         "magic": 1398292803,
@@ -53,9 +53,9 @@
           -2.0
         ]
       },
-      "sonic_address": "0x6045994",
+      "sonic_address": "0x6045a04",
       "sonic_method": "map",
-      "pc_after_run": "0x601f0da",
+      "pc_after_run": "0x60141c6",
       "telemetry": {
         "magic": 1481917506,
         "version": 3,
@@ -153,7 +153,7 @@
         ],
         "submission_rate_hz": 30.0
       },
-      "telemetry_address": "0x603d2ec",
+      "telemetry_address": "0x603d35c",
       "address_method": "map",
       "checks": {
         "guest_running": true,
@@ -166,15 +166,16 @@
     }
   },
   "comparisons": {},
-  "private_sonic_present": true,
-  "private_sonic_sha256": "4e24dc26b7bc100aa54cd3bdfd2b934291c3588becd69566e0e8560370fef724",
-  "private_sonic_source_sha256": "fbf5451620459a0601a19233bbee8b0c1a3bdc4b8c81d6160a69c6dd6200231e",
+  "sonic_asset_present": true,
+  "sonic_asset_dir": "assets/sonic-r/lod-160",
+  "sonic_asset_sha256": "4e24dc26b7bc100aa54cd3bdfd2b934291c3588becd69566e0e8560370fef724",
+  "sonic_asset_source_sha256": "fbf5451620459a0601a19233bbee8b0c1a3bdc4b8c81d6160a69c6dd6200231e",
   "probe_sha256": "d0c29fe9865aeae642fd3d6040dfefd41c47fb30d5c7af39d592423098513391",
   "bios_sha256": "96e106f740ab448cf89f0dd49dfbac7fe5391cb6bd6e14ad5e3061c13330266f",
   "build_exit": 0,
-  "app_sha256": "e8f2c5310fd2bba28f19f3341e33151d32faa625a12fbbd97cbde733f6559ccf",
+  "app_sha256": "307d32dc559c9f01714bbaecba8ccb9df59280853858f596d6e761dbe471a2e3",
   "cue_sha256": "1fc5c7464c17d92e90f8fb1f302ad5c9aa6639c23d04c2b674ac8f9d1e08bdba",
-  "bin_sha256": "c33ac31f24c0b1c2453a8f7957acb0b30a738bebaf39e50a13395aed9b3b8d69",
-  "iso_sha256": "7fcd829f4661cdca285bf6a29590bb0d81508abeee0326445ee93bd0808a8344",
+  "bin_sha256": "0bbd84e3a6a4453822f7d657b9d1fdc5d048654bc645baa22037557030e4ecfa",
+  "iso_sha256": "59288b71c6ce9ce233e9ada59ca2439ab6d05bdc799cef04c3366d9eb89ee2d9",
   "failures": []
 }

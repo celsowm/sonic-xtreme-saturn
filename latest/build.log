@@ -16,9 +16,37 @@ Blender quit
 -- Generating done (0.0s)
 -- Build files have been written to: <DEV>/lib-saturn/build/sdk
 [0/2] Re-checking globbed directories...
-ninja: no work to do.
+[1/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/2d/rendering/runtime.cpp.obj
+[2/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/runtime/time.cpp.obj
+[3/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/geometry/transform.cpp.obj
+[4/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/math2d/api.cpp.obj
+[5/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/view_cache_world.cpp.obj
+[6/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/api.cpp.obj
+[7/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/collision.cpp.obj
+[8/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/floor.cpp.obj
+[9/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/2d/rendering/api.cpp.obj
+[10/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/math3d/api.cpp.obj
+[11/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/geometry/mesh.cpp.obj
+[12/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/api.cpp.obj
+[13/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/terrain2.cpp.obj
+[14/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/sweep.cpp.obj
+[15/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/api.cpp.obj
+[16/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/sweep_full.cpp.obj
+[17/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/indexed.cpp.obj
+[18/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/follow_camera2d.cpp.obj
+[19/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/physics2_world.cpp.obj
+[20/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/character2.cpp.obj
+[21/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/skin.cpp.obj
+[22/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/geometry/mesh_api.cpp.obj
+[23/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/spatial/2d.cpp.obj
+[24/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/spatial/3d.cpp.obj
+[25/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/path2.cpp.obj
+[26/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/collision.cpp.obj
+[27/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/faces.cpp.obj
+[28/30] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/world.cpp.obj
+[29/30] Linking CXX static library libsaturn.a
 -- Install configuration: "Release"
--- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn.a
+-- Installing: <DEV>/saturn-prefix/lib/libsaturn.a
 -- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn_startup.a
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/sound_driver.h
@@ -181,7 +209,7 @@ ninja: no work to do.
 -- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/math2d/api.cpp
 -- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/math2d/logic.hpp
 -- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/math2d/tables.hpp
--- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/math3d/logic.hpp
+-- Installing: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/math3d/logic.hpp
 -- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/core/task/task.cpp
 -- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/graphics/2d/sprites/clip.cpp
 -- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/2d/character2.cpp
@@ -220,23 +248,23 @@ ninja: no work to do.
 -- The ASM compiler identification is GNU
 -- Found assembler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc
 -- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
--- Private Sonic R actor: enabled (local-only)
--- Configuring done (0.5s)
+-- Repository Sonic R skeletal actor: <GAME>/assets/sonic-r/lod-160
+-- Configuring done (0.6s)
 -- Generating done (0.0s)
 -- Build files have been written to: <GAME>/build/game
 [0/2] Re-checking globbed directories...
 [1/8] Generating generated/greybox.h, generated/collision.h
 [2/8] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
 [3/8] Building C object CMakeFiles/xtreme.dir/src/sonic_actor.c.obj
-[4/8] Building C object CMakeFiles/xtreme.dir/assets/private/sonic-r/lod-160/sonic.c.obj
+[4/8] Building C object CMakeFiles/xtreme.dir/assets/sonic-r/lod-160/sonic.c.obj
 [5/8] Building C object CMakeFiles/xtreme.dir/src/main.c.obj
 [6/8] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
 [7/8] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 233836 initialized bytes match ELF
+-- [boot-memory] _start=0x06004000, 233948 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 233836, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 233948, 'flags': 0, 'record_offset': 37092} IP observations=[]
 -- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 314 MODE1/2352 sectors
 -- [check] disc image OK: 314 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
