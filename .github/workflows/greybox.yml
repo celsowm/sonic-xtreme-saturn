@@ -1,4 +1,4 @@
-name: Greybox authoring
+name: Greybox authoring and host validation
 on: [push, pull_request]
 jobs:
   generate:
@@ -11,6 +11,14 @@ jobs:
           ref: 573fd8aa63c6ef0698f455b7cbd8afaba597d2ce
           path: toolkit
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: celsowm/libsaturn
+          ref: af86f8518f0d014f2a752ca43035d2278bc9bf8f
+          path: sdk-source
+          persist-credentials: false
+          submodules: false
+      - run: python -m unittest discover -s tests
       - run: sudo apt-get update && sudo apt-get install -y blender
       - run: blender --version
       - run: |
@@ -20,6 +28,11 @@ jobs:
             cmp "build/jade-gully/$file" "build/repeat/$file"
           done
           python toolkit/tools/validate_scene.py build/jade-gully/jade_gully.json
+          for dir in build/jade-gully build/repeat; do
+            python tools/bake_greybox.py "$dir/jade_gully.render.obj" "$dir/jade_gully.json" "$dir/greybox.h"
+          done
+          cmp build/jade-gully/greybox.h build/repeat/greybox.h
+          cc -std=c11 -Wall -Wextra -Werror -fsyntax-only -I sdk-source/include -I build/jade-gully src/main.c
       - uses: actions/upload-artifact@v4
         with:
           name: jade-gully-greybox

@@ -1,24 +1,23 @@
 # Sonic X-treme: Lost Adventure
 
-Unofficial fan-project concept: an original third-person 3D action platformer for Sega Saturn, inspired by the visual direction of the cancelled Sonic X-treme and the movement of Sonic Adventure.
+Unofficial original third-person 3D action platformer concept for Sega Saturn, inspired by Sonic X-treme and Sonic Adventure. Not affiliated with Sega; no proprietary assets included.
 
-**Status: authoring greybox + hardware smoke test, not a playable game.** Not affiliated with Sega. No proprietary game assets included.
+**Status:** native 3D greybox viewer implemented; target build and emulator validation pending. Not a playable game.
 
-Built on [LibSaturn](https://github.com/celsowm/libsaturn) and the companion [Blender Toolkit](https://github.com/celsowm/libsaturn-blender).
+Built on [LibSaturn](https://github.com/celsowm/libsaturn) and [Blender Toolkit](https://github.com/celsowm/libsaturn-blender).
 
-## First original stage fixture
+## Build and inspect Jade Gully
 
-[Jade Gully greybox generation](docs/GREYBOX.md) creates a local .blend and separate scene/geometry exports. CI runs the generation in headless Blender; Saturn loading is not implemented yet.
+Follow [the greybox generation steps](docs/GREYBOX.md) first, then install the LibSaturn SDK from its documented saturn-release preset. With SDK set to the absolute installation prefix:
 
-## Build the smoke test
-Install the LibSaturn SDK using its documented saturn-release preset. Set SDK to the absolute installation prefix, then:
 ```sh
 cmake -S . -B build -G Ninja \
   -DCMAKE_TOOLCHAIN_FILE="$SDK/share/libsaturn/toolchains/sh2eb-elf.cmake" \
   -DCMAKE_PREFIX_PATH="$SDK"
 cmake --build build --target xtreme_disc
 ```
-This displays an original geometric marker and exits the loop on START. Build/run still requires SH-2 toolchain and emulator qualification. Open the resulting BIN/CUE through the emulator with your own BIOS.
+
+Open the resulting BIN/CUE in an emulator with your own BIOS. D-pad pans across the stage, L/R lower/raise the camera, A selects an overhead view, B restores the starting view, START exits. See [viewer technical notes](docs/VIEWER.md).
 
 - [Technical roadmap](docs/ROADMAP.md)
 - [Jade Gully design](docs/JADE_GULLY.md)

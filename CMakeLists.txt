@@ -1,7 +1,24 @@
 cmake_minimum_required(VERSION 3.24)
 project(xtreme LANGUAGES C)
 find_package(LibSaturn 0.1 CONFIG REQUIRED)
-add_executable(xtreme src/main.c)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+set(XTREME_GREYBOX_DIR "${CMAKE_CURRENT_BINARY_DIR}/jade-gully" CACHE PATH "Directory containing exported Jade Gully scene")
+set(GREYBOX_OBJ "${XTREME_GREYBOX_DIR}/jade_gully.render.obj")
+set(GREYBOX_JSON "${XTREME_GREYBOX_DIR}/jade_gully.json")
+set(GENERATED "${CMAKE_CURRENT_BINARY_DIR}/generated/greybox.h")
+foreach(input IN ITEMS "${GREYBOX_OBJ}" "${GREYBOX_JSON}")
+    if(NOT EXISTS "${input}")
+        message(FATAL_ERROR "Missing ${input}; generate the Blender greybox first (docs/GREYBOX.md)")
+    endif()
+endforeach()
+add_custom_command(OUTPUT "${GENERATED}"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_greybox.py"
+        "${GREYBOX_OBJ}" "${GREYBOX_JSON}" "${GENERATED}"
+    DEPENDS "${GREYBOX_OBJ}" "${GREYBOX_JSON}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_greybox.py"
+    VERBATIM)
+add_executable(xtreme src/main.c "${GENERATED}")
+target_include_directories(xtreme PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
+target_compile_features(xtreme PRIVATE c_std_11)
 target_link_libraries(xtreme PRIVATE LibSaturn::Saturn)
 libsaturn_configure_executable(xtreme)
 libsaturn_add_disc(xtreme)
