@@ -1,0 +1,554 @@
+{
+  "schema_version": 1,
+  "name": "Jade Gully — Act 1 Adventure Layout",
+  "units": "m",
+  "axes": "RH_Z_UP",
+  "design": "action-adventure",
+  "target_visual_fps": 30,
+  "physics_hz": 60,
+  "world_bounds": {
+    "x": [
+      -42,
+      45
+    ],
+    "y": [
+      -15,
+      155
+    ],
+    "z": [
+      -12,
+      22
+    ]
+  },
+  "routes": [
+    {
+      "id": "main",
+      "label": "Emerald Run",
+      "kind": "speed",
+      "stations": [
+        [
+          0,
+          0,
+          10,
+          4
+        ],
+        [
+          0,
+          12,
+          9,
+          4
+        ],
+        [
+          3,
+          25,
+          5,
+          4
+        ],
+        [
+          8,
+          38,
+          1,
+          4
+        ],
+        [
+          13,
+          51,
+          1,
+          4
+        ],
+        [
+          12,
+          65,
+          3,
+          5
+        ],
+        [
+          7,
+          78,
+          5,
+          4
+        ],
+        [
+          0,
+          91,
+          5,
+          4
+        ],
+        [
+          -4,
+          104,
+          2,
+          4
+        ],
+        [
+          -4,
+          118,
+          0,
+          5
+        ],
+        [
+          0,
+          132,
+          1,
+          5
+        ]
+      ],
+      "loop": false,
+      "collision": true
+    },
+    {
+      "id": "upper",
+      "label": "Canopy Ridge",
+      "kind": "platform",
+      "stations": [
+        [
+          3,
+          25,
+          5,
+          4
+        ],
+        [
+          -7,
+          34,
+          7,
+          3
+        ],
+        [
+          -12,
+          47,
+          9,
+          3
+        ],
+        [
+          -10,
+          62,
+          8,
+          3
+        ],
+        [
+          7,
+          78,
+          5,
+          4
+        ]
+      ],
+      "loop": false,
+      "collision": true
+    },
+    {
+      "id": "river",
+      "label": "River Basin",
+      "kind": "explore",
+      "stations": [
+        [
+          8,
+          38,
+          1,
+          4
+        ],
+        [
+          18,
+          47,
+          0,
+          5
+        ],
+        [
+          23,
+          57,
+          -1,
+          5
+        ],
+        [
+          19,
+          69,
+          1,
+          4
+        ],
+        [
+          7,
+          78,
+          5,
+          4
+        ]
+      ],
+      "loop": false,
+      "collision": true
+    },
+    {
+      "id": "ruins",
+      "label": "Temple Steps",
+      "kind": "platform",
+      "stations": [
+        [
+          -4,
+          104,
+          2,
+          4
+        ],
+        [
+          -14,
+          112,
+          5,
+          4
+        ],
+        [
+          -18,
+          122,
+          8,
+          4
+        ],
+        [
+          -8,
+          130,
+          6,
+          4
+        ],
+        [
+          0,
+          132,
+          1,
+          5
+        ]
+      ],
+      "loop": false,
+      "collision": true
+    }
+  ],
+  "zones": [
+    {
+      "id": "overlook",
+      "anchor": [
+        0,
+        0,
+        10
+      ],
+      "radius_m": 15,
+      "challenge": "spawn + movement tutorial",
+      "camera": "lookahead",
+      "stream_group": "sector_00"
+    },
+    {
+      "id": "forest",
+      "anchor": [
+        8,
+        38,
+        1
+      ],
+      "radius_m": 19,
+      "challenge": "accelerate or climb upper route",
+      "camera": "follow",
+      "stream_group": "sector_01"
+    },
+    {
+      "id": "basin",
+      "anchor": [
+        18,
+        59,
+        0
+      ],
+      "radius_m": 18,
+      "challenge": "low-risk rings + optional ledge",
+      "camera": "wide",
+      "stream_group": "sector_02"
+    },
+    {
+      "id": "waterfall",
+      "anchor": [
+        7,
+        78,
+        5
+      ],
+      "radius_m": 17,
+      "challenge": "bridge + spring jump",
+      "camera": "ledge-aware",
+      "stream_group": "sector_03"
+    },
+    {
+      "id": "temple",
+      "anchor": [
+        -4,
+        112,
+        2
+      ],
+      "radius_m": 20,
+      "challenge": "platform stairs + checkpoint",
+      "camera": "authored-rail",
+      "stream_group": "sector_04"
+    },
+    {
+      "id": "goal",
+      "anchor": [
+        0,
+        132,
+        1
+      ],
+      "radius_m": 12,
+      "challenge": "last downhill burst and exit",
+      "camera": "goal-lock",
+      "stream_group": "sector_05"
+    }
+  ],
+  "entities": [
+    {
+      "id": "spawn",
+      "kind": "player_spawn",
+      "position": [
+        0,
+        2,
+        11
+      ],
+      "zone": "overlook"
+    },
+    {
+      "id": "ring_intro",
+      "kind": "ring",
+      "position": [
+        0,
+        12,
+        11
+      ],
+      "zone": "overlook"
+    },
+    {
+      "id": "ring_speed",
+      "kind": "ring",
+      "position": [
+        10,
+        52,
+        2
+      ],
+      "zone": "forest"
+    },
+    {
+      "id": "ring_ridge",
+      "kind": "ring",
+      "position": [
+        -10,
+        47,
+        10
+      ],
+      "zone": "forest"
+    },
+    {
+      "id": "ring_river",
+      "kind": "ring",
+      "position": [
+        23,
+        57,
+        0
+      ],
+      "zone": "basin"
+    },
+    {
+      "id": "checkpoint_forest",
+      "kind": "checkpoint",
+      "position": [
+        8,
+        38,
+        2
+      ],
+      "zone": "forest"
+    },
+    {
+      "id": "checkpoint_waterfall",
+      "kind": "checkpoint",
+      "position": [
+        7,
+        78,
+        6
+      ],
+      "zone": "waterfall"
+    },
+    {
+      "id": "spring_waterfall",
+      "kind": "spring",
+      "position": [
+        7,
+        78,
+        6
+      ],
+      "zone": "waterfall"
+    },
+    {
+      "id": "enemy_river",
+      "kind": "enemy",
+      "position": [
+        18,
+        47,
+        1
+      ],
+      "zone": "basin"
+    },
+    {
+      "id": "enemy_temple",
+      "kind": "enemy",
+      "position": [
+        -4,
+        118,
+        1
+      ],
+      "zone": "temple"
+    },
+    {
+      "id": "camera_waterfall",
+      "kind": "camera_anchor",
+      "position": [
+        -3,
+        75,
+        13
+      ],
+      "zone": "waterfall"
+    },
+    {
+      "id": "ring_temple",
+      "kind": "ring",
+      "position": [
+        -18,
+        122,
+        9
+      ],
+      "zone": "temple"
+    },
+    {
+      "id": "goal",
+      "kind": "goal",
+      "position": [
+        0,
+        132,
+        2
+      ],
+      "zone": "goal"
+    }
+  ],
+  "set_dressing": [
+    {
+      "id": "palm_start",
+      "asset": "nature-kit/tree-palm.glb",
+      "position": [
+        11,
+        14,
+        7
+      ],
+      "height_m": 5,
+      "triangles_max": 8,
+      "palette": "canopy"
+    },
+    {
+      "id": "palm_basin",
+      "asset": "nature-kit/tree-palmbend.glb",
+      "position": [
+        28,
+        58,
+        -1
+      ],
+      "height_m": 6,
+      "triangles_max": 8,
+      "palette": "canopy"
+    },
+    {
+      "id": "palm_temple",
+      "asset": "nature-kit/tree-palm.glb",
+      "position": [
+        -20,
+        114,
+        5
+      ],
+      "height_m": 5,
+      "triangles_max": 8,
+      "palette": "canopy"
+    },
+    {
+      "id": "rock_fork",
+      "asset": "nature-kit/rock-largea.glb",
+      "position": [
+        23,
+        41,
+        0
+      ],
+      "height_m": 3,
+      "triangles_max": 6,
+      "palette": "rock"
+    },
+    {
+      "id": "rock_temple",
+      "asset": "nature-kit/rock-largea.glb",
+      "position": [
+        -21,
+        126,
+        5
+      ],
+      "height_m": 3,
+      "triangles_max": 6,
+      "palette": "rock"
+    },
+    {
+      "id": "waterfall_cliff",
+      "asset": "nature-kit/cliff-waterfall-rock.glb",
+      "position": [
+        -21,
+        77,
+        0
+      ],
+      "height_m": 7,
+      "triangles_max": 8,
+      "palette": "rock"
+    },
+    {
+      "id": "temple_pillar",
+      "asset": "castle-kit/wall-pillar.glb",
+      "position": [
+        -15,
+        106,
+        4
+      ],
+      "height_m": 5,
+      "triangles_max": 10,
+      "palette": "rock"
+    },
+    {
+      "id": "temple_gate",
+      "asset": "castle-kit/wall-doorway.glb",
+      "position": [
+        -11,
+        119,
+        7
+      ],
+      "height_m": 5,
+      "triangles_max": 10,
+      "palette": "rock"
+    },
+    {
+      "id": "basin_bush",
+      "asset": "nature-kit/plant-bush.glb",
+      "position": [
+        27,
+        65,
+        0
+      ],
+      "height_m": 2,
+      "triangles_max": 6,
+      "palette": "canopy"
+    },
+    {
+      "id": "bridge_waterfall",
+      "asset": "nature-kit/bridge-wood.glb",
+      "position": [
+        4,
+        84,
+        4
+      ],
+      "height_m": 2,
+      "triangles_max": 10,
+      "palette": "rock"
+    }
+  ],
+  "budgets": {
+    "render_faces_max": 256,
+    "vertices_max": 2048,
+    "entities_max": 64,
+    "max_imported_prop_triangles": 80,
+    "texture_vram_reserved_for_actor_bytes": 148000,
+    "full_stage_not_yet_qualified": true
+  },
+  "notes": "Authoring plan for a new independent playable layout. Existing qualified main/upper collision remains untouched; new branches and imported CC0 props must be validated in Blender and Ymir before acceptance."
+}
