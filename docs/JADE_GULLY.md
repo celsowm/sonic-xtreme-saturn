@@ -13,3 +13,7 @@ Art: layered distant mountains/sky with VDP2 where feasible; modular checkerboar
 The first décor pass adds original low-poly palms near the overlook, bend and temple, four off-track rocks, and a flat blue-cyan waterfall beyond the traversable ribbon. These are silhouette and composition proxies, not final textures, water simulation, or wall collision. The route and its collision mesh are not modified.
 
 The success criteria are: Sonic visible without depth-order artifacts, ground contact and route progress unchanged, all 11 replay scenarios passing with SXAC v3 animation history, zero dropped simulation time, and a stable 30 scene submissions/s with acceptable p95 frame time. Ymir evidence must distinguish **submission cadence** from independently verified displayed FPS; physical-Saturn measurement remains pending.
+
+## Alternative connected Adventure layout (P3 candidate)
+
+Separate from the qualified original 11-case course, [Jade Gully Action Adventure](JADE_GULLY_ADVENTURE.md) now defines four routes, two wider collision-enabled clearings, six region/camera concepts, thirteen semantic entities and ten instances of selected Kenney CC0 source models checked into `assets/kenney/`. The original `tools/create_jade_gully.py` and baseline Ymir course remain unchanged. The new Blender generator `tools/create_jade_gully_adventure.py` budgets 234 render triangles including cliffs/water and decimates imported models before export. **This is an authoring candidate, not a fully playable 3–5 minute stage and not qualified on the Saturn yet.**
