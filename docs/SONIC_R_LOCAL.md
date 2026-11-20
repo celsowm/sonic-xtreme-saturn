@@ -47,3 +47,19 @@ The `SXAC` v2 character telemetry records state, error, texture registry count, 
 ## Remaining technical work
 
 Character direction relative to input, cross-fading clips, animation speed matching, near-plane/occlusion handling, draw-time optimization, derived texture budget, full route qualification, and actual Saturn hardware validation remain open. The original Sega asset permissions and exact contributor license are not yet verified.
+
+## Movement and pacing qualification (candidate)
+
+The actor telemetry is now `SXAC v3` and records a bitmask of animation clips visited, total transitions, physical takeoff/landing events and grounded/airborne simulation ticks. Clip mask bits: 0=idle, 1=highspeed, 2=jump, 3=falling, 4=landing, 5=brake, 6=turn_left, 7=turn_right. This proves a clip *was entered*, not that it looked correct in the screenshot; visual inspection remains necessary.
+
+The 11 Ymir replays now check that `jump_in_place` visits jump/fall/landing with physical takeoff/landing, `curve_route` visits running, and `fall_reset` visits falling. Actor tick/position agreement with the controller, paused/single-step actor determinism and HUD-on/off actor equivalence are also checked. Runtime acceptance demands no world/HUD errors, late swaps, draw timeouts, dropped simulated time or budget overruns.
+
+A new independent WRAM-H record `XFP1 v1` stores a 64-frame circular timing sample (frame interval, simulation, scene and flush, all in ms). `qualify-ymir.py` exports `frame-pacing.json` with measured p50/p95/p99/max, and requires at least 30 samples, p95 no greater than 38 ms, terminal frame <=40 ms and at least 29.0 scene submissions/s. These are emulator instrumentation/diagnostic gates, **not** a hardware-verified 30 FPS displayed cadence or worst-case stage performance proof. The 11-case result with all these new gates remains pending until a new run is published.
+
+Run all scenarios and automatically upload only sanitized ZIP/screenshot/JSON/log evidence to the dedicated `ymir-evidence` branch:
+
+```sh
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && python3 scripts/qualify-ymir.py --require-sonic
+```
+
+If this run reports `review`, inspect `latest/summary.json`, `latest/<case>/sonic-telemetry.json` and `latest/<case>/frame-pacing.json`; retain failures and tighten renderer/animation logic rather than relaxing acceptance numbers without evidence.
