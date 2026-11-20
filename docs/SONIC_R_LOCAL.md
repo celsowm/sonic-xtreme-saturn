@@ -17,3 +17,17 @@ The runner recompiles the game, runs 11 independent Ymir replay cases, checks XT
 Error gates: malformed generated asset, unsupported texture, lack of palette or VDP1 memory, SH-2 linker overrun, animation mismatch and scene capacity are real failures. Do not silently fall back to the blue proxy when the private files are present. Inspect `latest/summary.json` and `latest/build.log` on GitHub to diagnose. The HUD displays generic movement state; character telemetry is machine-readable separately.
 
 The initial character size is set by the local importer `--scale 0.03265`. Actual height and on-screen appearance must be verified visually in the Ymir screenshots. No stock-Saturn performance claim is established yet.
+
+## Early boot diagnostics
+
+If the Ymir screen is black, the game can return from `main` and loop in LibSaturn CRT0. That is **not** an XTDB parser bug by itself. The headless harness now extracts a separate initialized `xtreme_boot_debug` (`XBT1`) word record with `stage`, `error`, `main_entries`, and `frames` **before** attempting to decode normal frame telemetry. The game's `fail` path also commits XTDB even if no frame was rendered. The harness reads the independent `SXAC` character error state from the same WRAM dump, including on normal XTDB decode failure.
+
+Stages: 0 = entry into `main` not recorded, 1 = calling `sat_app_init_default`, 2 = Saturn runtime initialized, 3 = debug HUD initialized, 4 = scene allocated, 5 = Sonic initialized (or absent), 6 = frame loop entered, 7 = loop executing. A failure stores its `sat_result_t` numeric code in the record, with the raw emulator PC in the case summary.
+
+Diagnose a black frame with a **single** lightweight replay first:
+
+```sh
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && python3 scripts/qualify-ymir.py --require-sonic --case idle
+```
+
+The result in `latest/idle/boot-telemetry.json`, `latest/idle/sonic-telemetry.json` and `latest/summary.json` distinguishes a startup, asset, texture, or renderer failure without exposing any private source data. Fix that concrete failure before rerunning all eleven replays.
