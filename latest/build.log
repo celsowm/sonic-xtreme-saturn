@@ -16,10 +16,9 @@ Blender quit
 -- Generating done (0.0s)
 -- Build files have been written to: <DEV>/lib-saturn/build/sdk
 [0/2] Re-checking globbed directories...
-[1/3] Building CXX object CMakeFiles/libsaturn_core.dir/src/hal/vdp1/vdp1.cpp.obj
-[2/3] Linking CXX static library libsaturn.a
+ninja: no work to do.
 -- Install configuration: "Release"
--- Installing: <DEV>/saturn-prefix/lib/libsaturn.a
+-- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn.a
 -- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn_startup.a
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/sound_driver.h
@@ -222,7 +221,7 @@ Blender quit
 -- Found assembler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc
 -- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
 -- Private Sonic R actor: enabled (local-only)
--- Configuring done (0.6s)
+-- Configuring done (0.5s)
 -- Generating done (0.0s)
 -- Build files have been written to: <GAME>/build/game
 [0/2] Re-checking globbed directories...
