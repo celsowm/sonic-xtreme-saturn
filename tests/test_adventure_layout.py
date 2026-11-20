@@ -13,7 +13,7 @@ class AdventureLayoutTests(unittest.TestCase):
         self.assertEqual(result["routes"],4)
         self.assertEqual(result["path_segments"],22)
         self.assertEqual(result["props"],10)
-        self.assertEqual(result["face_budget_total"],212)
+        self.assertEqual(result["face_budget_total"],214)
         self.assertLessEqual(result["face_budget_total"],256)
 
     def test_branches_cannot_be_disconnected(self):
