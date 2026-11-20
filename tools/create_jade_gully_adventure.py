@@ -77,7 +77,29 @@ def import_cc0_prop(item,materials):
     used=sorted({int(idx) for poly in old_mesh.polygons for idx in poly.vertices})
     remap={old:new for new,old in enumerate(used)}
     compact_vertices=[tuple(old_mesh.vertices[idx].co) for idx in used]
-    compact_faces=[tuple(remap[int(idx)] for idx in poly.vertices) for poly in old_mesh.polygons]
+    # Reject face triangles that become collinear AFTER Q16.16 quantization,
+    # exactly as the native Saturn greybox baker does. Simplification can
+    # produce microscopic or flat polygons even when the source GLB is valid.
+    # This only affects imported visual props: never remove walkable faces.
+    from tools.bake_greybox import convert_xyz
+    fixed_vertices=[convert_xyz(p) for p in compact_vertices]
+    compact_faces=[]
+    removed=0
+    for poly in old_mesh.polygons:
+        idx=tuple(remap[int(i)] for i in poly.vertices)
+        a,b,c=idx[:3]
+        va,vb,vc=(fixed_vertices[k] for k in (a,b,c))
+        u=tuple(vb[k]-va[k] for k in range(3))
+        v=tuple(vc[k]-va[k] for k in range(3))
+        normal=(u[1]*v[2]-u[2]*v[1],
+                u[2]*v[0]-u[0]*v[2],
+                u[0]*v[1]-u[1]*v[0])
+        if not any(normal):
+            removed+=1
+            continue
+        compact_faces.append(idx)
+    if not compact_faces:
+        raise RuntimeError(f"{path}: no non-degenerate faces after quantization")
     compact=bpy.data.meshes.new(name+"_compact")
     compact.from_pydata(compact_vertices,[],compact_faces)
     compact.update()
@@ -85,7 +107,7 @@ def import_cc0_prop(item,materials):
     obj.data=compact
     if old_mesh.users==0:bpy.data.meshes.remove(old_mesh)
     obj["saturn_mesh"]="render"
-    print(f'[adventure] {item["id"]}: {len(faces)} -> {len(obj.data.polygons)} triangles; {len(used)} live vertices; budget {budget}')
+    print(f'[adventure] {item["id"]}: {len(faces)} -> {len(obj.data.polygons)} triangles; {len(used)} live vertices; removed {removed} zero-area faces; budget {budget}')
     return obj
 
 
