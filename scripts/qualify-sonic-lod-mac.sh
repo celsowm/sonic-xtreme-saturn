@@ -1,25 +1,33 @@
 #!/usr/bin/env bash
-# Generate and qualify a private, skeletal Sonic R LOD with the existing SDK.
-# No GLB/PNG/derived C/H/SKA is copied into the Git repository or evidence ZIP.
+# Regenerate and qualify a version-controlled Sonic R LOD using LibSaturn.
+# Source and generated C/H/SKA belong under tracked assets/sonic-r/.
+# The Ymir evidence ZIP contains only logs/screenshots/telemetry, not asset data.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEV="$(cd "$ROOT/.." && pwd)"
-SRC="$ROOT/assets/private/sonic-r"
+SRC="$ROOT/assets/sonic-r"
 ORIGINAL="$SRC/source/sonic.glb"
 SDK="${LIBSATURN_SOURCE:-$DEV/lib-saturn}"
 [[ -f "$SDK/tools/import_model.py" ]] || SDK="$DEV/libsaturn"
-PY="$SRC/.venv/bin/python"
+PY="$ROOT/assets/private/sonic-r/.venv/bin/python"
+if [[ ! -x "$PY" ]]; then
+  PY="$ROOT/build/sonic-venv/bin/python"
+  if [[ ! -x "$PY" ]]; then
+    python3 -m venv "$ROOT/build/sonic-venv"
+    "$PY" -m pip install pillow numpy
+  fi
+fi
 TRIS="${1:-160}"
 die(){ printf '[sonic-lod] %s\n' "$*" >&2; exit 1; }
 [[ "$TRIS" =~ ^[0-9]+$ ]] || die "triangle target must be an integer, got '$TRIS'"
 (( TRIS >= 80 && TRIS < 286 )) || die "triangle target must be 80..285"
 [[ -f "$ORIGINAL" ]] || die "source GLB missing: $ORIGINAL"
 [[ -f "$SDK/tools/import_model.py" ]] || die "libsaturn importer not found under ~/dev"
-[[ -x "$PY" ]] || die "private Python venv missing: $PY (run original import setup)"
+[[ -x "$PY" ]] || die "Python venv missing: $PY"
 OUT="$SRC/lod-$TRIS"
 mkdir -p "$OUT"
 cd "$ROOT"
-printf '[sonic-lod] Source (private): %s\n' "$ORIGINAL"
+printf '[sonic-lod] Versioned source: %s\n' "$ORIGINAL"
 printf '[sonic-lod] Target: %s triangles; SDK: %s\n' "$TRIS" "$SDK"
 # Simplification can enlarge UV footprints while reducing triangle count.
 # Retry only known face-size/total VDP1-budget failures, preserving animations.
@@ -86,6 +94,6 @@ print(f"[sonic-lod] Generated: faces={faces}, vertices={verts}, textures={textur
 print(f"[sonic-lod] Source transfer: {report.get('textures',{}).get('surface_transfer')}")
 PY
 export XTREME_SONIC_DIR="$OUT"
-echo "[sonic-lod] Building isolated private variant (source untouched)."
-echo "[sonic-lod] Ymir evidence will contain only screenshots, logs, JSON and SHA256 hashes."
+echo "[sonic-lod] Building tracked LOD candidate (source GLB untouched)."
+echo "[sonic-lod] LOD output is in tracked assets/sonic-r/lod-$TRIS; commit generated C/H/SKA after validation."
 python3 scripts/qualify-ymir.py --require-sonic --case idle
