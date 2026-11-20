@@ -3,7 +3,7 @@ COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 08ad63b5923c97e498078628192a64ad66ce50a2
 .....
 ----------------------------------------------------------------------
-Ran 5 tests in 0.001s
+Ran 5 tests in 0.000s
 
 OK
 Info: Saved as "jade_gully.blend"
