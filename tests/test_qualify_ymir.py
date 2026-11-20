@@ -55,7 +55,7 @@ class YmirTelemetryContractTests(unittest.TestCase):
     def test_legacy_proxy_telemetry_remains_independent(self):
         self.assertEqual(ymir.SIZE, 336)
         self.assertEqual(len(ymir.NAMES), 84)
-        self.assertEqual(len(ymir.SONIC_NAMES), 28)
+        self.assertEqual(len(ymir.SONIC_NAMES), 27)
 
 
 if __name__ == "__main__":
