@@ -46,4 +46,4 @@ The `SXAC` v2 character telemetry records state, error, texture registry count, 
 
 ## Remaining technical work
 
-Character direction relative to input, cross-fading clips, animation speed matching, near-plane/occlusion handling, draw-time optimization, derived texture budget, full route qualification, and actual Saturn hardware validation remain open. The original Sony/Sega asset permissions and exact contributor license are not yet verified.
+Character direction relative to input, cross-fading clips, animation speed matching, near-plane/occlusion handling, draw-time optimization, derived texture budget, full route qualification, and actual Saturn hardware validation remain open. The original Sega asset permissions and exact contributor license are not yet verified.
