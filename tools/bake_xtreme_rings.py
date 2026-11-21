@@ -28,7 +28,7 @@ def rgb555(rgb):
     return 0x8000|((b>>3)<<10)|((g>>3)<<5)|(r>>3)
 
 def load(source=SOURCE,metadata=META):
-    payload=base64.b64decode(source.read_text().strip(),validate=True)
+    payload=base64.b64decode("".join(source.read_text().split()),validate=True)
     if hashlib.sha256(payload).hexdigest()!=COMPRESSED_SHA256:
         raise ValueError("ring source checksum mismatch")
     packed=zlib.decompress(payload)
