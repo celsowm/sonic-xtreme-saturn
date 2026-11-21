@@ -32,9 +32,9 @@ class BakeTests(unittest.TestCase):
     def test_grouped_tree_lods_are_baked_together(self):
         # LOD metadata is indexed by tree name, never by individual face;
         # wood and foliage must flip together at the same camera distance.
-        verts=b"v 0 0 0\\nv 2 0 0\\nv 0 2 0\\n"
+        verts=b"v 0 0 0\nv 2 0 0\nv 0 2 0\n"
         groups=b"".join(
-            f"o mesh_{i:04d}_palm_demo_lod_{tier}_{material}\\nf 1 2 3\\n".encode()
+            f"o mesh_{i:04d}_palm_demo_lod_{tier}_{material}\nf 1 2 3\n".encode()
             for i,(tier,material) in enumerate((
                 ("near","wood"),("near","canopy"),("far","wood"),("far","canopy"))))
         header=emit(verts+groups,json.dumps(SCENE).encode())
