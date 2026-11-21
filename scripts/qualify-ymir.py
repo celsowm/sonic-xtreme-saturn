@@ -136,7 +136,7 @@ def decode_render_history(raw,offset):
 
 def locate_render_history(raw,maps):
     for p in maps:
-        m=re.search(r"0x([0-9a-fA-F]+)\\s+_?xtreme_render_history\\b",
+        m=re.search(r"0x([0-9a-fA-F]+)\s+_?xtreme_render_history\b",
                     p.read_text(errors="replace"))
         if m:
             address=int(m[1],16)
