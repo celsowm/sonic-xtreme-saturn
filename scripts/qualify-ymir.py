@@ -237,6 +237,18 @@ ADVENTURE_CASES=[
     ("offroad_right",180,[(65,"RIGHT",52)],[64,90,115,145,179]),
 ]
 
+def check_sonic_snapshot_alignment(sonic, controller):
+    """Both SXAC and XTDB must represent the same COMPLETED game frame.
+    The rendered Sonic world translation shares exact X/Z fixed-point
+    coordinates with the controller; only Y differs by the bind-foot offset.
+    """
+    return {
+        "actor_sim_sync":sonic["ticks"]==controller["ticks"],
+        "actor_position_sync":(
+            sonic["pos_x"]==controller["pos_x"] and
+            sonic["pos_z"]==controller["pos_z"]),
+    }
+
 def checks(name,t):
     out={"guest_running":t["frames"]>0 and t["ticks"]>0,
          "world_error_zero":t["error"]==0,"hud_error_zero":t["hud_error"]==0,
@@ -478,9 +490,14 @@ def main():
                         sonic["registry_capacity"]>=sonic["textures"] and sonic["init_stage"]==7)
                     if sonic is not None:
                         mask=sonic["clip_mask"]
-                        result["checks"]["actor_sim_sync"]=abs(sonic["ticks"]-t["ticks"])<=3
-                        result["checks"]["actor_position_sync"]=(abs(sonic["pos_x"]-t["pos_x"])<=65536 and
-                            abs(sonic["pos_z"]-t["pos_z"])<=65536)
+                        result["checks"].update(check_sonic_snapshot_alignment(sonic,t))
+                        result["actor_snapshot_alignment"]={
+                            "sonic_ticks":sonic["ticks"],
+                            "controller_ticks":t["ticks"],
+                            "delta_ticks":sonic["ticks"]-t["ticks"],
+                            "x_delta_fixed":sonic["pos_x"]-t["pos_x"],
+                            "z_delta_fixed":sonic["pos_z"]-t["pos_z"],
+                        }
                         if name in ("idle","idle_long"):
                             result["checks"]["idle_clip_visited"]=bool(mask & (1<<0))
                         if name=="curve_route":
