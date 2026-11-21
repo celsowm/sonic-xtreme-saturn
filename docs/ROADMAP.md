@@ -118,3 +118,145 @@ Host tests -> SH-2 build -> deterministic disc -> Ymir captured route -> Mednafe
 Responding to the visibly sparse v2 gameplay captures, Adventure scene authoring now uses four **textured, collision-enabled** terrain strips and shorter face intervals near the player. It retains all main-route elevation stations. Prop placement increases from 10 to 18 licensed Kenney CC0 instances, with higher per-tree face caps. Stage budget increases from 256 to 448 authored faces (manifest estimate 442), and indexed8 texture sources remain the same. The change is isolated to `XTREME_STAGE_LAYOUT=adventure`; classic camera and level authoring have not been modified.
 
 **Pending acceptance:** run `bash scripts/qualify-jade-adventure-mac.sh` on the Mac; inspect actual screenshots for near-field texture readability, prop silhouettes, gaps and terrain occlusion; verify Ymir p95/peak frame pacing, VRAM and command headroom, full controller/actor synchrony and off-road collision. If performance fails, favor sector culling/LOD and targeted optimization over relaxing 30 FPS gates. Neither a CI check nor an authored face budget proves prettier graphics or 30 FPS on a physical Saturn.
+
+## Jade Gully v4 — UV-stretch mitigation and grouped palm LOD (candidate, not yet Ymir-tested)
+
+Following the PR #2 Ymir `review` (idle/jump 30 submissions/s, curve ≈23, off-road ≈20.3, panoramic HUD ≈20; P95 50ms for the latter three), a second candidate has been authored **on the same draft PR branch**, not on main:
+
+- A deterministic, authoring-time geometric texture repeat for 5 near main-route intervals and 6 near valley intervals over meadow/rock materials. **It is not free UV wrapping**: each smaller piece maps an existing resident 64×64 Kenney image. This adds 34 theoretical foreground render triangles but **zero** collision triangles or VDP1 texture bytes.
+- Paired near/far palm LODs from actual GLB `woodBark` and `leafsGreen` primitives. The offline exporter writes one LOD group center for each of seven palms. The SH-2 selects near or far **once per palm** (not once per face), preventing broken bark/canopy switching at distance. Both variants remain resident in the scene tables; only one is submitted per frame. No new external assets.
+- Validator statically limits the authored scene to 512 possible faces (budget estimate 511). Latest Blender CI actually exported **460 render triangles / 168 collision triangles**, seven full near/far groups. Full Python, host C syntax and deterministic Blender export passed.
+
+**Not yet measured in Ymir/Mednafen/physical Saturn.** The new near tiling raises the scene's potential polygon count even though palm LOD can lower distant submissions; a performance improvement is *not guaranteed*. Next qualify using the PR head on the Mac, review idle/curve/offroad screenshots for texture scale, silhouette loss, holes and sudden LOD changes, and compare XFP1 P95 and full render/flush timing. Keep the PR in draft if any normal gameplay test exceeds P95 38ms or runs below 29 submissions/s; preserve all collision and character checks. Diagnostic panoramic-view cost should be reported separately without silently lowering previous gates.
+
+## Jade Gully v4 second Ymir check — SDK-controlled A/B required (2026-11-21)
+
+The newest full five-case Ymir replay **did execute the v4 candidate** at game commit `6bba31fc2b0f3880a2a3ec826c08973b2077efde` with SDK `f4ca95f21259e3771e4788fc27064a9bffad51ff`, and reported `review`. All five cases submitted ≈20 scenes/s and the recent-frame P95 was 50–51ms. Gameplay physics, Sonic alignment, offroad grounding, draw-timeout and late-swap guards remained intact, but none of the five performance checks passed. At idle, recent frame history showed about 22–23ms scene + 9–10ms flush + 3–4ms physics, enough to cross the ~33ms cadence threshold and consistently land at ~50ms. This is a timing *interpretation*, not proof of which specific SDK/game code caused it.
+
+Critically, the previous **same-PR candidate** that achieved 30/s at idle used a **different SDK commit** (`08e39e9dfb235a2ad88c17c690178c5ab0927e6f`). The newer `f4ca95f` was not retrievable from the public `celsowm/libsaturn` GitHub commit endpoint at the time of review. It may exist only locally or on another remote; do not attribute the regression to either the engine or level artwork without controlling the dependency revision.
+
+Added `scripts/qualify-jade-sdk-control-mac.sh`: checks out the immutable published `08e39e9` in a **separate** LibSaturn worktree, uses isolated build/install directories and the existing Ymir probe and BIOS, runs **idle/curve/offroad with exactly the current game checkout**, saves evidence only as a local ZIP with `--no-publish`, and prints the measured P95 and submission rates. It does **not** reset the developer's SDK or overwrite `ymir-evidence/latest`. If the controlled replay is still slow, optimize the application rendering/LOD; if it recovers, bisect SDK revisions and validate both with the same art before accepting an engine regression hypothesis. Keep PR #2 a draft until repeatable Ymir visual and performance evidence is available.
+
+## Jade Gully SDK-controlled Ymir result — confirmed (2026-11-21)
+
+The Mac ran the newly introduced isolated SDK control script at game commit `788bb1cb452b2b391da59969c4054283f67eb0a5`, with its unmodified local LibSaturn at `f4ca95f21259e3771e4788fc27064a9bffad51ff` and the published, detached control LibSaturn at `08e39e9dfb235a2ad88c17c690178c5ab0927e6f`. No game source changed between the prior v4 qualification and this controlled replay; only diagnostic script/docs. The resulting archive is on the user's Mac at `build/ymir-evidence-a0961jku-return.zip`; it was **not published** to `ymir-evidence`.
+
+| Ymir scenario | Local SDK f4ca95f scene submissions/s | Control SDK 08e39e9 scene submissions/s | Control P95 frame | Control scene P95 |
+|---|---:|---:|---:|---:|
+| idle | 20 | **30** | **34ms** | 23ms |
+| curve_route | 20 | **23** | 50ms | 25ms |
+| offroad_right | 20 | **20.3** | 50ms | 25ms |
+
+**Diagnosis:** Dependency choice has a material effect on frame scheduling (particularly idle). However, curve/off-road remain over budget under the *earlier* SDK; **both code/dependency revisions and stage rendering cost deserve investigation**. Recent render path performs camera-relative static face filtering, then submits textured stage quads individually, actor mesh and ring quads into a scene-wide painter. A major next step is separating scene submission/projection and painter cost by source class and by frame, then reducing *actually unseen* moving-scene work without damaging near-ground coverage. For current performance, ordinary gameplay requires ≤38ms P95 and ≥29 scene submissions/s; these are not the same as an independent measured display cadence. Do not merge draft PR #2 or silently relax acceptance thresholds.
+
+## Jade Gully source-level renderer instrumentation (XRH1 v1) — pending Ymir
+
+Draft PR #2 now emits an independent **64-completed-frame XRH1 profiler ring** in WRAM-H; the existing XTDB v3 and XFP1 telemetry layouts are left intact. The ring is built using the same `sat_time_ms()` clock as the existing frame profiler; it does not claim GPU timing, VDP1 displayed FPS or measurements outside emulation. Each frame records:
+
+- `scene_begin_ms`: scene initialization before stage submissions;
+- `stage_ms`: static stage quads plus entity/ring submissions;
+- `actor_ms`: Sonic actor transformation/submission;
+- `flush_ms`: trusted LibSaturn painter/VDP1 lowering through scene flush;
+- `stage_faces_tested`, `stage_visibility_skipped`, `stage_lod_skipped`: authored render stage filtering;
+- `stage_submitted`, `marker_submitted`, `actor_submitted`, `total_submitted`, `total_flushed`, `painter_culled`, `painter_clipped`: attribution and renderer work.
+
+The Ymir harness decodes XRH1 through the linker map (falling back to unique magic-scan), verifies attribution per sample, checks that the terminal profiler frame matches the XTDB snapshot, saves `render-profile.json` inside the evidence ZIP, and reports per-class P95 timing. `qualify-jade-sdk-control-mac.sh` prints the counts and timing breakdown while retaining the old LibSaturn `08e39e9` in an isolated worktree; the sanitized ZIP and screenshots are automatically published to the separate `ymir-sdk-control-evidence` branch, never over the full-run evidence.
+
+The game remains on the draft PR branch. This change **does not optimize the scene or claim a performance recovery**; the next pinned-SDK qualification must identify whether stage submissions, Sonic actor submission or painter flush owns the expensive frames before changing geometry. The instrumentation itself has overhead and should be benchmarked against the previous captured runs.
+
+## Jade Gully conservative group-frustum optimization (candidate; Ymir pending)
+
+The updated control-RUN evidence at game `25e6542`, SDK `08e39e9`,
+measured 30/24/23 scene submissions/s for idle/curve/offroad. The newly
+textured rings save 28 marker-face submissions in all three runs, but
+moving scenes still miss the 30 scene-submissions/s diagnostic target. Their
+XHR1 stage source remains ~17–18ms P95; actor ~6ms; painter/flush ~7–9ms.
+Observed screenshots show a legible gold/transparent ring and significant
+remaining landscape texture/material quality issues. The original AABB XZ
+visibility heuristic is retained.
+
+**New candidate (not yet measured):** add a conservative four-plane view
+frustum test in `src/stage_visibility.h`, against the exact row-major
+`scene.faces.view_proj.m` used by LibSaturn's per-quad projection. The
+closed-form AABB support corner bounds each entire world-space face group
+against clip planes `w±x`/`w±y` with an additional 2-unit margin.
+All fixed-point products accumulate in signed 64-bit. If any plane excludes
+the *complete* group, its faces can be rejected without calling
+`sat_scene_submit_quad`. Straddling/near-camera/large terrain pieces
+are retained and handled by the normal SDK clipping/painter path.
+
+**SH-2 work budget:** calculate AABBs at scene startup and aggregate
+consecutive 8-face groups; calculate four plane coefficient vectors once
+per scene; evaluate at most ~58 grouped AABBs (461 authored faces) per
+render frame. Unlike testing each quad separately, this avoids thousands
+of extra 64-bit multiplies on the SH-2. Gameplay physics and collision
+are untouched. Offscreen group rejection increments the existing
+`stage_visibility_skipped` counter; no changes to XTDB/XRH1 formats.
+
+Test policy: deterministic host tests check right/left/top/bottom,
+camera yaw, whole-floor span, 2m safety, overflow-to-visible fallback,
+12,000 random AABBs, and group union. CI compiles both ON and OFF
+variants, no feature-specific SDK changes. The implementation defaults
+ON in `XTREME_STAGE_LAYOUT=adventure`, with an exact controlled
+counterfactual possible on the Mac:
+```bash
+# Same pinned SDK, old filtering for direct comparison
+XTREME_STAGE_FRUSTUM_GATE=OFF bash scripts/qualify-jade-sdk-control-mac.sh
+# New full-group frustum gate (default)
+bash scripts/qualify-jade-sdk-control-mac.sh
+```
+**Both commands automatically publish a sanitized ZIP and images** to the
+dedicated `ymir-sdk-control-evidence` branch; the later run owns `latest`
+while prior commits remain in branch history. No need to attach a Mac ZIP.
+Do not claim a speedup, continuity, transparency correctness or independent
+display FPS from the host tests: require full Ymir telemetry and human
+frame-by-frame visual review before accepting this candidate or PR #2.
+
+## Jade Gully frame scheduling and VDP1 synchronisation instrumentation — XSW1 (2026-11-21)
+
+Mac/Ymir game `587f7435`, pinned LibSaturn `08e39e9`: 30 / 28 / 25.5 scene submissions/s in idle, curve, offroad, respectively. The last 64 XFP1 observations show **seven** 48–50ms curve frames (48–50, 56, 64–66), and **nine consecutive** 50ms offroad frames (45–53); no draw timeouts, no late swaps. XRH1 measured ~17–18ms P95 in static stage + markers, ~6ms actor, ~6–8ms painter flush, but did **not** separate app-level VBlank waiting.
+
+**Source inspection of the identical pinned SDK proved the wait location:**
+`sat_app_frame_begin()` in `src/core/app/api.cpp` first invokes
+`sat_wait_vblank()`; `sat_wait_vblank()` in `src/graphics/video.cpp`
+runs `scu::wait_vblank()` **and** `vdp1::wait_swap_requested()`.
+`sat_app_frame_end()` calls `sat_end_frame()`, which submits the VDP1
+display list. Thus the startup hypothesis "frame end waits for VBlank" was
+incorrect. The full begin call must be measured, and the API does **not**
+offer an independent breakdown of VBlank vs swap-request wait. No SDK
+source or frame lifecycle was modified.
+
+**New XSW1** standalone WRAM-H record (64 completed frames, version 1,
+16×32-bit words per frame, zero inter-frame gap on the first sample) measures
+`frame_interval_ms` (exactly XFP1 interval), `begin_ms` (time spent in
+whole `sat_app_frame_begin` call), `end_ms` (whole
+`sat_app_frame_end` call), `prior_end_gap_ms` (previous call's return
+to this call's entry), and `active_work_ms` (begin return to end entry).
+It also records hardware field count before/after **each** call and
+the respective cumulative delta of VDP1 draw waits, late swaps and
+draw timeouts. Instrumentation uses `sat_time_ms()` and
+`sat_field_count()` (not GPU timer), and costs extra SDK calls itself;
+compare with the uninstrumented baseline before accepting cadence changes.
+
+The Ymir reader validates exact sequential frame IDs and field ordering,
+correlates the 64-frame XSW1 ring with **exact** XFP1 frame intervals,
+writes `frame-sync.json` into the automatically published sanitized ZIP,
+and emits per-case `frame_sync` including `slow_frames` (interval ≥45ms)
+in `summary.json`. Each slow record contains its matching begin, end,
+CPU-work, field counts and wait deltas. Incorrect, missing or truncated
+XSW1 data triggers the `frame_sync_available` qualification check.
+Existing XTDB v3, XFP1 and XRH1 formats remain unchanged.
+
+**Run on Mac (automatically publishes ZIP, summary and screenshots):**
+```bash
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/qualify-jade-sdk-control-mac.sh
+```
+Inspect `ymir-sdk-control-evidence/latest/summary.json`,
+`latest/curve_route/frame-sync.json` and
+`latest/offroad_right/frame-sync.json`. A large
+`begin_ms` with little `end_ms` points toward time spent in the
+begin helper (VBlank/swap + setup); a large `active_work_ms` indicates
+CPU/HUD/painter workload. Field counts and draw-wait deltas distinguish
+the situation further. Even after this, screen presentation FPS is not
+independently established. This feature is **measurement only**; do not
+claim a 30/s fix or merge draft PR #2 yet.

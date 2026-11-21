@@ -7,6 +7,12 @@
 #include "controller.h"
 #ifdef XTREME_STAGE_ADVENTURE
 #include "stage_textures.h"
+#include "ring_sprites.h"
+#include "stage_visibility.h"
+#include "stage_lod.h"
+#include "render_profile.h"
+#include "frame_sync_profile.h"
+#include <saturn/video.h>
 #endif
 #ifdef XTREME_HAS_SONIC
 #include "sonic_actor.h"
@@ -27,9 +33,9 @@
 #define CHARACTER_FACES 2u
 #endif
 #ifdef XTREME_STAGE_ADVENTURE
-/* Octagonal, untextured authored ring silhouettes replace editor diamonds.
- * Eight world quads per ring; non-ring markers remain debug-only. */
-#define MARKER_FACE_RESERVE (8u * STAGE_ENTITY_COUNT)
+/* One transparent 32x32 source sprite quad per ring. Debug markers may
+ * still submit two quads per other entity while Y is enabled. */
+#define MARKER_FACE_RESERVE (2u * STAGE_ENTITY_COUNT)
 #else
 #define MARKER_FACE_RESERVE (2u * STAGE_ENTITY_COUNT)
 #endif
@@ -302,31 +308,60 @@ static sat_result_t submit(const sat_quad3_t* q, uint16_t rgb) {
 }
 #ifdef XTREME_STAGE_ADVENTURE
 static sat_result_t draw_gold_ring(const sat_vec3_t* pos) {
-    /* World-space eight-sided annulus, approximately 1.5 m high.
-     * Not yet a collectible: it visualizes placement, not gameplay state. */
-    static const int32_t outer_x[8]={0,34756,49152,34756,0,-34756,-49152,-34756};
-    static const int32_t outer_y[8]={49152,34756,0,-34756,-49152,-34756,0,34756};
-    static const int32_t inner_x[8]={0,18536,26214,18536,0,-18536,-26214,-18536};
-    static const int32_t inner_y[8]={26214,18536,0,-18536,-26214,-18536,0,18536};
-    for(unsigned i=0;i<8;++i) {
-        const unsigned next=(i+1u)&7u;
-        const sat_quad3_t q={{{pos->x+outer_x[i],pos->y+outer_y[i],pos->z},
-                             {pos->x+outer_x[next],pos->y+outer_y[next],pos->z},
-                             {pos->x+inner_x[next],pos->y+inner_y[next],pos->z},
-                             {pos->x+inner_x[i],pos->y+inner_y[i],pos->z}}};
-        const sat_result_t rc=submit(&q,(i&1u)?SAT_RGB555(29,22,1):SAT_RGB555(31,29,7));
-        if(rc!=SAT_OK)return rc;
-    }
-    return SAT_OK;
+    /* One world-space billboard replaces eight fake solid quads. Actual
+     * 16-frame X-Treme ring animation rotates around its own center at
+     * 2 physics ticks per source frame, regardless of video submission rate.
+     * Only the horizontal camera-right axis rotates; the sprite remains
+     * vertical so the ring never tilts with the chase camera pitch. */
+    const sat_scene3d_material_t* material=
+        xtreme_ring_sprite_material(xtreme_ticks);
+    if(!material)return SAT_ERR_INVALID_ARG;
+    const int32_t half=FX(3)/4;
+    const int32_t rx=(int32_t)(-((int64_t)scene.faces.forward.z*half)/65536);
+    const int32_t rz=(int32_t)(((int64_t)scene.faces.forward.x*half)/65536);
+    const sat_quad3_t quad={{{pos->x-rx,pos->y+half,pos->z-rz},
+                             {pos->x+rx,pos->y+half,pos->z+rz},
+                             {pos->x+rx,pos->y-half,pos->z+rz},
+                             {pos->x-rx,pos->y-half,pos->z-rz}}};
+    return sat_scene_submit_quad(&scene,&quad,material,0u);
 }
 #endif
 
 #ifdef XTREME_STAGE_ADVENTURE
-typedef struct {
-    sat_fx16_t lo_x,hi_x,lo_z,hi_z;
-} stage_face_bounds_t;
-static stage_face_bounds_t stage_bounds[STAGE_FACE_COUNT];
+static xtreme_stage_aabb_t stage_bounds[STAGE_FACE_COUNT];
 static sat_quad3_t stage_cached_quads[STAGE_FACE_COUNT];
+#if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
+/* The 8-face groups are immutable and measured once at startup. Compute
+ * only 4 clip-space side planes per displayed scene, not per terrain face. */
+#define STAGE_FRUSTUM_GROUP_COUNT \
+    ((STAGE_FACE_COUNT+XTREME_STAGE_FRUSTUM_GROUP_SIZE-1u)/XTREME_STAGE_FRUSTUM_GROUP_SIZE)
+static xtreme_stage_aabb_t stage_group_bounds[STAGE_FRUSTUM_GROUP_COUNT];
+static uint8_t stage_group_visible[STAGE_FRUSTUM_GROUP_COUNT];
+static xtreme_stage_frustum_t stage_frustum;
+#endif
+static uint8_t stage_lod_near[STAGE_LOD_GROUP_COUNT ? STAGE_LOD_GROUP_COUNT : 1u];
+/* Separate compact instrumentation avoids changing XTDB v3 or XFP1. */
+volatile xtreme_render_history_t xtreme_render_history={
+    .magic=XTREME_RENDER_HISTORY_MAGIC,.version=1u
+};
+static xtreme_render_sample_t render_pending;
+/* XSW1 is a separate, binary-stable sync trace; do not repurpose XRH1. */
+volatile xtreme_sync_history_t xtreme_sync_history={
+    .magic=XTREME_SYNC_MAGIC,.version=1u
+};
+static xtreme_sync_sample_t sync_pending;
+
+/* One distance decision per palm, not per polygon: bark and canopy always
+ * switch together. Square-distance is unnecessary on SH-2; a conservative
+ * XZ max-axis threshold also avoids expensive per-face 64-bit multiplies.
+ * Gameplay collision does not use any render LOD. */
+static void stage_select_prop_lods(void) {
+    for(unsigned i=0;i<STAGE_LOD_GROUP_COUNT;++i)
+        stage_lod_near[i]=xtreme_stage_lod_choose_near(
+            stage_lod_centers[i].x,stage_lod_centers[i].z,
+            player.feet.x,player.feet.z,stage_lod_near[i]);
+}
+
 /* Baked scenery is immutable. Build its indexed quads and AABBs once during
  * startup instead of gathering four Q16.16 vertices or recalculating
  * bounding boxes every rendered frame. No change to collision or painter. */
@@ -336,33 +371,51 @@ static void stage_prepare_bounds(void) {
         sat_quad3_t* q=&stage_cached_quads[i];
         for(unsigned j=0;j<4;++j)q->v[j]=stage_vertices[f->v[j]];
         const sat_vec3_t* p=&q->v[0];
-        stage_face_bounds_t* out=&stage_bounds[i];
+        xtreme_stage_aabb_t* out=&stage_bounds[i];
         out->lo_x=out->hi_x=p->x;
+        out->lo_y=out->hi_y=p->y;
         out->lo_z=out->hi_z=p->z;
         for(unsigned j=1;j<4;++j){
             p=&q->v[j];
             if(p->x<out->lo_x)out->lo_x=p->x;
             if(p->x>out->hi_x)out->hi_x=p->x;
+            if(p->y<out->lo_y)out->lo_y=p->y;
+            if(p->y>out->hi_y)out->hi_y=p->y;
             if(p->z<out->lo_z)out->lo_z=p->z;
             if(p->z>out->hi_z)out->hi_z=p->z;
         }
     }
+#if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
+    for(unsigned g=0;g<STAGE_FRUSTUM_GROUP_COUNT;++g) {
+        const unsigned first=g*XTREME_STAGE_FRUSTUM_GROUP_SIZE;
+        xtreme_stage_aabb_t* const group=&stage_group_bounds[g];
+        *group=stage_bounds[first];
+        unsigned last=first+XTREME_STAGE_FRUSTUM_GROUP_SIZE;
+        if(last>STAGE_FACE_COUNT)last=STAGE_FACE_COUNT;
+        for(unsigned j=first+1u;j<last;++j)
+            xtreme_stage_aabb_merge(group,&stage_bounds[j]);
+    }
+#endif
 }
 #endif
 
-/* Coarse fixed-point offscreen rejection for Adventure only. Render
- * scenery within 55m laterally, 60m behind and 85m ahead; panoramic camera
- * mode retains all geometry. Physics always sees the full collision world.
- * Use the face bounding box, not its centroid, to avoid culling long ground
- * quads at the sector border. */
+/* Adventurerenderer: cheap camera-aware rejection of never-visible polygons.
+ * A broad camera half-space gate saves submit/projection work while retaining
+ * the local continuous terrain. Viewer mode remains unrestricted. The actual
+ * display FOV still belongs to LibSaturn; renderer coverage is Ymir-gated. */
 static int stage_quad_relevant(unsigned i) {
 #ifdef XTREME_STAGE_ADVENTURE
     if(!viewer){
-        const stage_face_bounds_t* b=&stage_bounds[i];
-        if((int64_t)b->hi_x<(int64_t)player.feet.x-FX(55) ||
-           (int64_t)b->lo_x>(int64_t)player.feet.x+FX(55) ||
-           (int64_t)b->hi_z<(int64_t)player.feet.z-FX(85) ||
-           (int64_t)b->lo_z>(int64_t)player.feet.z+FX(60))
+        const xtreme_stage_aabb_t* bounds=&stage_bounds[i];
+        if(!xtreme_stage_aabb_visible(bounds,camera.eye.x,camera.eye.z))
+            return 0;
+        /* The SDK's painter projects four corners BEFORE checking if the
+         * complete quad is behind the camera. Cheap conservative support-
+         * corner test matches that whole-face rejection with a 1m guard.
+         * Use scene.faces.forward computed from the same camera at begin. */
+        if(!xtreme_stage_aabb_may_be_in_front(bounds,
+               scene.faces.eye.x,scene.faces.eye.y,scene.faces.eye.z,
+               scene.faces.forward.x,scene.faces.forward.y,scene.faces.forward.z))
             return 0;
     }
 #else
@@ -372,9 +425,42 @@ static int stage_quad_relevant(unsigned i) {
 }
 static sat_result_t draw_stage(void) {
     sat_result_t rc;
+#ifdef XTREME_STAGE_ADVENTURE
+    render_pending=(xtreme_render_sample_t){0};
+    render_pending.stage_faces_tested=STAGE_FACE_COUNT;
+#if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
+    xtreme_stage_frustum_prepare(&stage_frustum,scene.faces.view_proj.m);
+    for(unsigned g=0;g<STAGE_FRUSTUM_GROUP_COUNT;++g) {
+        /* Never apply the optimization to the wide panorama viewer. */
+        stage_group_visible[g]=(uint8_t)(viewer ||
+            xtreme_stage_aabb_frustum_relevant(&stage_group_bounds[g],
+                                              &stage_frustum));
+    }
+#endif
+    stage_select_prop_lods();
+#endif
     for (unsigned i=0; i<STAGE_FACE_COUNT; ++i) {
         const stage_face_t* f = &stage_faces[i];
-        if(!stage_quad_relevant(i)) continue;
+        if(
+#if defined(XTREME_STAGE_ADVENTURE) && defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
+            !stage_group_visible[i/XTREME_STAGE_FRUSTUM_GROUP_SIZE] ||
+#endif
+            !stage_quad_relevant(i)) {
+#ifdef XTREME_STAGE_ADVENTURE
+            ++render_pending.stage_visibility_skipped;
+#endif
+            continue;
+        }
+#ifdef XTREME_STAGE_ADVENTURE
+        /* Near/far model *groups* are mutually exclusive. One switch
+         * controls the whole Kenney tree, preserving wood and foliage.
+         * Keep panoramic/debug rendering on the same budgeted LOD path. */
+        if((f->lod==1u && !stage_lod_near[f->lod_group]) ||
+           (f->lod==2u && stage_lod_near[f->lod_group])) {
+            ++render_pending.stage_lod_skipped;
+            continue;
+        }
+#endif
 #ifdef XTREME_STAGE_ADVENTURE
         /* No flat RGB polygon in Adventure: every baked stage face
          * receives its real resident indexed8 landscape material. */
@@ -389,6 +475,11 @@ static sat_result_t draw_stage(void) {
 #endif
         if (rc != SAT_OK) return rc;
     }
+#ifdef XTREME_STAGE_ADVENTURE
+    /* Count only accepted world-stage submissions; renderer/painter culls
+     * and clipped triangles are reported separately after scene flush. */
+    render_pending.stage_submitted=scene.submitted_faces;
+#endif
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i) {
         const stage_entity_t* e = &stage_entities[i];
         const sat_vec3_t p = e->pos;
@@ -417,6 +508,10 @@ static sat_result_t draw_stage(void) {
         rc = submit(&q,marker_colors[e->kind]);
         if (rc != SAT_OK) return rc;
     }
+#ifdef XTREME_STAGE_ADVENTURE
+    render_pending.marker_submitted=
+        scene.submitted_faces-render_pending.stage_submitted;
+#endif
     return SAT_OK;
 }
 static sat_result_t draw_player(void) {
@@ -605,6 +700,10 @@ int main(void) {
      * managed CRAM palette, before the first frame; no per-frame upload. */
     rc=xtreme_stage_textures_init();
     if(rc!=SAT_OK)return fail(rc);
+    /* Ring sprite atlas shares the static indexed palette strategy.
+     * Every frame stays resident: no upload or heap work in draw_stage. */
+    rc=xtreme_ring_sprites_init();
+    if(rc!=SAT_OK)return fail(rc);
     stage_prepare_bounds();
 #endif
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i)
@@ -616,12 +715,47 @@ int main(void) {
     uint32_t last=sat_time_ms();
     rate_start=last;
     uint8_t jump_pending=0;
+#ifdef XTREME_STAGE_ADVENTURE
+    uint32_t last_end_done_at=0u;
+    uint8_t have_last_end=0u;
+#endif
     xtreme_boot_debug.stage=6u; /* entering frame loop */
     for (;;) {
         xtreme_boot_debug.stage=7u;
         sat_pad_state_t pad = {0};
+#ifdef XTREME_STAGE_ADVENTURE
+        /* SDK 08e39e9: begin calls sat_wait_vblank(), which includes
+         * VDP1 swap-request waiting; end only submits the VDP1 list.
+         * Time the whole API calls without changing their behavior. */
+        const uint32_t field_before_begin=sat_field_count();
+        sat_vdp1_frame_stats_t vdp_before_begin={0},vdp_after_begin={0};
+        const uint8_t vdp_before_begin_ok=
+            sat_vdp1_frame_stats(&vdp_before_begin)==SAT_OK;
+        const uint32_t begin_called_at=sat_time_ms();
+#endif
         rc = sat_app_frame_begin(SAT_RGB555(10,19,27),SAT_RGB555(10,19,27),&pad);
         if (rc != SAT_OK) return fail(rc);
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t begin_done_at=sat_time_ms();
+        const uint32_t field_after_begin=sat_field_count();
+        const uint8_t vdp_after_begin_ok=
+            sat_vdp1_frame_stats(&vdp_after_begin)==SAT_OK;
+        sync_pending=(xtreme_sync_sample_t){0};
+        sync_pending.frame=xtreme_frames+1u;
+        sync_pending.begin_ms=begin_done_at-begin_called_at;
+        sync_pending.prior_end_gap_ms=have_last_end?
+            begin_called_at-last_end_done_at:0u;
+        sync_pending.field_before_begin=field_before_begin;
+        sync_pending.field_after_begin=field_after_begin;
+        if(vdp_before_begin_ok&&vdp_after_begin_ok) {
+            sync_pending.draw_waits_begin_delta=
+                vdp_after_begin.draw_waits-vdp_before_begin.draw_waits;
+            sync_pending.late_swaps_begin_delta=
+                vdp_after_begin.late_swaps-vdp_before_begin.late_swaps;
+            sync_pending.draw_timeouts_begin_delta=
+                vdp_after_begin.draw_timeouts-vdp_before_begin.draw_timeouts;
+        }
+#endif
         if (pad.pressed & SAT_PAD_START) {
             rc = sat_app_frame_end();
             if (rc != SAT_OK) return fail(rc);
@@ -631,6 +765,10 @@ int main(void) {
         uint32_t elapsed=now-last;
         last=now;
         xtreme_debug.frame_ms=elapsed;
+#ifdef XTREME_STAGE_ADVENTURE
+        /* Identical sample as XFP1, frame index matches both ring cursors. */
+        sync_pending.frame_interval_ms=elapsed;
+#endif
         if(now-rate_start>=1000u){
             xtreme_debug.submit_x10=(uint32_t)(((uint64_t)(xtreme_frames-rate_frames)*10000u)/(now-rate_start));
             rate_start=now;rate_frames=xtreme_frames;
@@ -703,11 +841,24 @@ int main(void) {
         xtreme_debug.hud_reserved=reserved;
         rc = sat_scene_begin(&scene,&camera,camera.near_z,WIDTH,HEIGHT,reserved);
         if (rc != SAT_OK) return fail(rc);
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t stage_start=sat_time_ms();
+#endif
         rc = draw_stage();
         if (rc != SAT_OK) return fail(rc);
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t actor_start=sat_time_ms();
+        render_pending.scene_begin_ms=stage_start-scene_start;
+        render_pending.stage_ms=actor_start-stage_start;
+        const uint32_t before_actor=scene.submitted_faces;
+#endif
         rc=draw_player();
         if (rc!=SAT_OK) return fail(rc);
         const uint32_t flush_start=sat_time_ms();
+#ifdef XTREME_STAGE_ADVENTURE
+        render_pending.actor_ms=flush_start-actor_start;
+        render_pending.actor_submitted=scene.submitted_faces-before_actor;
+#endif
         xtreme_debug.scene_ms=flush_start-scene_start;
 #ifdef XTREME_STAGE_ADVENTURE
         /* All Sonic indexed textures and the RGB stage palette are uploaded
@@ -720,6 +871,13 @@ int main(void) {
         rc=sat_scene_flush(&scene);
 #endif
         xtreme_debug.flush_ms=sat_time_ms()-flush_start;
+#ifdef XTREME_STAGE_ADVENTURE
+        render_pending.flush_ms=xtreme_debug.flush_ms;
+        render_pending.total_submitted=scene.submitted_faces;
+        render_pending.total_flushed=scene.flushed_faces;
+        render_pending.painter_culled=scene.culled_faces;
+        render_pending.painter_clipped=scene.clipped_faces;
+#endif
         if(rc!=SAT_OK&&rc!=SAT_ERR_CAPACITY)return fail(rc);
         if(rc!=SAT_OK){xtreme_debug.error=rc;xtreme_error=rc;}
         xtreme_world_commands=scene.world_commands;
@@ -742,10 +900,43 @@ int main(void) {
         if(sat_vdp1_command_stats(&post)==SAT_OK&&pre_ok&&post.used>=pre.used)
             xtreme_debug.hud_used=post.used-pre.used;
         xtreme_debug.hud_ms=sat_time_ms()-hud_start;
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t field_before_end=sat_field_count();
+        sat_vdp1_frame_stats_t vdp_before_end={0},vdp_after_end={0};
+        const uint8_t vdp_before_end_ok=
+            sat_vdp1_frame_stats(&vdp_before_end)==SAT_OK;
+        const uint32_t end_called_at=sat_time_ms();
+#endif
         rc = sat_app_frame_end();
         if (rc != SAT_OK) return fail(rc);
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t end_done_at=sat_time_ms();
+        sync_pending.active_work_ms=end_called_at-begin_done_at;
+        sync_pending.end_ms=end_done_at-end_called_at;
+        sync_pending.field_before_end=field_before_end;
+        sync_pending.field_after_end=sat_field_count();
+        const uint8_t vdp_after_end_ok=
+            sat_vdp1_frame_stats(&vdp_after_end)==SAT_OK;
+        if(vdp_before_end_ok&&vdp_after_end_ok) {
+            sync_pending.draw_waits_end_delta=
+                vdp_after_end.draw_waits-vdp_before_end.draw_waits;
+            sync_pending.late_swaps_end_delta=
+                vdp_after_end.late_swaps-vdp_before_end.late_swaps;
+            sync_pending.draw_timeouts_end_delta=
+                vdp_after_end.draw_timeouts-vdp_before_end.draw_timeouts;
+        }
+        last_end_done_at=end_done_at;
+        have_last_end=1u;
+#endif
         ++xtreme_frames;
         record_frame_sample();
+#ifdef XTREME_STAGE_ADVENTURE
+        xtreme_sync_history_append(&xtreme_sync_history,&sync_pending);
+#endif
+#ifdef XTREME_STAGE_ADVENTURE
+        render_pending.frame=xtreme_frames;
+        xtreme_render_history_append(&xtreme_render_history,&render_pending);
+#endif
         xtreme_debug.frames=xtreme_frames;
         xtreme_boot_debug.frames=xtreme_frames;
 #ifdef XTREME_HAS_SONIC

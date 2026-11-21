@@ -73,6 +73,138 @@ class YmirTelemetryContractTests(unittest.TestCase):
         self.assertEqual(result["frame_ms_max"],45)
         self.assertEqual(result["scene_ms_p95"],24)
 
+    def render_ring(self, count=64, next_frame=66):
+        entries=[(0,)*ymir.RENDER_WORDS for _ in range(ymir.RENDER_CAPACITY)]
+        for frame in range(next_frame-count+1,next_frame+1):
+            sample={
+                "frame":frame,"scene_begin_ms":1,"stage_ms":21+(frame%2),
+                "actor_ms":4,"flush_ms":9,"stage_faces_tested":460,
+                "stage_visibility_skipped":100,"stage_lod_skipped":40,
+                "stage_submitted":300,"marker_submitted":8,
+                "actor_submitted":90,"total_submitted":398,
+                "total_flushed":380,"painter_culled":42,
+                "painter_clipped":3
+            }
+            entries[(frame-1)%ymir.RENDER_CAPACITY]=tuple(
+                sample[k] for k in ymir.RENDER_FIELDS)
+        return (struct.pack(">4I",ymir.RENDER_MAGIC,1,count,next_frame)+
+                b"".join(struct.pack(">"+str(ymir.RENDER_WORDS)+"I",*entry)
+                         for entry in entries))
+
+    def test_render_profile_ring_and_header_scan(self):
+        raw=b"\0"*16+self.render_ring()+b"\0"*16
+        profile,address,method=ymir.locate_render_history(raw,[])
+        self.assertEqual(method,"header_scan")
+        self.assertEqual(address,0x06000010)
+        self.assertEqual(profile["count"],64)
+        self.assertEqual(profile["terminal"]["frame"],66)
+        self.assertEqual(profile["stage_submitted_p95"],300)
+        self.assertEqual(profile["actor_ms_p95"],4)
+        self.assertEqual(profile["stage_ms_p95"],22)
+        self.assertEqual(profile["terminal"]["total_submitted"],398)
+        self.assertEqual(profile["last_frames"][0]["frame"],3)
+
+    def test_render_profile_rejects_corrupt_or_unattributed(self):
+        raw=self.render_ring()
+        with self.assertRaises(ValueError):
+            ymir.decode_render_history(raw[:-1],0)
+        bad=bytearray(raw)
+        struct.pack_into(">I",bad,4,2)  # unknown version
+        with self.assertRaises(ValueError):
+            ymir.decode_render_history(bad,0)
+        bad=bytearray(raw)
+        last_pos=(66-1)%ymir.RENDER_CAPACITY
+        total_field=ymir.RENDER_FIELDS.index("total_submitted")
+        struct.pack_into(">I",bad,16+last_pos*ymir.RENDER_WORDS*4+
+                         total_field*4,999)
+        with self.assertRaises(ValueError):
+            ymir.decode_render_history(bad,0)
+
+    def sync_ring(self, count=64, next_frame=66):
+        entries=[(0,)*ymir.SYNC_WORDS for _ in range(ymir.SYNC_CAPACITY)]
+        for frame in range(next_frame-count+1,next_frame+1):
+            sample={
+                "frame":frame,"frame_interval_ms":50 if frame in (48,49,50) else 33,
+                "begin_ms":17 if frame in (48,49,50) else 5,
+                "end_ms":1,"prior_end_gap_ms":0,"active_work_ms":28,
+                "field_before_begin":frame*2,
+                "field_after_begin":frame*2+1,
+                "field_before_end":frame*2+1,
+                "field_after_end":frame*2+1,
+                "draw_waits_begin_delta":0,"draw_waits_end_delta":0,
+                "late_swaps_begin_delta":0,"late_swaps_end_delta":0,
+                "draw_timeouts_begin_delta":0,"draw_timeouts_end_delta":0
+            }
+            entries[(frame-1)%ymir.SYNC_CAPACITY]=tuple(
+                sample[k] for k in ymir.SYNC_FIELDS)
+        return (struct.pack(">4I",ymir.SYNC_MAGIC,1,count,next_frame)+
+                b"".join(struct.pack(">"+str(ymir.SYNC_WORDS)+"I",*sample)
+                         for sample in entries))
+
+    def test_sync_ring_wrap_and_magic_scan(self):
+        raw=b"\0"*16+self.sync_ring()+b"\0"*16
+        sync,addr,method=ymir.locate_sync_history(raw,[])
+        self.assertEqual((addr,method),(0x06000010,"header_scan"))
+        self.assertEqual(sync["count"],64)
+        self.assertEqual(sync["total_frames_recorded"],66)
+        self.assertEqual(sync["last_frames"][0]["frame"],3)
+        self.assertEqual(sync["terminal"]["frame"],66)
+        # Only 3/64 frames are slow: nearest-rank P95 is still 5ms.
+        self.assertEqual(sync["begin_ms_p95"],5)
+        self.assertEqual(max(x["begin_ms"] for x in sync["last_frames"]),17)
+        self.assertEqual(sync["end_ms_p95"],1)
+        self.assertEqual(sync["begin_fields_p95"],1)
+
+    def test_sync_ring_rejects_corruption_and_out_of_order(self):
+        raw=self.sync_ring()
+        for modified in (raw[:-1],):
+            with self.assertRaises(ValueError):
+                ymir.decode_sync_history(modified,0)
+        corrupted=bytearray(raw)
+        struct.pack_into(">I",corrupted,4,2)
+        with self.assertRaises(ValueError):
+            ymir.decode_sync_history(corrupted,0)
+        corrupted=bytearray(raw)
+        pos=(66-1)%ymir.SYNC_CAPACITY
+        struct.pack_into(">I",corrupted,16+pos*ymir.SYNC_WORDS*4,999)
+        with self.assertRaises(ValueError):
+            ymir.decode_sync_history(corrupted,0)
+
+    def test_slow_frame_correlation_uses_exact_frame_indices(self):
+        sync=ymir.decode_sync_history(self.sync_ring(),0)
+        samples=[]
+        for frame in range(3,67):
+            interval=50 if frame in (48,49,50) else 33
+            samples.append({"frame_ms":interval,"sim_ms":4,
+                            "scene_ms":22,"flush_ms":8})
+        pacing={"last_frames":samples,"total_frames_recorded":66,"count":64}
+        slow=ymir.correlate_slow_frames(pacing,sync)
+        self.assertEqual([s["frame"] for s in slow],[48,49,50])
+        self.assertTrue(all(s["begin_call_ms"]==17 for s in slow))
+        self.assertTrue(all(s["end_call_ms"]==1 for s in slow))
+        self.assertTrue(all(s["begin_fields"]==1 for s in slow))
+        pacing["last_frames"][48-3]["frame_ms"]=49
+        with self.assertRaises(ValueError):
+            ymir.correlate_slow_frames(pacing,sync)
+
+    def test_control_evidence_branch_is_isolated_and_allowlisted(self):
+        self.assertIn("ymir-evidence",ymir.EVIDENCE_BRANCHES)
+        self.assertIn("ymir-sdk-control-evidence",ymir.EVIDENCE_BRANCHES)
+        self.assertNotIn("main",ymir.EVIDENCE_BRANCHES)
+        with self.assertRaises(ValueError):
+            ymir.publish(Path("/does-not-exist"),Path("/does-not-exist"),{},
+                         branch="main")
+        with self.assertRaises(ValueError):
+            ymir.republish_latest(branch="main")
+
+    def test_control_script_auto_publishes_and_recovers_without_yimir(self):
+        script=(SCRIPT.parent/"qualify-jade-sdk-control-mac.sh").read_text()
+        self.assertIn('EVIDENCE_BRANCH="ymir-sdk-control-evidence"',script)
+        self.assertIn("--evidence-branch \"$EVIDENCE_BRANCH\"",script)
+        self.assertIn('if [[ "${1:-}" == "--upload-last" ]]',script)
+        self.assertIn("--expected-sdk \"$PIN\"",script)
+        self.assertNotIn(" --no-publish",script)
+
     def test_all_eleven_scenarios_have_replay_and_screenshots(self):
         self.assertEqual(len(ymir.CASES), 11)
         self.assertEqual(len({case[0] for case in ymir.CASES}), 11)

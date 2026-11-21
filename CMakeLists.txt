@@ -23,6 +23,12 @@ add_executable(xtreme src/main.c src/controller.c "${GENERATED}" "${GENERATED_CO
 set(XTREME_STAGE_LAYOUT "classic" CACHE STRING "Selected level layout: classic|adventure")
 if(XTREME_STAGE_LAYOUT STREQUAL "adventure")
     target_compile_definitions(xtreme PRIVATE XTREME_STAGE_ADVENTURE=1)
+    # Optional exact same-stage A/B for conservative screen-plane culling.
+    # OFF preserves the prior per-quad camera-plane + authored XZ path.
+    option(XTREME_STAGE_FRUSTUM_GATE "Conservative static face frustum rejection" ON)
+    if(XTREME_STAGE_FRUSTUM_GATE)
+        target_compile_definitions(xtreme PRIVATE XTREME_STAGE_FRUSTUM_GATE=1)
+    endif()
     # Real Kenney CC0 art is committed as PNGs. Generate just the SH-2 native
     # index8 arrays at build time; no Python package or network access needed.
     set(STAGE_TEXTURE_INPUTS)
@@ -39,6 +45,18 @@ if(XTREME_STAGE_LAYOUT STREQUAL "adventure")
         COMMENT "Quantizing Kenney CC0 PNG terrain textures for VDP1 indexed8"
         VERBATIM)
     target_sources(xtreme PRIVATE src/stage_textures.c "${STAGE_TEXTURE_HEADER}")
+    # Vendor-derived 16x32x32 source ring frames; baked offline to INDEX8.
+    # Keep pixel source and provenance in git, never fetch assets at build.
+    set(RING_TEXTURE_HEADER "${CMAKE_CURRENT_BINARY_DIR}/generated/ring_texture_data.h")
+    add_custom_command(OUTPUT "${RING_TEXTURE_HEADER}"
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_xtreme_rings.py"
+            "${RING_TEXTURE_HEADER}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_xtreme_rings.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/assets/rings/xtreme-ring-frames.b64"
+                "${CMAKE_CURRENT_SOURCE_DIR}/assets/rings/metadata.json"
+        COMMENT "Baking 16 original X-Treme ring sprite frames for Saturn indexed8"
+        VERBATIM)
+    target_sources(xtreme PRIVATE src/ring_sprites.c "${RING_TEXTURE_HEADER}")
 elseif(NOT XTREME_STAGE_LAYOUT STREQUAL "classic")
     message(FATAL_ERROR "Unknown XTREME_STAGE_LAYOUT: ${XTREME_STAGE_LAYOUT}")
 endif()

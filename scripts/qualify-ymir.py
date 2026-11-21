@@ -91,6 +91,168 @@ def locate_frame_history(raw,maps):
     off,values=found[0]
     return values,0x06000000+off,"header_scan"
 
+# XRH1 v1 is separate from the existing XTDB and frame pacing XFP1.
+# Per-frame intervals come from sat_time_ms(), not direct GPU measurements.
+RENDER_CAPACITY=64
+RENDER_FIELDS=("frame scene_begin_ms stage_ms actor_ms flush_ms "
+               "stage_faces_tested stage_visibility_skipped stage_lod_skipped "
+               "stage_submitted marker_submitted actor_submitted total_submitted "
+               "total_flushed painter_culled painter_clipped").split()
+RENDER_WORDS=len(RENDER_FIELDS)
+RENDER_MAGIC=0x58524831
+
+def decode_render_history(raw,offset):
+    need=16+RENDER_CAPACITY*RENDER_WORDS*4
+    if offset<0 or offset+need>len(raw):
+        raise ValueError("XRH1 ring outside WRAM-H")
+    magic,version,count,nxt=struct.unpack_from(">4I",raw,offset)
+    if magic!=RENDER_MAGIC or version!=1 or count>RENDER_CAPACITY or nxt<count:
+        raise ValueError("invalid XRH1 v1 header")
+    samples=[]
+    start=(nxt-count)%RENDER_CAPACITY
+    for i in range(count):
+        pos=(start+i)%RENDER_CAPACITY
+        values=struct.unpack_from(">"+str(RENDER_WORDS)+"I",
+                                 raw,offset+16+pos*RENDER_WORDS*4)
+        sample=dict(zip(RENDER_FIELDS,values))
+        if (sample["stage_submitted"]+sample["marker_submitted"]+
+                sample["actor_submitted"] != sample["total_submitted"]):
+            raise ValueError("XRH1 unattributed submissions")
+        if (sample["stage_visibility_skipped"]+sample["stage_lod_skipped"]+
+                sample["stage_submitted"] > sample["stage_faces_tested"]):
+            raise ValueError("XRH1 impossible stage visibility counters")
+        samples.append(sample)
+    return {
+        "version":version,"count":count,"total_frames_recorded":nxt,
+        "last_frames":samples,
+        "scene_begin_ms_p95":percentile_nearest_rank([x["scene_begin_ms"] for x in samples],95),
+        "stage_ms_p95":percentile_nearest_rank([x["stage_ms"] for x in samples],95),
+        "actor_ms_p95":percentile_nearest_rank([x["actor_ms"] for x in samples],95),
+        "flush_ms_p95":percentile_nearest_rank([x["flush_ms"] for x in samples],95),
+        "stage_submitted_p95":percentile_nearest_rank([x["stage_submitted"] for x in samples],95),
+        "painter_culled_p95":percentile_nearest_rank([x["painter_culled"] for x in samples],95),
+        "terminal":samples[-1] if samples else None
+    }
+
+def locate_render_history(raw,maps):
+    for p in maps:
+        m=re.search(r"0x([0-9a-fA-F]+)\s+_?xtreme_render_history\b",
+                    p.read_text(errors="replace"))
+        if m:
+            address=int(m[1],16)
+            return decode_render_history(raw,address-0x06000000),address,"map"
+    found=[]
+    sig=struct.pack(">II",RENDER_MAGIC,1)
+    for m in re.finditer(re.escape(sig),raw):
+        if m.start()%4:continue
+        try:found.append((m.start(),decode_render_history(raw,m.start())))
+        except (ValueError,struct.error):continue
+    if len(found)!=1:
+        raise ValueError(f"expected unique XRH1 ring, found {len(found)}")
+    off,values=found[0]
+    return values,0x06000000+off,"header_scan"
+
+# XSW1: app-frame timing, kept independent of XRH1 stage/actor/flush.
+# sat_app_frame_begin() contains sat_wait_vblank + swap-request wait.
+SYNC_MAGIC=0x58535731
+SYNC_CAPACITY=64
+SYNC_FIELDS=("frame frame_interval_ms begin_ms end_ms "
+             "prior_end_gap_ms active_work_ms "
+             "field_before_begin field_after_begin field_before_end field_after_end "
+             "draw_waits_begin_delta draw_waits_end_delta "
+             "late_swaps_begin_delta late_swaps_end_delta "
+             "draw_timeouts_begin_delta draw_timeouts_end_delta").split()
+SYNC_WORDS=len(SYNC_FIELDS)
+
+def decode_sync_history(raw, offset):
+    need=16+SYNC_CAPACITY*SYNC_WORDS*4
+    if offset<0 or offset+need>len(raw):
+        raise ValueError("XSW1 ring outside WRAM-H")
+    magic,version,count,nxt=struct.unpack_from(">4I",raw,offset)
+    if magic!=SYNC_MAGIC or version!=1 or count>SYNC_CAPACITY or nxt<count:
+        raise ValueError("invalid XSW1 header")
+    samples=[]
+    start=(nxt-count)%SYNC_CAPACITY
+    for i in range(count):
+        pos=(start+i)%SYNC_CAPACITY
+        values=struct.unpack_from(">"+str(SYNC_WORDS)+"I",raw,
+                                 offset+16+pos*SYNC_WORDS*4)
+        sample=dict(zip(SYNC_FIELDS,values))
+        if sample["frame"]!=nxt-count+i+1:
+            raise ValueError("XSW1 out-of-order frame index")
+        if (sample["field_after_begin"]<sample["field_before_begin"] or
+                sample["field_after_end"]<sample["field_before_end"]):
+            raise ValueError("XSW1 invalid field order")
+        samples.append(sample)
+    def p95(name):
+        return percentile_nearest_rank([x[name] for x in samples],95)
+    return {
+        "version":version,"count":count,"total_frames_recorded":nxt,
+        "last_frames":samples,
+        "begin_ms_p50":percentile_nearest_rank([x["begin_ms"] for x in samples],50),
+        "begin_ms_p95":p95("begin_ms"),
+        "end_ms_p95":p95("end_ms"),
+        "active_work_ms_p95":p95("active_work_ms"),
+        "prior_end_gap_ms_p95":p95("prior_end_gap_ms"),
+        "begin_fields_p95":percentile_nearest_rank(
+            [x["field_after_begin"]-x["field_before_begin"] for x in samples],95),
+        "end_fields_p95":percentile_nearest_rank(
+            [x["field_after_end"]-x["field_before_end"] for x in samples],95),
+        "begin_draw_waits_total":sum(x["draw_waits_begin_delta"] for x in samples),
+        "end_draw_waits_total":sum(x["draw_waits_end_delta"] for x in samples),
+        "terminal":samples[-1] if samples else None
+    }
+
+def locate_sync_history(raw,maps):
+    for p in maps:
+        m=re.search(r"0x([0-9a-fA-F]+)\s+_?xtreme_sync_history\b",
+                    p.read_text(errors="replace"))
+        if m:
+            addr=int(m[1],16)
+            return decode_sync_history(raw,addr-0x06000000),addr,"map"
+    found=[]
+    magic=struct.pack(">II",SYNC_MAGIC,1)
+    for m in re.finditer(re.escape(magic),raw):
+        if m.start()%4:continue
+        try:found.append((m.start(),decode_sync_history(raw,m.start())))
+        except (ValueError,struct.error):continue
+    if len(found)!=1:
+        raise ValueError(f"expected unique XSW1 ring, found {len(found)}")
+    off,values=found[0]
+    return values,0x06000000+off,"header_scan"
+
+def correlate_slow_frames(frame_history,sync_history,threshold_ms=45):
+    """Match XFP1 begin-to-begin elapsed values against XSW1 per-frame IDs."""
+    if not frame_history or not sync_history:return []
+    sync={s["frame"]:s for s in sync_history["last_frames"]}
+    first=frame_history["total_frames_recorded"]-frame_history["count"]+1
+    slow=[]
+    for i,sample in enumerate(frame_history["last_frames"]):
+        frame=first+i
+        if frame not in sync:continue
+        if sync[frame]["frame_interval_ms"]!=sample["frame_ms"]:
+            raise ValueError("XFP1 / XSW1 frame interval mismatch")
+        if sample["frame_ms"]>=threshold_ms:
+            slow.append({
+                "frame":frame,"interval_ms":sample["frame_ms"],
+                "scene_ms":sample["scene_ms"],
+                "sim_ms":sample["sim_ms"],
+                "flush_ms":sample["flush_ms"],
+                "begin_call_ms":sync[frame]["begin_ms"],
+                "end_call_ms":sync[frame]["end_ms"],
+                "active_work_ms":sync[frame]["active_work_ms"],
+                "prior_end_gap_ms":sync[frame]["prior_end_gap_ms"],
+                "begin_fields":sync[frame]["field_after_begin"]-
+                               sync[frame]["field_before_begin"],
+                "end_fields":sync[frame]["field_after_end"]-
+                             sync[frame]["field_before_end"],
+                "begin_draw_waits":sync[frame]["draw_waits_begin_delta"],
+                "end_draw_waits":sync[frame]["draw_waits_end_delta"],
+                "begin_late_swaps":sync[frame]["late_swaps_begin_delta"],
+                "end_late_swaps":sync[frame]["late_swaps_end_delta"]
+            })
+    return slow
+
 BOOT_NAMES=("magic version stage error main_entries frames").split()
 BOOT_SIZE=4*len(BOOT_NAMES)
 
@@ -279,9 +441,16 @@ def sanitize_text(work, bios, probe):
             if source and source!="/":cleaned=cleaned.replace(source,replacement)
         if cleaned!=original:f.write_text(cleaned,encoding="utf-8")
 
-def publish(archive, work, summary):
-    """Push a standalone evidence tree. Never check out or modify main."""
-    branch="ymir-evidence"
+EVIDENCE_BRANCHES=("ymir-evidence","ymir-sdk-control-evidence")
+
+def publish(archive, work, summary, branch="ymir-evidence"):
+    """Publish the sanitized ZIP and screenshots without touching main/index.
+
+    The SDK-control runs use a dedicated branch so a 3-case experiment never
+    overwrites the 5-case production qualification under ymir-evidence.
+    """
+    if branch not in EVIDENCE_BRANCHES:
+        raise ValueError("unsupported evidence branch: "+branch)
     ref="refs/heads/"+branch
     url=subprocess.check_output(["git","-C",str(ROOT),"remote","get-url","origin"],text=True).strip()
     allowed=("https://github.com/celsowm/sonic-xtreme-saturn.git",
@@ -323,11 +492,13 @@ def publish(archive, work, summary):
         # A normal non-force push rejects concurrent, divergent publications.
         subprocess.run(["git","-C",str(ROOT),"push","origin",commit+":"+ref],check=True)
     print("[xtreme] GitHub ZIP: https://github.com/celsowm/sonic-xtreme-saturn/blob/"+commit+"/latest/return.zip",flush=True)
-    print("[xtreme] Results: https://github.com/celsowm/sonic-xtreme-saturn/tree/ymir-evidence/latest",flush=True)
+    print("[xtreme] Results: https://github.com/celsowm/sonic-xtreme-saturn/tree/"+branch+"/latest",flush=True)
     print("[xtreme] Evidence commit: "+commit,flush=True)
 
-def republish_latest():
-    """Retry publication of an existing complete return ZIP without booting Ymir."""
+def republish_latest(branch="ymir-evidence", expected_sdk=None):
+    """Upload last sanitized ZIP without rebuilding or replaying Ymir."""
+    if branch not in EVIDENCE_BRANCHES:
+        raise ValueError("unsupported evidence branch: "+branch)
     candidates=sorted((ROOT/"build").glob("ymir-evidence-*-return.zip"),
                       key=lambda p:p.stat().st_mtime,reverse=True)
     if not candidates:
@@ -349,8 +520,10 @@ def republish_latest():
                     dst.parent.mkdir(parents=True,exist_ok=True)
                     with z.open(item) as src,dst.open("wb") as out:shutil.copyfileobj(src,out)
             summary=json.loads((work/"summary.json").read_text())
+            if expected_sdk and summary.get("sdk_commit")!=expected_sdk:
+                raise ValueError("latest ZIP SDK differs from pinned SDK; refusing to upload unrelated evidence")
             print("[xtreme] Republishing",archive.name,"game",summary["game_commit"],"status",summary["status"],flush=True)
-            publish(archive,work,summary)
+            publish(archive,work,summary,branch)
         return 0
     except (OSError,ValueError,RuntimeError,KeyError,zipfile.BadZipFile,subprocess.CalledProcessError) as exc:
         print(f"[xtreme] Retry failed: {type(exc).__name__}: {exc}",file=sys.stderr)
@@ -364,10 +537,13 @@ def main():
     p.add_argument("--case",action="append",choices=[c[0] for c in active_cases])
     p.add_argument("--timeout",type=int,default=600)
     p.add_argument("--require-sonic",action="store_true",help="fail if private Sonic R C/H/SKA are missing")
-    p.add_argument("--no-publish",action="store_true",help="keep ZIP local instead of publishing to the public GitHub evidence branch")
-    p.add_argument("--publish-latest",action="store_true",help="retry GitHub push of the newest local return ZIP without rebuilding")
+    p.add_argument("--no-publish",action="store_true",help="explicitly retain evidence locally (default: publish to GitHub)")
+    p.add_argument("--publish-latest",action="store_true",help="upload newest local sanitized ZIP without rebuilding Ymir")
+    p.add_argument("--evidence-branch",choices=EVIDENCE_BRANCHES,default="ymir-evidence",
+                   help="destination evidence branch (SDK control has its own branch)")
+    p.add_argument("--expected-sdk",help="with --publish-latest, reject archives built using a different SDK")
     a=p.parse_args()
-    if a.publish_latest:return republish_latest()
+    if a.publish_latest:return republish_latest(a.evidence_branch,a.expected_sdk)
     sdk=Path(os.environ.get("LIBSATURN_SOURCE",str(DEV/"lib-saturn"))).expanduser()
     if not (sdk/"CMakeLists.txt").exists(): sdk=DEV/"libsaturn"
     probe=a.probe or Path(os.environ.get("YMIR_PROBE",str(sdk/"harness/build-macos/probe")))
@@ -468,6 +644,36 @@ def main():
                     (d/"frame-pacing.json").write_text(json.dumps(hist,indent=2)+"\n")
                 except (ValueError,OSError,struct.error) as exc:
                     result["frame_pacing_decode_error"]=str(exc)
+                if is_adventure:
+                    try:
+                        profile,profile_addr,profile_method=locate_render_history(raw,maps)
+                        result["render_profile"]=profile
+                        result["render_profile_address"]=hex(profile_addr)
+                        result["render_profile_method"]=profile_method
+                        (d/"render-profile.json").write_text(json.dumps(profile,indent=2)+"\n")
+                    except (ValueError,OSError,struct.error) as exc:
+                        result["render_profile_decode_error"]=str(exc)
+                    profile=result.get("render_profile")
+                    last_profile=profile.get("terminal") if profile else None
+                    result["checks"]["render_profile_available"]=(
+                        profile is not None and profile["count"]>=30 and
+                        last_profile is not None and last_profile["frame"]==t["frames"])
+                    try:
+                        sync,sync_addr,sync_method=locate_sync_history(raw,maps)
+                        result["frame_sync"]=sync
+                        result["frame_sync_address"]=hex(sync_addr)
+                        result["frame_sync_method"]=sync_method
+                        hist=result.get("frame_pacing")
+                        sync["slow_frames"]=correlate_slow_frames(hist,sync)
+                        (d/"frame-sync.json").write_text(json.dumps(sync,indent=2)+"\n")
+                    except (ValueError,OSError,struct.error) as exc:
+                        result["frame_sync_decode_error"]=str(exc)
+                    sync=result.get("frame_sync")
+                    sync_last=sync.get("terminal") if sync else None
+                    result["checks"]["frame_sync_available"]=(
+                        sync is not None and sync["count"]>=30 and
+                        sync_last is not None and sync_last["frame"]==t["frames"] and
+                        sync["total_frames_recorded"]==t["frames"])
                 if sonic_present:
                     hist=result.get("frame_pacing")
                     result["checks"]["frame_history_available"]=(hist is not None and hist["count"]>=30)
@@ -569,8 +775,8 @@ def main():
         print(f"\n[xtreme] {summary['status']}: {archive}",flush=True)
         if not a.no_publish:
             try:
-                publish(archive,work,summary)
-            except (OSError,RuntimeError,subprocess.CalledProcessError) as exc:
+                publish(archive,work,summary,a.evidence_branch)
+            except (OSError,ValueError,RuntimeError,subprocess.CalledProcessError) as exc:
                 print(f"[xtreme] GitHub publish failed: {type(exc).__name__}. ZIP retained: {archive}",file=sys.stderr,flush=True)
                 publish_failed=True
     if publish_failed:return 2
