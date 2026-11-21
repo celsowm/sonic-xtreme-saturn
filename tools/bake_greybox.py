@@ -25,6 +25,8 @@ PALETTE = {
     "canopy": (3, 3),
     "rock": (2, 4),
     "water": (5, 5),
+    "meadow": (6, 6),
+    "terrace": (7, 7),
 }
 KINDS = ("player_spawn", "ring", "spring", "checkpoint", "enemy", "goal", "camera_anchor", "prop")
 
