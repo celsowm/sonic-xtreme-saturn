@@ -99,12 +99,34 @@ def validate(data, asset_root=None):
     landmass_triangles=(len(routes["main"])+min(4,len(routes["main"])))*4*2
     bank_triangles=sum((len(s)-1)*2 for name,s in routes.items() if name!="main")
     corridor_triangles=segments*2
-    # Wide clearing: a walkable top quad and four sloped border quads (10).
+    # The material API currently maps each 64x64 Kenney texture over an entire
+    # polygon. Split selected NEAR render patches only; collision is unchanged.
+    tiling=data.get("visual_tiling",{})
+    route_prefix=tiling.get("main_route_prefix_segments",0)
+    valley_prefix=tiling.get("valley_prefix_segments",0)
+    tiled_bands=tiling.get("valley_bands",[])
+    if type(route_prefix)!=int or not 0<=route_prefix<len(main):
+        raise ValueError("invalid near route tiling count")
+    if type(valley_prefix)!=int or not 0<=valley_prefix<=len(main)+4:
+        raise ValueError("invalid near valley tiling count")
+    if not isinstance(tiled_bands,list) or len(set(tiled_bands))!=len(tiled_bands) or not set(tiled_bands).issubset({"canopy","terrace","meadow","rock"}):
+        raise ValueError("invalid valley tiling bands")
+    # One extra quad per lateral split = 2 extra render triangles.
+    tiling_triangles=2*(route_prefix+valley_prefix*len(tiled_bands))
+    palm_count=sum(p["asset"].startswith("nature-kit/tree-") for p in props)
+    far_lod_faces=data["budgets"].get("far_palm_lod_faces_per_instance",0)
+    if type(far_lod_faces)!=int or not 0<=far_lod_faces<=8:
+        raise ValueError("invalid far palm LOD budget")
+    if palm_count and not 3<=far_lod_faces<=8:
+        raise ValueError("palms require a bounded far LOD")
+    palm_lod_triangles=palm_count*far_lod_faces
+    # Wide clearing: walkable top quad and four border quads (10).
     estimated_render_faces=(corridor_triangles+landmass_triangles+
-                            bank_triangles+used_budget+2+10*len(clearings))
+                            bank_triangles+used_budget+2+10*len(clearings)+
+                            tiling_triangles+palm_lod_triangles)
     if estimated_render_faces>data["budgets"]["render_faces_max"]:
         raise ValueError("render budget exceeded: continuous valley, branch banks, paths and props")
-    if data["budgets"]["render_faces_max"]>448:
+    if data["budgets"]["render_faces_max"]>512:
         raise ValueError("unsupported single-stage face capacity")
     return {
         "routes":len(paths),
@@ -118,6 +140,9 @@ def validate(data, asset_root=None):
         "branch_terrace_triangles":bank_triangles,
         "cliff_triangles":0,
         "prop_triangle_budget":used_budget,
+        "near_render_tile_extra_triangles":tiling_triangles,
+        "far_lod_triangles":palm_lod_triangles,
+        "palm_lod_instances":palm_count,
         "face_budget_total":estimated_render_faces,
         "face_capacity":data["budgets"]["render_faces_max"],
     }
