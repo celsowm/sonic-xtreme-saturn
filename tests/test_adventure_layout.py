@@ -44,6 +44,18 @@ class AdventureLayoutTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate(changed)
 
+    def test_natural_prop_snap_validation(self):
+        snap=[p for p in self.data["set_dressing"] if p.get("snap_to_valley")]
+        self.assertEqual(len(snap),14)
+        changed=copy.deepcopy(self.data)
+        changed["set_dressing"][0]["snap_to_valley"]="yes"
+        with self.assertRaises(ValueError):
+            validate(changed)
+        changed=copy.deepcopy(self.data)
+        changed["set_dressing"][5]["snap_to_valley"]=True
+        with self.assertRaises(ValueError):
+            validate(changed)
+
     def test_branches_cannot_be_disconnected(self):
         changed=copy.deepcopy(self.data)
         changed["routes"][1]["stations"][0][0]=99
