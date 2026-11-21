@@ -31,7 +31,7 @@ int main(void) {
     assert(!xtreme_stage_aabb_may_be_in_front(
         &behind,0,0,M(7),0,0,M(-1)));
     assert(xtreme_stage_aabb_may_be_in_front(
-        &opening,0,0,M(7),0,0,M(-1)));
+        &underfoot,0,0,M(7),0,0,M(-1)));
     xtreme_stage_aabb_t straddles=BOX(-5,5,-1,1);
     assert(xtreme_stage_aabb_may_be_in_front(
         &straddles,0,0,0,0,0,M(-1)));
