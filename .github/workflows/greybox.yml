@@ -25,6 +25,7 @@ jobs:
       - run: cc -std=c11 -Wall -Wextra -Werror -I src tests/test_stage_lod.c -o /tmp/stage-lod-test && /tmp/stage-lod-test
       - run: bash -n scripts/qualify-jade-sdk-control-mac.sh
       - run: cc -std=c11 -Wall -Wextra -Werror -I src tests/test_render_profile.c -o /tmp/render-profile-test && /tmp/render-profile-test
+      - run: cc -std=c11 -Wall -Wextra -Werror -I src tests/test_frame_sync_profile.c -o /tmp/frame-sync-profile-test && /tmp/frame-sync-profile-test
       - run: cc -std=c11 -Wall -Wextra -Werror -I src tests/test_ring_frame_clock.c -o /tmp/ring-frame-clock-test && /tmp/ring-frame-clock-test
       - run: python3 tools/bake_xtreme_rings.py /tmp/ring_texture_data.h
       # Check the actual C module too, not just the Python bake and frame clock.
