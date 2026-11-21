@@ -8,6 +8,7 @@
 #ifdef XTREME_STAGE_ADVENTURE
 #include "stage_textures.h"
 #include "stage_visibility.h"
+#include "stage_lod.h"
 #endif
 #ifdef XTREME_HAS_SONIC
 #include "sonic_actor.h"
@@ -332,14 +333,10 @@ static uint8_t stage_lod_near[STAGE_LOD_GROUP_COUNT ? STAGE_LOD_GROUP_COUNT : 1u
  * XZ max-axis threshold also avoids expensive per-face 64-bit multiplies.
  * Gameplay collision does not use any render LOD. */
 static void stage_select_prop_lods(void) {
-    const int64_t threshold=(int64_t)FX(27);
-    for(unsigned i=0;i<STAGE_LOD_GROUP_COUNT;++i) {
-        int64_t dx=(int64_t)stage_lod_centers[i].x-player.feet.x;
-        int64_t dz=(int64_t)stage_lod_centers[i].z-player.feet.z;
-        if(dx<0)dx=-dx;
-        if(dz<0)dz=-dz;
-        stage_lod_near[i]=(dx<=threshold && dz<=threshold);
-    }
+    for(unsigned i=0;i<STAGE_LOD_GROUP_COUNT;++i)
+        stage_lod_near[i]=xtreme_stage_lod_choose_near(
+            stage_lod_centers[i].x,stage_lod_centers[i].z,
+            player.feet.x,player.feet.z);
 }
 
 /* Baked scenery is immutable. Build its indexed quads and AABBs once during
