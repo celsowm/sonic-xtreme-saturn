@@ -1,0 +1,339 @@
+COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
+[xtreme] SDK source: <GAME>/build/sdk-control-08e39e9dfb235a2ad88c17c690178c5ab0927e6f
+08e39e9dfb235a2ad88c17c690178c5ab0927e6f
+...........................................
+----------------------------------------------------------------------
+Ran 43 tests in 0.253s
+
+OK
+stage visibility gate ok
+whole-tree stage LOD ok
+render profile ring ok
+authored ring frame clock ok
+{
+  "branch_terrace_triangles": 24,
+  "cliff_triangles": 0,
+  "corridor_triangles": 44,
+  "entities": 13,
+  "face_budget_total": 511,
+  "face_capacity": 512,
+  "far_lod_triangles": 35,
+  "landmass_triangles": 120,
+  "near_render_tile_extra_triangles": 34,
+  "palm_lod_instances": 7,
+  "path_segments": 22,
+  "prop_triangle_budget": 232,
+  "props": 18,
+  "routes": 4,
+  "walkable_clearings": 2,
+  "zones": 6
+}
+[xtreme] Building stage layout: adventure
+[adventure] Contract validated: {'routes': 4, 'zones': 6, 'entities': 13, 'props': 18, 'walkable_clearings': 2, 'path_segments': 22, 'corridor_triangles': 44, 'landmass_triangles': 120, 'branch_terrace_triangles': 24, 'cliff_triangles': 0, 'prop_triangle_budget': 232, 'near_render_tile_extra_triangles': 34, 'far_lod_triangles': 35, 'palm_lod_instances': 7, 'face_budget_total': 511, 'face_capacity': 512}
+[adventure] meadow: 21 render tiles vs 15 collision quads
+[adventure] rock: 21 render tiles vs 15 collision quads
+[adventure] palm_start: natural base height 7.00 -> valley 8.83 m
+[adventure] palm_start_lod_near_wood: 18 -> 4 triangles; 12 live vertices; removed 0; cap 5
+[adventure] palm_start_lod_near_canopy: 168 -> 13 triangles; 39 live vertices; removed 0; cap 15
+[adventure] palm_start_lod_far_wood: 18 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_start_lod_far_canopy: 168 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_start: original Kenney wood/foliage retained; near=17 far=3 faces
+[adventure] palm_basin: natural base height -1.00 -> valley -1.60 m
+[adventure] palm_basin_lod_near_wood: 34 -> 4 triangles; 12 live vertices; removed 0; cap 5
+[adventure] palm_basin_lod_near_canopy: 166 -> 13 triangles; 39 live vertices; removed 0; cap 15
+[adventure] palm_basin_lod_far_wood: 34 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_basin_lod_far_canopy: 166 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_basin: original Kenney wood/foliage retained; near=17 far=3 faces
+[adventure] palm_temple: natural base height 5.00 -> valley 2.07 m
+[adventure] palm_temple_lod_near_wood: 18 -> 4 triangles; 12 live vertices; removed 0; cap 5
+[adventure] palm_temple_lod_near_canopy: 168 -> 13 triangles; 33 live vertices; removed 0; cap 15
+[adventure] palm_temple_lod_far_wood: 18 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_temple_lod_far_canopy: 168 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_temple: original Kenney wood/foliage retained; near=17 far=3 faces
+[adventure] rock_fork: natural base height 0.00 -> valley -2.27 m
+[adventure] rock_fork_rock: 80 -> 7 triangles; 15 live vertices; removed 0; cap 8
+[adventure] rock_temple: natural base height 5.00 -> valley 2.48 m
+[adventure] rock_temple_rock: 80 -> 7 triangles; 15 live vertices; removed 0; cap 8
+[adventure] waterfall_cliff_rock: 34 -> 11 triangles; 21 live vertices; removed 0; cap 12
+[adventure] temple_pillar_rock: 186 -> 12 triangles; 28 live vertices; removed 0; cap 14
+[adventure] temple_gate_rock: 500 -> 10 triangles; 22 live vertices; removed 2; cap 14
+[adventure] basin_bush: natural base height 0.00 -> valley -0.50 m
+[adventure] basin_bush_canopy: 32 -> 7 triangles; 21 live vertices; removed 0; cap 8
+[adventure] bridge_waterfall_rock: 220 -> 11 triangles; 29 live vertices; removed 0; cap 12
+[adventure] palm_overlook_left: natural base height 10.30 -> valley 10.29 m
+[adventure] palm_overlook_left_lod_near_wood: 18 -> 3 triangles; 9 live vertices; removed 0; cap 4
+[adventure] palm_overlook_left_lod_near_canopy: 168 -> 11 triangles; 33 live vertices; removed 0; cap 13
+[adventure] palm_overlook_left_lod_far_wood: 18 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_overlook_left_lod_far_canopy: 168 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_overlook_left: original Kenney wood/foliage retained; near=14 far=3 faces
+[adventure] palm_overlook_right: natural base height 8.40 -> valley 7.97 m
+[adventure] palm_overlook_right_lod_near_wood: 34 -> 3 triangles; 9 live vertices; removed 0; cap 4
+[adventure] palm_overlook_right_lod_near_canopy: 166 -> 11 triangles; 33 live vertices; removed 0; cap 13
+[adventure] palm_overlook_right_lod_far_wood: 34 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_overlook_right_lod_far_canopy: 166 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_overlook_right: original Kenney wood/foliage retained; near=14 far=3 faces
+[adventure] palm_forest_ridge: natural base height 5.00 -> valley 6.88 m
+[adventure] palm_forest_ridge_lod_near_wood: 18 -> 3 triangles; 9 live vertices; removed 0; cap 4
+[adventure] palm_forest_ridge_lod_near_canopy: 168 -> 11 triangles; 33 live vertices; removed 0; cap 13
+[adventure] palm_forest_ridge_lod_far_wood: 18 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_forest_ridge_lod_far_canopy: 168 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_forest_ridge: original Kenney wood/foliage retained; near=14 far=3 faces
+[adventure] palm_forest_basin: natural base height -2.00 -> valley -2.57 m
+[adventure] palm_forest_basin_lod_near_wood: 34 -> 3 triangles; 9 live vertices; removed 0; cap 4
+[adventure] palm_forest_basin_lod_near_canopy: 166 -> 11 triangles; 31 live vertices; removed 0; cap 13
+[adventure] palm_forest_basin_lod_far_wood: 34 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_forest_basin_lod_far_canopy: 166 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_forest_basin: original Kenney wood/foliage retained; near=14 far=3 faces
+[adventure] bush_overlook: natural base height 6.00 -> valley 7.27 m
+[adventure] bush_overlook_canopy: 32 -> 6 triangles; 18 live vertices; removed 0; cap 7
+[adventure] rock_overlook: natural base height 4.00 -> valley 3.78 m
+[adventure] rock_overlook_rock: 80 -> 6 triangles; 14 live vertices; removed 0; cap 7
+[adventure] bush_forest: natural base height 4.00 -> valley 6.67 m
+[adventure] bush_forest_canopy: 32 -> 6 triangles; 18 live vertices; removed 0; cap 7
+[adventure] rock_waterfall: natural base height 0.50 -> valley 1.74 m
+[adventure] rock_waterfall_rock: 80 -> 6 triangles; 14 live vertices; removed 0; cap 7
+Info: Saved as "jade_gully.blend"
+[adventure] 13 markers, render/collision exports ready
+[adventure] This candidate is NOT qualified on Saturn until Ymir passes.
+Blender 5.2.2 LTS (hash d13f752e3b9c built 2026-09-15 01:49:19)
+
+Blender quit
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: <GAME>/build/sdk-control-build-08e39e9dfb235a2ad88c17c690178c5ab0927e6f
+[0/2] Re-checking globbed directories...
+ninja: no work to do.
+-- Install configuration: "Release"
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/lib/libsaturn.a
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/lib/libsaturn_startup.a
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/sound_driver.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/time.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/sprite_batch.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/music.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/cd_mount.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/sprite_clip.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/dma.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/anim3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/sprite_atlas.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp1_command_batch.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/math3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/input.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/task.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/character3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/collide3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/stage_map2.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/core.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/version.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/profile.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/math2d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/cd.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/music_codecs.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/sprite_anim.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/collide2d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/hud.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/sampler.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/surface.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp1.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_rbg0_ground.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_alloc.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_floor.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/spatial.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/skin3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/sh2.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/geometry3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/world_lod3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/world_lod_fade3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/mesh3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/water_regions.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/save.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/movie.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/follow_camera3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/water_prepare.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/scene3d_faces.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/file.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/scu_dsp.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/render3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_color_calc.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/int_math.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/skeleton3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/water_plane.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/color.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/entity_stream2.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/scsp_dsp.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/render2d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/audio.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_special.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/app.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/uart.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/geometry2d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/cart_overlay.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/voxel_terrain.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/fmt.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/dual_sh2.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/scene3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/terrain2.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/grid.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/cd_block.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/texture_memory.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/cdfs.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/follow_camera2d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/water_sim.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/cdda.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/physics2_world.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/fade3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_environment.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/water_view.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/world_lod3d_governor.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/palette.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/water_volume.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/tate_fb.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp1_color_calc.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/loader.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/disc_stream.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_layers.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/surface3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/physics3_transform.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/save_schema.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/mesh3d_draw.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/character_asset_format.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/character2.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/spatial3.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/water.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/resource_plan.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/video.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/exec.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/ram_cart.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/physics3_world.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/irq.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/fx_compositor.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/water_actor.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/view_cache.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/memory.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/saturn.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/font.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/texture.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/scene3d_material_pool.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/transform3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/asset_memory.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_sprite_shadow.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_color_offset.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/asset.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_rotation_coefficients.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/parallel.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/vdp2_compose.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/mpeg.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/abus.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/model3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/smpc.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/orbit_camera3d.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/physics.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/tate.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/path2.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/lz.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/include/saturn/scene.h
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/linker/saturn.ld
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/cmake/LibSaturnFunctions.cmake
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/cmake/LibSaturnCheckNoInitArray.cmake
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/cmake/LibSaturnCheckImageSize.cmake
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/cmake/LibSaturnBuildDisc.cmake
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/memory_layout.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/gen_ip_bin.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/check_ip_bin.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/check_iso.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/boot_image.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/build_native_ip.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/check_native_ip.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/check_boot_memory.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/boot_trace_address.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/normalize_iso_dates.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/prepare_native_payloads.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/inspect_boot_image.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/iso_to_raw.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/gen_cue.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/check_disc_image.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/satlz.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/satmovie.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/assets/movies/libsaturn_intro.mov
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/boot/aip.s
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/boot/ip_sbl_template.bin
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/boot/ip_yaul_template.bin
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d_tool.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/__init__.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/build.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/clips.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/emit_c.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/entities.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/errors.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/grid.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/metatiles.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/paths.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/tools/stage2d/terrain.py
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/core/math2d/api.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/core/math2d/logic.hpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/core/math2d/tables.hpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/core/math3d/logic.hpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/core/task/task.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/graphics/2d/sprites/clip.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/character2.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/character2_logic.hpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/collision.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/collision_logic.hpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/follow_camera2d.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/grid.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/grid_logic.hpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/path2.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/physics2_world.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/terrain2.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/2d/terrain2_logic.hpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/spatial/2d.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/spatial/2d_logic.hpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/sim/src/physics/spatial/entity_stream2.cpp
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/toolchains/sh2eb-elf.cmake
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/share/libsaturn/LICENSE
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/lib/cmake/LibSaturn/LibSaturnTargets.cmake
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/lib/cmake/LibSaturn/LibSaturnTargets-release.cmake
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/lib/cmake/LibSaturn/LibSaturnConfig.cmake
+-- Up-to-date: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f/lib/cmake/LibSaturn/LibSaturnConfigVersion.cmake
+[xtreme] Fresh game configuration with SDK: <GAME>/build/sdk-control-prefix-08e39e9dfb235a2ad88c17c690178c5ab0927e6f
+-- The C compiler identification is GNU 13.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- The CXX compiler identification is GNU 13.2.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: <DEV>/saturn-tools/bin/sh2eb-elf-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The ASM compiler identification is GNU
+-- Found assembler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc
+-- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
+-- Repository Sonic R skeletal actor: <GAME>/assets/sonic-r/lod-160
+-- Configuring done (0.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: <GAME>/build/game
+[0/2] Re-checking globbed directories...
+[1/10] Generating generated/greybox.h, generated/collision.h
+[2/10] Building C object CMakeFiles/xtreme.dir/src/stage_textures.c.obj
+[3/10] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
+[4/10] Building C object CMakeFiles/xtreme.dir/src/ring_sprites.c.obj
+[5/10] Building C object CMakeFiles/xtreme.dir/src/sonic_actor.c.obj
+[6/10] Building C object CMakeFiles/xtreme.dir/assets/sonic-r/lod-160/sonic.c.obj
+[7/10] Building C object CMakeFiles/xtreme.dir/src/main.c.obj
+[8/10] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
+-- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
+[9/10] Creating Saturn disc image xtreme
+-- [boot-memory] _start=0x06004000, 311148 initialized bytes match ELF
+-- [native] validated IP size=4096 bytes; redistributable=False
+-- [check] native AIP instructions, System ID, payloads and handoff OK
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 311148, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 351 MODE1/2352 sectors
+-- [check] disc image OK: 351 MODE1/2352 sectors
+-- disc: <GAME>/build/game/disc/xtreme.cue
+[adventure] Baked continuous landscape verified: {'render_triangles': 461, 'collision_triangles': 168, 'collision_vertices': 188, 'markers': 13, 'palm_lod_groups': 7}
+[xtreme] Disc: <GAME>/build/game/disc/xtreme.cue
+[xtreme] Blender: <GAME>/build/jade-gully-adventure/jade_gully.blend
