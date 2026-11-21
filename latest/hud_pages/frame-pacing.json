@@ -1,390 +1,390 @@
 {
   "version": 1,
   "count": 64,
-  "total_frames_recorded": 94,
+  "total_frames_recorded": 85,
   "last_frames": [
     {
       "frame_ms": 50,
       "sim_ms": 4,
-      "scene_ms": 24,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 4,
-      "scene_ms": 24,
-      "flush_ms": 7
+      "scene_ms": 23,
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 4,
-      "scene_ms": 24,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 4,
-      "scene_ms": 24,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 4,
-      "scene_ms": 24,
-      "flush_ms": 6
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 4,
-      "scene_ms": 24,
-      "flush_ms": 6
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 4,
-      "scene_ms": 24,
-      "flush_ms": 6
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 4,
-      "scene_ms": 24,
-      "flush_ms": 7
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 10
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 23,
+      "flush_ms": 10
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 23,
+      "flush_ms": 10
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 23,
+      "flush_ms": 10
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 23,
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 24,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 10
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 24,
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 10
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 22,
+      "flush_ms": 10
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 24,
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 22,
+      "flush_ms": 10
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 22,
+      "flush_ms": 10
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 22,
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 22,
+      "flush_ms": 10
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 49,
-      "sim_ms": 4,
-      "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 5,
-      "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 5,
-      "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 5,
-      "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 5,
-      "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 5,
-      "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 5,
-      "scene_ms": 23,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 5,
-      "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
-      "flush_ms": 7
+      "flush_ms": 9
     },
     {
       "frame_ms": 50,
       "sim_ms": 4,
       "scene_ms": 23,
+      "flush_ms": 9
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 23,
+      "flush_ms": 9
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 23,
+      "flush_ms": 9
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 23,
+      "flush_ms": 9
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 4,
+      "scene_ms": 23,
+      "flush_ms": 9
+    },
+    {
+      "frame_ms": 50,
+      "sim_ms": 0,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 36,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 37,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 37,
+      "scene_ms": 35,
       "flush_ms": 7
     },
     {
       "frame_ms": 50,
       "sim_ms": 0,
-      "scene_ms": 37,
-      "flush_ms": 7
-    },
-    {
-      "frame_ms": 50,
-      "sim_ms": 0,
-      "scene_ms": 37,
+      "scene_ms": 35,
       "flush_ms": 7
     }
   ],
@@ -392,7 +392,7 @@
   "frame_ms_p95": 50,
   "frame_ms_p99": 50,
   "frame_ms_max": 50,
-  "scene_ms_p95": 37,
-  "sim_ms_p95": 5,
-  "flush_ms_p95": 7
+  "scene_ms_p95": 35,
+  "sim_ms_p95": 4,
+  "flush_ms_p95": 10
 }

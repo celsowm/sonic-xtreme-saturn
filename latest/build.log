@@ -1,20 +1,24 @@
 COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 [xtreme] SDK source: <DEV>/lib-saturn
-08e39e9dfb235a2ad88c17c690178c5ab0927e6f
-..............................
+f4ca95f21259e3771e4788fc27064a9bffad51ff
+.....................................
 ----------------------------------------------------------------------
-Ran 30 tests in 0.249s
+Ran 37 tests in 0.247s
 
 OK
 stage visibility gate ok
+whole-tree stage LOD ok
 {
   "branch_terrace_triangles": 24,
   "cliff_triangles": 0,
   "corridor_triangles": 44,
   "entities": 13,
-  "face_budget_total": 442,
-  "face_capacity": 448,
+  "face_budget_total": 511,
+  "face_capacity": 512,
+  "far_lod_triangles": 35,
   "landmass_triangles": 120,
+  "near_render_tile_extra_triangles": 34,
+  "palm_lod_instances": 7,
   "path_segments": 22,
   "prop_triangle_budget": 232,
   "props": 18,
@@ -23,38 +27,68 @@ stage visibility gate ok
   "zones": 6
 }
 [xtreme] Building stage layout: adventure
-[adventure] Contract validated: {'routes': 4, 'zones': 6, 'entities': 13, 'props': 18, 'walkable_clearings': 2, 'path_segments': 22, 'corridor_triangles': 44, 'landmass_triangles': 120, 'branch_terrace_triangles': 24, 'cliff_triangles': 0, 'prop_triangle_budget': 232, 'face_budget_total': 442, 'face_capacity': 448}
-[adventure] palm_start_wood: 18 -> 4 triangles; 12 live vertices; removed 0; cap 5
-[adventure] palm_start_canopy: 168 -> 13 triangles; 37 live vertices; removed 0; cap 15
-[adventure] palm_start: original Kenney wood/foliage groups retained (17 total triangles)
-[adventure] palm_basin_wood: 34 -> 4 triangles; 12 live vertices; removed 0; cap 5
-[adventure] palm_basin_canopy: 166 -> 13 triangles; 39 live vertices; removed 0; cap 15
-[adventure] palm_basin: original Kenney wood/foliage groups retained (17 total triangles)
-[adventure] palm_temple_wood: 18 -> 4 triangles; 12 live vertices; removed 0; cap 5
-[adventure] palm_temple_canopy: 168 -> 13 triangles; 35 live vertices; removed 0; cap 15
-[adventure] palm_temple: original Kenney wood/foliage groups retained (17 total triangles)
+[adventure] Contract validated: {'routes': 4, 'zones': 6, 'entities': 13, 'props': 18, 'walkable_clearings': 2, 'path_segments': 22, 'corridor_triangles': 44, 'landmass_triangles': 120, 'branch_terrace_triangles': 24, 'cliff_triangles': 0, 'prop_triangle_budget': 232, 'near_render_tile_extra_triangles': 34, 'far_lod_triangles': 35, 'palm_lod_instances': 7, 'face_budget_total': 511, 'face_capacity': 512}
+[adventure] meadow: 21 render tiles vs 15 collision quads
+[adventure] rock: 21 render tiles vs 15 collision quads
+[adventure] palm_start: natural base height 7.00 -> valley 8.83 m
+[adventure] palm_start_lod_near_wood: 18 -> 4 triangles; 12 live vertices; removed 0; cap 5
+[adventure] palm_start_lod_near_canopy: 168 -> 13 triangles; 39 live vertices; removed 0; cap 15
+[adventure] palm_start_lod_far_wood: 18 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_start_lod_far_canopy: 168 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_start: original Kenney wood/foliage retained; near=17 far=3 faces
+[adventure] palm_basin: natural base height -1.00 -> valley -1.60 m
+[adventure] palm_basin_lod_near_wood: 34 -> 4 triangles; 12 live vertices; removed 0; cap 5
+[adventure] palm_basin_lod_near_canopy: 166 -> 13 triangles; 39 live vertices; removed 0; cap 15
+[adventure] palm_basin_lod_far_wood: 34 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_basin_lod_far_canopy: 166 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_basin: original Kenney wood/foliage retained; near=17 far=3 faces
+[adventure] palm_temple: natural base height 5.00 -> valley 2.07 m
+[adventure] palm_temple_lod_near_wood: 18 -> 4 triangles; 12 live vertices; removed 0; cap 5
+[adventure] palm_temple_lod_near_canopy: 168 -> 13 triangles; 33 live vertices; removed 0; cap 15
+[adventure] palm_temple_lod_far_wood: 18 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_temple_lod_far_canopy: 168 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_temple: original Kenney wood/foliage retained; near=17 far=3 faces
+[adventure] rock_fork: natural base height 0.00 -> valley -2.27 m
 [adventure] rock_fork_rock: 80 -> 7 triangles; 15 live vertices; removed 0; cap 8
+[adventure] rock_temple: natural base height 5.00 -> valley 2.48 m
 [adventure] rock_temple_rock: 80 -> 7 triangles; 15 live vertices; removed 0; cap 8
 [adventure] waterfall_cliff_rock: 34 -> 11 triangles; 21 live vertices; removed 0; cap 12
 [adventure] temple_pillar_rock: 186 -> 12 triangles; 28 live vertices; removed 0; cap 14
 [adventure] temple_gate_rock: 500 -> 10 triangles; 22 live vertices; removed 2; cap 14
+[adventure] basin_bush: natural base height 0.00 -> valley -0.50 m
 [adventure] basin_bush_canopy: 32 -> 7 triangles; 21 live vertices; removed 0; cap 8
 [adventure] bridge_waterfall_rock: 220 -> 11 triangles; 29 live vertices; removed 0; cap 12
-[adventure] palm_overlook_left_wood: 18 -> 3 triangles; 9 live vertices; removed 0; cap 4
-[adventure] palm_overlook_left_canopy: 168 -> 11 triangles; 33 live vertices; removed 0; cap 13
-[adventure] palm_overlook_left: original Kenney wood/foliage groups retained (14 total triangles)
-[adventure] palm_overlook_right_wood: 34 -> 3 triangles; 9 live vertices; removed 0; cap 4
-[adventure] palm_overlook_right_canopy: 166 -> 11 triangles; 33 live vertices; removed 0; cap 13
-[adventure] palm_overlook_right: original Kenney wood/foliage groups retained (14 total triangles)
-[adventure] palm_forest_ridge_wood: 18 -> 3 triangles; 9 live vertices; removed 0; cap 4
-[adventure] palm_forest_ridge_canopy: 168 -> 11 triangles; 31 live vertices; removed 0; cap 13
-[adventure] palm_forest_ridge: original Kenney wood/foliage groups retained (14 total triangles)
-[adventure] palm_forest_basin_wood: 34 -> 3 triangles; 9 live vertices; removed 0; cap 4
-[adventure] palm_forest_basin_canopy: 166 -> 11 triangles; 31 live vertices; removed 0; cap 13
-[adventure] palm_forest_basin: original Kenney wood/foliage groups retained (14 total triangles)
+[adventure] palm_overlook_left: natural base height 10.30 -> valley 10.29 m
+[adventure] palm_overlook_left_lod_near_wood: 18 -> 3 triangles; 9 live vertices; removed 0; cap 4
+[adventure] palm_overlook_left_lod_near_canopy: 168 -> 11 triangles; 33 live vertices; removed 0; cap 13
+[adventure] palm_overlook_left_lod_far_wood: 18 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_overlook_left_lod_far_canopy: 168 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_overlook_left: original Kenney wood/foliage retained; near=14 far=3 faces
+[adventure] palm_overlook_right: natural base height 8.40 -> valley 7.97 m
+[adventure] palm_overlook_right_lod_near_wood: 34 -> 3 triangles; 9 live vertices; removed 0; cap 4
+[adventure] palm_overlook_right_lod_near_canopy: 166 -> 11 triangles; 33 live vertices; removed 0; cap 13
+[adventure] palm_overlook_right_lod_far_wood: 34 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_overlook_right_lod_far_canopy: 166 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_overlook_right: original Kenney wood/foliage retained; near=14 far=3 faces
+[adventure] palm_forest_ridge: natural base height 5.00 -> valley 6.88 m
+[adventure] palm_forest_ridge_lod_near_wood: 18 -> 3 triangles; 9 live vertices; removed 0; cap 4
+[adventure] palm_forest_ridge_lod_near_canopy: 168 -> 11 triangles; 33 live vertices; removed 0; cap 13
+[adventure] palm_forest_ridge_lod_far_wood: 18 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_forest_ridge_lod_far_canopy: 168 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_forest_ridge: original Kenney wood/foliage retained; near=14 far=3 faces
+[adventure] palm_forest_basin: natural base height -2.00 -> valley -2.57 m
+[adventure] palm_forest_basin_lod_near_wood: 34 -> 3 triangles; 9 live vertices; removed 0; cap 4
+[adventure] palm_forest_basin_lod_near_canopy: 166 -> 11 triangles; 31 live vertices; removed 0; cap 13
+[adventure] palm_forest_basin_lod_far_wood: 34 -> 1 triangles; 3 live vertices; removed 0; cap 2
+[adventure] palm_forest_basin_lod_far_canopy: 166 -> 2 triangles; 6 live vertices; removed 0; cap 3
+[adventure] palm_forest_basin: original Kenney wood/foliage retained; near=14 far=3 faces
+[adventure] bush_overlook: natural base height 6.00 -> valley 7.27 m
 [adventure] bush_overlook_canopy: 32 -> 6 triangles; 18 live vertices; removed 0; cap 7
+[adventure] rock_overlook: natural base height 4.00 -> valley 3.78 m
 [adventure] rock_overlook_rock: 80 -> 6 triangles; 14 live vertices; removed 0; cap 7
+[adventure] bush_forest: natural base height 4.00 -> valley 6.67 m
 [adventure] bush_forest_canopy: 32 -> 6 triangles; 18 live vertices; removed 0; cap 7
+[adventure] rock_waterfall: natural base height 0.50 -> valley 1.74 m
 [adventure] rock_waterfall_rock: 80 -> 6 triangles; 14 live vertices; removed 0; cap 7
 Info: Saved as "jade_gully.blend"
 [adventure] 13 markers, render/collision exports ready
@@ -290,13 +324,13 @@ ninja: no work to do.
 [7/9] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
 [8/9] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 285012 initialized bytes match ELF
+-- [boot-memory] _start=0x06004000, 291936 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 285012, 'flags': 0, 'record_offset': 37092} IP observations=[]
--- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 339 MODE1/2352 sectors
--- [check] disc image OK: 339 MODE1/2352 sectors
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 291936, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 342 MODE1/2352 sectors
+-- [check] disc image OK: 342 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
-[adventure] Baked continuous landscape verified: {'render_triangles': 406, 'collision_triangles': 168, 'collision_vertices': 188, 'markers': 13}
+[adventure] Baked continuous landscape verified: {'render_triangles': 461, 'collision_triangles': 168, 'collision_vertices': 188, 'markers': 13, 'palm_lod_groups': 7}
 [xtreme] Disc: <GAME>/build/game/disc/xtreme.cue
 [xtreme] Blender: <GAME>/build/jade-gully-adventure/jade_gully.blend
