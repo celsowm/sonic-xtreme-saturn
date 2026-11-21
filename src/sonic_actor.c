@@ -62,31 +62,40 @@ static sonic_actor_t actor;
 
 /* Stable, source-independent WRAM symbol readable by the Ymir probe.
  * magic = 'SXAC', v3. Independent of the game's XTDB v3 layout. */
-volatile struct {
+typedef struct {
     uint32_t magic,version,enabled,ready,error;
     uint32_t vertices,faces,textures,joints,clip,ticks,draws;
     uint32_t animation_ms,skin_ms,draw_ms;
     int32_t pos_x,pos_y,pos_z;
     uint32_t registry_capacity,init_stage,vram_free;
     uint32_t clip_mask,clip_changes,takeoffs,landings,ground_ticks,air_ticks;
-} xtreme_sonic_debug;
+} sonic_debug_state_t;
+/* Ymir reads only this completed-frame snapshot, not animation work in progress. */
+volatile sonic_debug_state_t xtreme_sonic_debug;
+static sonic_debug_state_t sonic_debug_live;
+
+void xtreme_sonic_publish_debug(void) {
+    xtreme_sonic_debug=sonic_debug_live;
+}
 
 static sat_result_t fail(sat_result_t rc) {
-    xtreme_sonic_debug.error=(uint32_t)rc;
+    sonic_debug_live.error=(uint32_t)rc;
+    /* Preserve diagnostics even if boot fails before the first completed frame. */
+    xtreme_sonic_publish_debug();
     return rc;
 }
 sat_result_t xtreme_sonic_init(void) {
-    xtreme_sonic_debug.magic=0x53584143u; /* SXAC */
-    xtreme_sonic_debug.version=3u;
-    xtreme_sonic_debug.init_stage=1u;
-    xtreme_sonic_debug.enabled=1u;
-    xtreme_sonic_debug.vertices=SONIC_VERTEX_COUNT;
-    xtreme_sonic_debug.faces=SONIC_FACE_COUNT;
-    xtreme_sonic_debug.textures=SONIC_TEXTURE_COUNT;
-    xtreme_sonic_debug.joints=sonic_skeleton.joint_count;
+    sonic_debug_live.magic=0x53584143u; /* SXAC */
+    sonic_debug_live.version=3u;
+    sonic_debug_live.init_stage=1u;
+    sonic_debug_live.enabled=1u;
+    sonic_debug_live.vertices=SONIC_VERTEX_COUNT;
+    sonic_debug_live.faces=SONIC_FACE_COUNT;
+    sonic_debug_live.textures=SONIC_TEXTURE_COUNT;
+    sonic_debug_live.joints=sonic_skeleton.joint_count;
     /* Fail with an explicit capacity result before uploading anything.
      * No hidden temporary upload or texture table expansion at runtime. */
-    xtreme_sonic_debug.registry_capacity=sat_texture_capacity();
+    sonic_debug_live.registry_capacity=sat_texture_capacity();
     if(sat_texture_capacity()<SONIC_TEXTURE_COUNT)
         return fail(SAT_ERR_CAPACITY);
     if(sonic_skeleton.joint_count==0 ||
@@ -95,10 +104,10 @@ sat_result_t xtreme_sonic_init(void) {
         return fail(SAT_ERR_CAPACITY);
     sat_result_t rc=sat_model_validate(&sonic_asset);
     if(rc!=SAT_OK)return fail(rc);
-    xtreme_sonic_debug.init_stage=2u;
+    sonic_debug_live.init_stage=2u;
     rc=sat_skeleton_validate(&sonic_skeleton);
     if(rc!=SAT_OK)return fail(rc);
-    xtreme_sonic_debug.init_stage=3u;
+    sonic_debug_live.init_stage=3u;
     rc=sat_skin_validate(&sonic_skin);
     if(rc!=SAT_OK)return fail(rc);
     rc=sat_skeleton_instance_init(&actor.skeleton,&sonic_skeleton,
@@ -109,7 +118,7 @@ sat_result_t xtreme_sonic_init(void) {
     if(rc!=SAT_OK)return fail(rc);
     rc=sat_skel_clip_player_init(&actor.animation,&sonic_clip_idle);
     if(rc!=SAT_OK)return fail(rc);
-    xtreme_sonic_debug.init_stage=4u;
+    sonic_debug_live.init_stage=4u;
     rc=sat_mesh_init(&actor.mesh,actor.vertices,SONIC_VERTEX_COUNT,
                      actor.indices,SONIC_FACE_COUNT);
     if(rc!=SAT_OK)return fail(rc);
@@ -117,13 +126,13 @@ sat_result_t xtreme_sonic_init(void) {
     if(rc!=SAT_OK)return fail(rc);
     rc=sat_skin_validate_mesh(&sonic_skin,&actor.mesh);
     if(rc!=SAT_OK)return fail(rc);
-    xtreme_sonic_debug.init_stage=5u;
+    sonic_debug_live.init_stage=5u;
     rc=sat_character_materials_upload(&sonic_asset,actor.textures,
                                       actor.native_textures,actor.materials,
                                       SONIC_TEXTURE_COUNT);
     if(rc!=SAT_OK)return fail(rc);
-    xtreme_sonic_debug.init_stage=6u;
-    xtreme_sonic_debug.vram_free=sat_vdp1_vram_free_bytes();
+    sonic_debug_live.init_stage=6u;
+    sonic_debug_live.vram_free=sat_vdp1_vram_free_bytes();
     actor.instance=(sat_scene3d_instance_t){0};
     actor.instance.mesh=&actor.mesh;
     actor.instance.materials=actor.materials;
@@ -142,8 +151,9 @@ sat_result_t xtreme_sonic_init(void) {
     if(rc!=SAT_OK)return fail(rc);
     actor.instance.validated_binding=&actor.immutable_binding;
     actor.ready=1u;
-    xtreme_sonic_debug.ready=1u;
-    xtreme_sonic_debug.init_stage=7u;
+    sonic_debug_live.ready=1u;
+    sonic_debug_live.init_stage=7u;
+    xtreme_sonic_publish_debug();
     return SAT_OK;
 }
 
@@ -151,11 +161,11 @@ sat_result_t xtreme_sonic_tick(const xtreme_player_t* player) {
     if(!player||!actor.ready)return fail(SAT_ERR_INVALID_ARG);
     uint8_t next=SONIC_IDLE;
     if(actor.was_grounded&&!player->grounded&&player->velocity.y>0)
-        ++xtreme_sonic_debug.takeoffs;
+        ++sonic_debug_live.takeoffs;
     if(!actor.was_grounded&&player->grounded)
-        ++xtreme_sonic_debug.landings;
-    if(player->grounded)++xtreme_sonic_debug.ground_ticks;
-    else ++xtreme_sonic_debug.air_ticks;
+        ++sonic_debug_live.landings;
+    if(player->grounded)++sonic_debug_live.ground_ticks;
+    else ++sonic_debug_live.air_ticks;
     if(!player->grounded)next=player->velocity.y>0?SONIC_JUMP:SONIC_FALLING;
     else {
         const sat_fx16_t vx=player->velocity.x;
@@ -168,12 +178,12 @@ sat_result_t xtreme_sonic_tick(const xtreme_player_t* player) {
         if(actor.landing_ticks){next=SONIC_LANDING;--actor.landing_ticks;}
     }
     actor.was_grounded=player->grounded;
-    xtreme_sonic_debug.clip_mask|=1u<<next;
+    sonic_debug_live.clip_mask|=1u<<next;
     if(actor.current_clip!=next){
         sat_result_t rc=sat_skel_clip_player_set_clip(&actor.animation,clips[next],0);
         if(rc!=SAT_OK)return fail(rc);
         actor.current_clip=next;
-        ++xtreme_sonic_debug.clip_changes;
+        ++sonic_debug_live.clip_changes;
     }
     sat_clip_event_t events[4];
     uint16_t count=0;
@@ -181,8 +191,8 @@ sat_result_t xtreme_sonic_tick(const xtreme_player_t* player) {
     sat_result_t rc=sat_skel_clip_player_advance(&actor.animation,
                  SONIC_DELTA,events,4,&count,&root);
     if(rc!=SAT_OK)return fail(rc);
-    ++xtreme_sonic_debug.ticks;
-    xtreme_sonic_debug.clip=actor.current_clip;
+    ++sonic_debug_live.ticks;
+    sonic_debug_live.clip=actor.current_clip;
     return SAT_OK;
 }
 
@@ -195,12 +205,12 @@ sat_result_t xtreme_sonic_submit(sat_scene_t* scene,const xtreme_player_t* playe
     if(rc!=SAT_OK)return fail(rc);
     rc=sat_skeleton_world_matrices(&actor.skeleton,actor.joint_world,SONIC_MAX_JOINTS);
     if(rc!=SAT_OK)return fail(rc);
-    xtreme_sonic_debug.animation_ms=sat_time_ms()-start;
+    sonic_debug_live.animation_ms=sat_time_ms()-start;
     const uint32_t skin_start=sat_time_ms();
     rc=sat_skin_update_mesh(&sonic_skin,actor.joint_world,sonic_skeleton.joint_count,
                             &actor.mesh,SONIC_MARGIN,&actor.bounds);
     if(rc!=SAT_OK)return fail(rc);
-    xtreme_sonic_debug.skin_ms=sat_time_ms()-skin_start;
+    sonic_debug_live.skin_ms=sat_time_ms()-skin_start;
     /* The generated bind minimum anchors the feet to the ground, rather than
      * assuming an origin at the soles of this particular GLB. */
     const sat_vec3_t where={
@@ -210,14 +220,14 @@ sat_result_t xtreme_sonic_submit(sat_scene_t* scene,const xtreme_player_t* playe
     };
     rc=sat_mat4_translate(&actor.world,where.x,where.y,where.z);
     if(rc!=SAT_OK)return fail(rc);
-    xtreme_sonic_debug.pos_x=where.x;
-    xtreme_sonic_debug.pos_y=where.y;
-    xtreme_sonic_debug.pos_z=where.z;
+    sonic_debug_live.pos_x=where.x;
+    sonic_debug_live.pos_y=where.y;
+    sonic_debug_live.pos_z=where.z;
     const uint32_t draw_start=sat_time_ms();
     rc=sat_scene_submit_instance(scene,&actor.instance,SAT_SCENE3D_SLOT_INHERIT,
                                   actor.projected,actor.world_vertices);
     if(rc!=SAT_OK)return fail(rc);
-    xtreme_sonic_debug.draw_ms=sat_time_ms()-draw_start;
-    ++xtreme_sonic_debug.draws;
+    sonic_debug_live.draw_ms=sat_time_ms()-draw_start;
+    ++sonic_debug_live.draws;
     return SAT_OK;
 }
