@@ -27,6 +27,17 @@ jobs:
       - run: cc -std=c11 -Wall -Wextra -Werror -I src tests/test_render_profile.c -o /tmp/render-profile-test && /tmp/render-profile-test
       - run: cc -std=c11 -Wall -Wextra -Werror -I src tests/test_ring_frame_clock.c -o /tmp/ring-frame-clock-test && /tmp/ring-frame-clock-test
       - run: python3 tools/bake_xtreme_rings.py /tmp/ring_texture_data.h
+      # Check the actual C module too, not just the Python bake and frame clock.
+      # Match the SDK used by the Mac A/B control; this is where the previous
+      # missing-constant regression escaped host validation.
+      - uses: actions/checkout@v4
+        with:
+          repository: celsowm/libsaturn
+          ref: 08e39e9dfb235a2ad88c17c690178c5ab0927e6f
+          path: sdk-control
+          persist-credentials: false
+          submodules: false
+      - run: cc -std=c11 -Wall -Wextra -Werror -fsyntax-only -I sdk-control/include -I src -I /tmp src/ring_sprites.c
       - run: sudo apt-get update && sudo apt-get install -y blender
       - run: blender --version
       - run: |
