@@ -19,7 +19,7 @@ class BakeTests(unittest.TestCase):
         # All render props are separate from the ground collision OBJ.
         # Group suffixes map to small, fixed renderer color indices.
         header = b"v 0 0 0\nv 2 0 0\nv 0 2 0\n"
-        for suffix, expected in (("canopy",3),("trunk",2),("rock",2),("water",5)):
+        for suffix, expected in (("canopy",3),("trunk",2),("wood",4),("rock",2),("water",5)):
             source = header + f"o mesh_0000_palm_{suffix}\nf 1 2 3\n".encode()
             vertices, faces = parse_obj(source.decode())
             self.assertEqual(len(vertices),3)
