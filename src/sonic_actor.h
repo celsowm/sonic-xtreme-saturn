@@ -8,5 +8,7 @@
  * in Git and the greybox build remains independent of this module. */
 sat_result_t xtreme_sonic_init(void);
 sat_result_t xtreme_sonic_tick(const xtreme_player_t* player);
+/* Publish only the complete character state once per completed video frame. */
+void xtreme_sonic_publish_debug(void);
 sat_result_t xtreme_sonic_submit(sat_scene_t* scene, const xtreme_player_t* player);
 #endif
