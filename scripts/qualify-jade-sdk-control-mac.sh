@@ -65,10 +65,31 @@ if not zips:
 archive=zips[-1]
 with zipfile.ZipFile(archive) as z:
     summary=json.loads(z.read("summary.json"))
+    buildlog=z.read("build.log").decode("utf-8","replace") if "build.log" in z.namelist() else ""
 print("[sdk-control] Local ZIP:",archive)
 print("[sdk-control] Ymir status:",summary.get("status"))
 print("[sdk-control] SDK:",summary.get("sdk_commit"))
 print("[sdk-control] Game:",summary.get("game_commit"))
+if summary.get("failures"):
+    print("[sdk-control] Failures:", " | ".join(map(str,summary["failures"])))
+if summary.get("build_exit") not in (None,0):
+    print("[sdk-control] Build exit:",summary["build_exit"])
+    lines=buildlog.splitlines()
+    diagnostic=[i for i,line in enumerate(lines) if any(term in line.lower() for term in
+        ("error:", "fatal error", "undefined reference", "failed:", "build stopped", "cmake error"))]
+    if diagnostic:
+        selected=set()
+        for i in diagnostic[:12]:
+            selected.update(range(max(0,i-3),min(len(lines),i+4)))
+        print("[sdk-control] Compiler diagnostics from sanitized ZIP build.log:")
+        for i in sorted(selected):
+            print(f"[build.log:{i+1}] {lines[i]}")
+    elif lines:
+        print("[sdk-control] No compiler error marker; last 45 build lines:")
+        for i,line in enumerate(lines[-45:],start=max(1,len(lines)-44)):
+            print(f"[build.log:{i}] {line}")
+    else:
+        print("[sdk-control] No build.log included in ZIP")
 for name,case in summary.get("cases",{}).items():
     t=case.get("telemetry",{})
     f=case.get("frame_pacing",{})
