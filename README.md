@@ -8,6 +8,12 @@ Unofficial third-person 3D action platformer concept for Sega Saturn, inspired b
 
 Built on [LibSaturn](https://github.com/celsowm/libsaturn) and [Blender Toolkit](https://github.com/celsowm/libsaturn-blender).
 
+## Real landscape textures (new, Ymir qualification pending)
+
+Jade Gully Adventure now uses **eight real 64×64 Kenney Retro Textures Fantasy CC0 PNGs**, checked into [assets/textures/jade-gully](assets/textures/jade-gully/ATTRIBUTION.md), replacing the temporary generated/noise materials. Their unchanged source pixels are converted by `tools/bake_stage_textures.py` into **32 KiB of VDP1 indexed8 textures** and one shared 256-entry palette; all Adventure stage faces now submit indexed8 textured materials, not flat RGB. The old classic greybox remains selectable. The complete authoring/host CI passed [run 44847714151](https://github.com/celsowm/sonic-xtreme-saturn/actions/runs/44847714151) (26 Python tests, deterministic PNG conversion, C syntax, Blender stage export).
+
+The **new material build has not yet been measured in Ymir or on Saturn hardware**: the earlier 5/5 gameplay PASS predates these indexed textures. The level still needs UV tiling, stronger geography/foliage and final camera polish. For historical reference, see [Sonic X-treme prototype texture preservation](https://textures.spriters-resource.com/saturn/sonicxtreme/)—those original Sega textures were **not** copied into this public repository.
+
 ## Jade Gully — experimental Action Adventure layout
 
 The original, Ymir-qualified greybox remains the default. The alternative [Action Adventure stage design](docs/JADE_GULLY_ADVENTURE.md) uses a branching 3D map with forest speed route, upper canopy ridge, exploratory river basin, temple ascent and two broad walkable clearings. **Nine real Kenney CC0 low-poly environment models** (palms, rocks, vegetation, bridge, cliff and ruins) are checked in at [`assets/kenney/`](assets/kenney/ATTRIBUTION.md), with source/license documentation. Blender renders/deforms selected authored GLB props offline; the Saturn binary never loads GLBs at runtime.
