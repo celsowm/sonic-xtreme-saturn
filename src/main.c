@@ -356,11 +356,14 @@ static void stage_prepare_bounds(void) {
         const sat_vec3_t* p=&q->v[0];
         xtreme_stage_aabb_t* out=&stage_bounds[i];
         out->lo_x=out->hi_x=p->x;
+        out->lo_y=out->hi_y=p->y;
         out->lo_z=out->hi_z=p->z;
         for(unsigned j=1;j<4;++j){
             p=&q->v[j];
             if(p->x<out->lo_x)out->lo_x=p->x;
             if(p->x>out->hi_x)out->hi_x=p->x;
+            if(p->y<out->lo_y)out->lo_y=p->y;
+            if(p->y>out->hi_y)out->hi_y=p->y;
             if(p->z<out->lo_z)out->lo_z=p->z;
             if(p->z>out->hi_z)out->hi_z=p->z;
         }
@@ -374,8 +377,19 @@ static void stage_prepare_bounds(void) {
  * display FOV still belongs to LibSaturn; renderer coverage is Ymir-gated. */
 static int stage_quad_relevant(unsigned i) {
 #ifdef XTREME_STAGE_ADVENTURE
-    if(!viewer && !xtreme_stage_aabb_visible(&stage_bounds[i],camera.eye.x,camera.eye.z))
-        return 0;
+    if(!viewer){
+        const xtreme_stage_aabb_t* bounds=&stage_bounds[i];
+        if(!xtreme_stage_aabb_visible(bounds,camera.eye.x,camera.eye.z))
+            return 0;
+        /* The SDK's painter projects four corners BEFORE checking if the
+         * complete quad is behind the camera. Cheap conservative support-
+         * corner test matches that whole-face rejection with a 1m guard.
+         * Use scene.faces.forward computed from the same camera at begin. */
+        if(!xtreme_stage_aabb_may_be_in_front(bounds,
+               scene.faces.eye.x,scene.faces.eye.y,scene.faces.eye.z,
+               scene.faces.forward.x,scene.faces.forward.y,scene.faces.forward.z))
+            return 0;
+    }
 #else
     (void)i;
 #endif
