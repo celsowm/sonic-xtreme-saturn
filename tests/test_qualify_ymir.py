@@ -120,6 +120,24 @@ class YmirTelemetryContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ymir.decode_render_history(bad,0)
 
+    def test_control_evidence_branch_is_isolated_and_allowlisted(self):
+        self.assertIn("ymir-evidence",ymir.EVIDENCE_BRANCHES)
+        self.assertIn("ymir-sdk-control-evidence",ymir.EVIDENCE_BRANCHES)
+        self.assertNotIn("main",ymir.EVIDENCE_BRANCHES)
+        with self.assertRaises(ValueError):
+            ymir.publish(Path("/does-not-exist"),Path("/does-not-exist"),{},
+                         branch="main")
+        with self.assertRaises(ValueError):
+            ymir.republish_latest(branch="main")
+
+    def test_control_script_auto_publishes_and_recovers_without_yimir(self):
+        script=(SCRIPT.parent/"qualify-jade-sdk-control-mac.sh").read_text()
+        self.assertIn('EVIDENCE_BRANCH="ymir-sdk-control-evidence"',script)
+        self.assertIn("--evidence-branch \"$EVIDENCE_BRANCH\"",script)
+        self.assertIn('if [[ "${1:-}" == "--upload-last" ]]',script)
+        self.assertIn("--expected-sdk \"$PIN\"",script)
+        self.assertNotIn(" --no-publish",script)
+
     def test_all_eleven_scenarios_have_replay_and_screenshots(self):
         self.assertEqual(len(ymir.CASES), 11)
         self.assertEqual(len({case[0] for case in ymir.CASES}), 11)
