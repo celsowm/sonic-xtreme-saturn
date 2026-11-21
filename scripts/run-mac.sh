@@ -48,6 +48,8 @@ build/debug-clock-test
 build/controller-test
 cc -std=c11 -Wall -Wextra -Werror -I src tests/test_stage_visibility.c -o build/stage-visibility-test
 build/stage-visibility-test
+cc -std=c11 -Wall -Wextra -Werror -I src tests/test_stage_lod.c -o build/stage-lod-test
+build/stage-lod-test
 STAGE_LAYOUT="${XTREME_STAGE_LAYOUT:-classic}"
 case "$STAGE_LAYOUT" in
     classic)
