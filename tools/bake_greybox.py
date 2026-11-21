@@ -22,6 +22,7 @@ PALETTE = {
     "river_route": (0, 3),
     "ruins_route": (2, 4),
     "trunk": (2, 4),
+    "wood": (4, 4),
     "canopy": (3, 3),
     "rock": (2, 4),
     "water": (5, 5),
