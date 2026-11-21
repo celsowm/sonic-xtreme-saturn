@@ -30,7 +30,7 @@ sat_result_t xtreme_ring_sprites_init(void) {
         mat->kind=SAT_SCENE3D_INDEXED_TEXTURED;
         mat->texture=&ring_textures[i];
         mat->rgb555=SAT_RGB555(31,27,2); /* near-clip fallback, no blue boxes */
-        mat->color_calc_slot=SAT_INDEXED_SOLID_OPAQUE;
+        mat->color_calc_slot=255u; /* indexed opaque slot; explicit SDK ABI */
         mat->sprite_flags=SAT_SPRITE_FLAG_HIGH_SPEED_SHRINK;
     }
     ring_ready=1u;
