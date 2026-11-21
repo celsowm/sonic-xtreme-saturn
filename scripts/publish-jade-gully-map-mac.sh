@@ -25,7 +25,7 @@ SRC="$(cd "$(dirname "$SRC")" && pwd)/$(basename "$SRC")"
 file "$SRC" | grep -q 'PNG image data' || fail "Not a PNG: $SRC"
 command -v git >/dev/null || fail "Git is missing"
 git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null || fail "Not a Git working tree"
-git -C "$ROOT" remote get-url origin | grep -Eq '(^|[:/])celsowm/sonic-xtreme-saturn(\\.git)?$' || fail "Unexpected origin; refusing to push another repository"
+git -C "$ROOT" remote get-url origin | grep -Eq '(^|[:/])celsowm/sonic-xtreme-saturn(\.git)?$' || fail "Unexpected origin; refusing to push another repository"
 
 echo '[jade-map] Fetching origin/main without switching local branches...'
 git -C "$ROOT" fetch origin main
