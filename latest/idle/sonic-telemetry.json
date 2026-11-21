@@ -9,7 +9,7 @@
   "textures": 148,
   "joints": 11,
   "clip": 0,
-  "ticks": 124,
+  "ticks": 122,
   "draws": 62,
   "animation_ms": 1,
   "skin_ms": 0,
@@ -24,7 +24,7 @@
   "clip_changes": 3,
   "takeoffs": 0,
   "landings": 1,
-  "ground_ticks": 111,
+  "ground_ticks": 109,
   "air_ticks": 13,
   "position_m": [
     0.0,

@@ -1,6 +1,6 @@
 {
   "status": "review",
-  "game_commit": "6ae6800644deeb9e45af7ab1e27b91dcb40f9cdd",
+  "game_commit": "475fcadaf54fced1a56750ac152e83cf4b445ed3",
   "sdk_commit": "04553e1f4865dfa906bc594f64f34677c8f9feb1",
   "game_dirty": "",
   "sdk_dirty": "",
@@ -23,7 +23,7 @@
         "main_entries": 1,
         "frames": 62
       },
-      "boot_address": "0x603e9b8",
+      "boot_address": "0x603ea88",
       "boot_method": "map",
       "sonic": {
         "magic": 1398292803,
@@ -36,7 +36,7 @@
         "textures": 148,
         "joints": 11,
         "clip": 0,
-        "ticks": 124,
+        "ticks": 122,
         "draws": 62,
         "animation_ms": 1,
         "skin_ms": 0,
@@ -51,7 +51,7 @@
         "clip_changes": 3,
         "takeoffs": 0,
         "landings": 1,
-        "ground_ticks": 111,
+        "ground_ticks": 109,
         "air_ticks": 13,
         "position_m": [
           0.0,
@@ -59,9 +59,9 @@
           -2.0
         ]
       },
-      "sonic_address": "0x604d5c0",
+      "sonic_address": "0x604d6fc",
       "sonic_method": "map",
-      "pc_after_run": "0x600c4f0",
+      "pc_after_run": "0x600c5ba",
       "telemetry": {
         "magic": 1481917506,
         "version": 3,
@@ -159,7 +159,7 @@
         ],
         "submission_rate_hz": 30.0
       },
-      "telemetry_address": "0x603f690",
+      "telemetry_address": "0x603f760",
       "address_method": "map",
       "checks": {
         "guest_running": true,
@@ -566,7 +566,7 @@
         "sim_ms_p95": 3,
         "flush_ms_p95": 6
       },
-      "frame_pacing_address": "0x603e5a8",
+      "frame_pacing_address": "0x603e678",
       "frame_pacing_method": "map",
       "performance_frame_pacing": {
         "recent_samples": 62,
@@ -576,6 +576,13 @@
         "frame_ms_max": 34,
         "scene_ms_p95": 19,
         "independent_display_fps": null
+      },
+      "actor_snapshot_alignment": {
+        "sonic_ticks": 122,
+        "controller_ticks": 122,
+        "delta_ticks": 0,
+        "x_delta_fixed": 0,
+        "z_delta_fixed": 0
       },
       "performance": {
         "target_display_fps": 30,
@@ -605,7 +612,7 @@
         "main_entries": 1,
         "frames": 97
       },
-      "boot_address": "0x603e9b8",
+      "boot_address": "0x603ea88",
       "boot_method": "map",
       "sonic": {
         "magic": 1398292803,
@@ -618,9 +625,9 @@
         "textures": 148,
         "joints": 11,
         "clip": 0,
-        "ticks": 194,
+        "ticks": 192,
         "draws": 97,
-        "animation_ms": 1,
+        "animation_ms": 0,
         "skin_ms": 1,
         "draw_ms": 4,
         "pos_x": 0,
@@ -633,7 +640,7 @@
         "clip_changes": 7,
         "takeoffs": 1,
         "landings": 2,
-        "ground_ticks": 142,
+        "ground_ticks": 140,
         "air_ticks": 52,
         "position_m": [
           0.0,
@@ -641,9 +648,9 @@
           -2.0
         ]
       },
-      "sonic_address": "0x604d5c0",
+      "sonic_address": "0x604d6fc",
       "sonic_method": "map",
-      "pc_after_run": "0x600c4f0",
+      "pc_after_run": "0x600c5ac",
       "telemetry": {
         "magic": 1481917506,
         "version": 3,
@@ -741,7 +748,7 @@
         ],
         "submission_rate_hz": 30.0
       },
-      "telemetry_address": "0x603f690",
+      "telemetry_address": "0x603f760",
       "address_method": "map",
       "checks": {
         "guest_running": true,
@@ -1167,7 +1174,7 @@
         "sim_ms_p95": 2,
         "flush_ms_p95": 6
       },
-      "frame_pacing_address": "0x603e5a8",
+      "frame_pacing_address": "0x603e678",
       "frame_pacing_method": "map",
       "performance_frame_pacing": {
         "recent_samples": 64,
@@ -1177,6 +1184,13 @@
         "frame_ms_max": 34,
         "scene_ms_p95": 19,
         "independent_display_fps": null
+      },
+      "actor_snapshot_alignment": {
+        "sonic_ticks": 192,
+        "controller_ticks": 192,
+        "delta_ticks": 0,
+        "x_delta_fixed": 0,
+        "z_delta_fixed": 0
       },
       "performance": {
         "target_display_fps": 30,
@@ -1205,7 +1219,7 @@
         "main_entries": 1,
         "frames": 68
       },
-      "boot_address": "0x603e9b8",
+      "boot_address": "0x603ea88",
       "boot_method": "map",
       "sonic": {
         "magic": 1398292803,
@@ -1218,14 +1232,14 @@
         "textures": 148,
         "joints": 11,
         "clip": 1,
-        "ticks": 138,
-        "draws": 69,
-        "animation_ms": 1,
+        "ticks": 135,
+        "draws": 68,
+        "animation_ms": 0,
         "skin_ms": 1,
         "draw_ms": 4,
-        "pos_x": 262466,
-        "pos_y": 257421,
-        "pos_z": -2179065,
+        "pos_x": 262163,
+        "pos_y": 280353,
+        "pos_z": -2091936,
         "registry_capacity": 164,
         "init_stage": 7,
         "vram_free": 264232,
@@ -1233,17 +1247,17 @@
         "clip_changes": 4,
         "takeoffs": 0,
         "landings": 1,
-        "ground_ticks": 125,
+        "ground_ticks": 122,
         "air_ticks": 13,
         "position_m": [
-          4.004913330078125,
-          3.9279327392578125,
-          -33.24989318847656
+          4.0002899169921875,
+          4.2778472900390625,
+          -31.92041015625
         ]
       },
-      "sonic_address": "0x604d5c0",
+      "sonic_address": "0x604d6fc",
       "sonic_method": "map",
-      "pc_after_run": "0x601e800",
+      "pc_after_run": "0x601e8da",
       "telemetry": {
         "magic": 1481917506,
         "version": 3,
@@ -1341,7 +1355,7 @@
         ],
         "submission_rate_hz": 30.0
       },
-      "telemetry_address": "0x603f690",
+      "telemetry_address": "0x603f760",
       "address_method": "map",
       "checks": {
         "guest_running": true,
@@ -1357,7 +1371,7 @@
         "frame_p95_30_target": true,
         "sonic_rendered": true,
         "actor_sim_sync": true,
-        "actor_position_sync": false,
+        "actor_position_sync": true,
         "run_clip_visited": true,
         "animation_transitions": true,
         "submission_rate_30_target": true,
@@ -1765,7 +1779,7 @@
         "sim_ms_p95": 3,
         "flush_ms_p95": 7
       },
-      "frame_pacing_address": "0x603e5a8",
+      "frame_pacing_address": "0x603e678",
       "frame_pacing_method": "map",
       "performance_frame_pacing": {
         "recent_samples": 64,
@@ -1775,6 +1789,13 @@
         "frame_ms_max": 49,
         "scene_ms_p95": 22,
         "independent_display_fps": null
+      },
+      "actor_snapshot_alignment": {
+        "sonic_ticks": 135,
+        "controller_ticks": 135,
+        "delta_ticks": 0,
+        "x_delta_fixed": 0,
+        "z_delta_fixed": 0
       },
       "performance": {
         "target_display_fps": 30,
@@ -1806,7 +1827,7 @@
         "main_entries": 1,
         "frames": 127
       },
-      "boot_address": "0x603e9b8",
+      "boot_address": "0x603ea88",
       "boot_method": "map",
       "sonic": {
         "magic": 1398292803,
@@ -1842,9 +1863,9 @@
           -2.0
         ]
       },
-      "sonic_address": "0x604d5c0",
+      "sonic_address": "0x604d6fc",
       "sonic_method": "map",
-      "pc_after_run": "0x601ea14",
+      "pc_after_run": "0x601eae4",
       "telemetry": {
         "magic": 1481917506,
         "version": 3,
@@ -1942,7 +1963,7 @@
         ],
         "submission_rate_hz": 30.0
       },
-      "telemetry_address": "0x603f690",
+      "telemetry_address": "0x603f760",
       "address_method": "map",
       "checks": {
         "guest_running": true,
@@ -2360,7 +2381,7 @@
         "sim_ms_p95": 2,
         "flush_ms_p95": 6
       },
-      "frame_pacing_address": "0x603e5a8",
+      "frame_pacing_address": "0x603e678",
       "frame_pacing_method": "map",
       "performance_frame_pacing": {
         "recent_samples": 64,
@@ -2370,6 +2391,13 @@
         "frame_ms_max": 34,
         "scene_ms_p95": 25,
         "independent_display_fps": null
+      },
+      "actor_snapshot_alignment": {
+        "sonic_ticks": 204,
+        "controller_ticks": 204,
+        "delta_ticks": 0,
+        "x_delta_fixed": 0,
+        "z_delta_fixed": 0
       },
       "performance": {
         "target_display_fps": 30,
@@ -2398,7 +2426,7 @@
         "main_entries": 1,
         "frames": 87
       },
-      "boot_address": "0x603e9b8",
+      "boot_address": "0x603ea88",
       "boot_method": "map",
       "sonic": {
         "magic": 1398292803,
@@ -2411,10 +2439,10 @@
         "textures": 148,
         "joints": 11,
         "clip": 0,
-        "ticks": 174,
+        "ticks": 172,
         "draws": 87,
         "animation_ms": 1,
-        "skin_ms": 1,
+        "skin_ms": 0,
         "draw_ms": 4,
         "pos_x": 1882948,
         "pos_y": 913434,
@@ -2426,7 +2454,7 @@
         "clip_changes": 5,
         "takeoffs": 0,
         "landings": 1,
-        "ground_ticks": 161,
+        "ground_ticks": 159,
         "air_ticks": 13,
         "position_m": [
           28.73150634765625,
@@ -2434,9 +2462,9 @@
           -2.25299072265625
         ]
       },
-      "sonic_address": "0x604d5c0",
+      "sonic_address": "0x604d6fc",
       "sonic_method": "map",
-      "pc_after_run": "0x600fb7e",
+      "pc_after_run": "0x600fc3e",
       "telemetry": {
         "magic": 1481917506,
         "version": 3,
@@ -2534,7 +2562,7 @@
         ],
         "submission_rate_hz": 30.0
       },
-      "telemetry_address": "0x603f690",
+      "telemetry_address": "0x603f760",
       "address_method": "map",
       "checks": {
         "guest_running": true,
@@ -2955,7 +2983,7 @@
         "sim_ms_p95": 3,
         "flush_ms_p95": 7
       },
-      "frame_pacing_address": "0x603e5a8",
+      "frame_pacing_address": "0x603e678",
       "frame_pacing_method": "map",
       "performance_frame_pacing": {
         "recent_samples": 64,
@@ -2965,6 +2993,13 @@
         "frame_ms_max": 34,
         "scene_ms_p95": 21,
         "independent_display_fps": null
+      },
+      "actor_snapshot_alignment": {
+        "sonic_ticks": 172,
+        "controller_ticks": 172,
+        "delta_ticks": 0,
+        "x_delta_fixed": 0,
+        "z_delta_fixed": 0
       },
       "performance": {
         "target_display_fps": 30,
@@ -2993,10 +3028,10 @@
   "probe_sha256": "d0c29fe9865aeae642fd3d6040dfefd41c47fb30d5c7af39d592423098513391",
   "bios_sha256": "96e106f740ab448cf89f0dd49dfbac7fe5391cb6bd6e14ad5e3061c13330266f",
   "build_exit": 0,
-  "app_sha256": "d94ec4d4f1cf86ca1a0b1bddde87eb08059ea5a01121f4382568163a15ce69b2",
+  "app_sha256": "b81dc5b91ceca6ddb4f8014d8b83f8b25e92b86e6fa3e3184f3fa923cf469b6b",
   "cue_sha256": "1fc5c7464c17d92e90f8fb1f302ad5c9aa6639c23d04c2b674ac8f9d1e08bdba",
-  "bin_sha256": "1802df7c516db1332388338b67f965417376f2033256ef717c98b42bf04c777e",
-  "iso_sha256": "ca96c95f33373d0d0d30e64b264b8af154123c615227a8d4f23f83f4e3f1c1ed",
+  "bin_sha256": "fc849d4be3fc746856cddadd2af80ddcd175553ccac3bc55aa58846cae7c1334",
+  "iso_sha256": "01033ad355cf261ea8dea88e560a8fdc9fa016af409c0dfc12320154c37028cd",
   "failures": [
     "curve_route: telemetry checks"
   ]
