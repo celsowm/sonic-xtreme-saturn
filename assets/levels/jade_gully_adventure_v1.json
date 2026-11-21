@@ -431,7 +431,8 @@
       ],
       "height_m": 5,
       "triangles_max": 20,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "palm_basin",
@@ -443,7 +444,8 @@
       ],
       "height_m": 6,
       "triangles_max": 20,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "palm_temple",
@@ -455,7 +457,8 @@
       ],
       "height_m": 5,
       "triangles_max": 20,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "rock_fork",
@@ -467,7 +470,8 @@
       ],
       "height_m": 3,
       "triangles_max": 8,
-      "palette": "rock"
+      "palette": "rock",
+      "snap_to_valley": true
     },
     {
       "id": "rock_temple",
@@ -479,7 +483,8 @@
       ],
       "height_m": 3,
       "triangles_max": 8,
-      "palette": "rock"
+      "palette": "rock",
+      "snap_to_valley": true
     },
     {
       "id": "waterfall_cliff",
@@ -527,7 +532,8 @@
       ],
       "height_m": 2,
       "triangles_max": 8,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "bridge_waterfall",
@@ -551,7 +557,8 @@
       ],
       "height_m": 6.6,
       "triangles_max": 17,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "palm_overlook_right",
@@ -563,7 +570,8 @@
       ],
       "height_m": 6.2,
       "triangles_max": 17,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "palm_forest_ridge",
@@ -575,7 +583,8 @@
       ],
       "height_m": 7,
       "triangles_max": 17,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "palm_forest_basin",
@@ -587,7 +596,8 @@
       ],
       "height_m": 6.8,
       "triangles_max": 17,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "bush_overlook",
@@ -599,7 +609,8 @@
       ],
       "height_m": 2.2,
       "triangles_max": 7,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "rock_overlook",
@@ -611,7 +622,8 @@
       ],
       "height_m": 2.8,
       "triangles_max": 7,
-      "palette": "rock"
+      "palette": "rock",
+      "snap_to_valley": true
     },
     {
       "id": "bush_forest",
@@ -623,7 +635,8 @@
       ],
       "height_m": 2.3,
       "triangles_max": 7,
-      "palette": "canopy"
+      "palette": "canopy",
+      "snap_to_valley": true
     },
     {
       "id": "rock_waterfall",
@@ -635,7 +648,8 @@
       ],
       "height_m": 3.5,
       "triangles_max": 7,
-      "palette": "rock"
+      "palette": "rock",
+      "snap_to_valley": true
     }
   ],
   "budgets": {
@@ -649,7 +663,7 @@
     "branch_terrace_triangles": 24,
     "far_palm_lod_faces_per_instance": 5
   },
-  "notes": "Jade art/perf v4 candidate: near-view render-only polygon splitting for repeated Kenney CC0 texels; original valley/route collision preserved. Seven palms have sourced two-material near/far LODs; target-only LOD/culling and 30 FPS visual cadence require new Ymir review.",
+  "notes": "Jade art/perf v4 candidate: near-view render-only polygon splitting for repeated Kenney CC0 texels; original valley/route collision preserved. Seven palms have sourced two-material near/far LODs; target-only LOD/culling and 30 FPS visual cadence require new Ymir review. Natural trees/bushes/rocks snap visual-only to the same authored valley height; gameplay collision retains its previous geometry.",
   "clearings": [
     {
       "id": "river_basin",
