@@ -7,6 +7,7 @@
 #include "controller.h"
 #ifdef XTREME_STAGE_ADVENTURE
 #include "stage_textures.h"
+#include "ring_sprites.h"
 #include "stage_visibility.h"
 #include "stage_lod.h"
 #include "render_profile.h"
@@ -30,9 +31,9 @@
 #define CHARACTER_FACES 2u
 #endif
 #ifdef XTREME_STAGE_ADVENTURE
-/* Octagonal, untextured authored ring silhouettes replace editor diamonds.
- * Eight world quads per ring; non-ring markers remain debug-only. */
-#define MARKER_FACE_RESERVE (8u * STAGE_ENTITY_COUNT)
+/* One transparent 32x32 source sprite quad per ring. Debug markers may
+ * still submit two quads per other entity while Y is enabled. */
+#define MARKER_FACE_RESERVE (2u * STAGE_ENTITY_COUNT)
 #else
 #define MARKER_FACE_RESERVE (2u * STAGE_ENTITY_COUNT)
 #endif
@@ -305,22 +306,22 @@ static sat_result_t submit(const sat_quad3_t* q, uint16_t rgb) {
 }
 #ifdef XTREME_STAGE_ADVENTURE
 static sat_result_t draw_gold_ring(const sat_vec3_t* pos) {
-    /* World-space eight-sided annulus, approximately 1.5 m high.
-     * Not yet a collectible: it visualizes placement, not gameplay state. */
-    static const int32_t outer_x[8]={0,34756,49152,34756,0,-34756,-49152,-34756};
-    static const int32_t outer_y[8]={49152,34756,0,-34756,-49152,-34756,0,34756};
-    static const int32_t inner_x[8]={0,18536,26214,18536,0,-18536,-26214,-18536};
-    static const int32_t inner_y[8]={26214,18536,0,-18536,-26214,-18536,0,18536};
-    for(unsigned i=0;i<8;++i) {
-        const unsigned next=(i+1u)&7u;
-        const sat_quad3_t q={{{pos->x+outer_x[i],pos->y+outer_y[i],pos->z},
-                             {pos->x+outer_x[next],pos->y+outer_y[next],pos->z},
-                             {pos->x+inner_x[next],pos->y+inner_y[next],pos->z},
-                             {pos->x+inner_x[i],pos->y+inner_y[i],pos->z}}};
-        const sat_result_t rc=submit(&q,(i&1u)?SAT_RGB555(29,22,1):SAT_RGB555(31,29,7));
-        if(rc!=SAT_OK)return rc;
-    }
-    return SAT_OK;
+    /* One world-space billboard replaces eight fake solid quads. Actual
+     * 16-frame X-Treme ring animation rotates around its own center at
+     * 2 physics ticks per source frame, regardless of video submission rate.
+     * Only the horizontal camera-right axis rotates; the sprite remains
+     * vertical so the ring never tilts with the chase camera pitch. */
+    const sat_scene3d_material_t* material=
+        xtreme_ring_sprite_material(xtreme_ticks);
+    if(!material)return SAT_ERR_INVALID_ARG;
+    const int32_t half=FX(3)/4;
+    const int32_t rx=(int32_t)(-((int64_t)scene.faces.forward.z*half)/65536);
+    const int32_t rz=(int32_t)(((int64_t)scene.faces.forward.x*half)/65536);
+    const sat_quad3_t quad={{{pos->x-rx,pos->y+half,pos->z-rz},
+                             {pos->x+rx,pos->y+half,pos->z+rz},
+                             {pos->x+rx,pos->y-half,pos->z+rz},
+                             {pos->x-rx,pos->y-half,pos->z-rz}}};
+    return sat_scene_submit_quad(&scene,&quad,material,0u);
 }
 #endif
 
@@ -658,6 +659,10 @@ int main(void) {
     /* Upload 8 resident 64x64 landscape textures once after Sonic's
      * managed CRAM palette, before the first frame; no per-frame upload. */
     rc=xtreme_stage_textures_init();
+    if(rc!=SAT_OK)return fail(rc);
+    /* Ring sprite atlas shares the static indexed palette strategy.
+     * Every frame stays resident: no upload or heap work in draw_stage. */
+    rc=xtreme_ring_sprites_init();
     if(rc!=SAT_OK)return fail(rc);
     stage_prepare_bounds();
 #endif
