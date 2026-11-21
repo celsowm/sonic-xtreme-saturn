@@ -8,8 +8,8 @@
   "physics_hz": 60,
   "world_bounds": {
     "x": [
-      -42,
-      45
+      -70,
+      70
     ],
     "y": [
       -15,
@@ -548,9 +548,11 @@
     "entities_max": 64,
     "max_imported_prop_triangles": 80,
     "texture_vram_reserved_for_actor_bytes": 148000,
-    "full_stage_not_yet_qualified": true
+    "full_stage_not_yet_qualified": true,
+    "landmass_triangles": 80,
+    "branch_terrace_triangles": 24
   },
-  "notes": "Authoring plan for a new independent playable layout. Existing qualified main/upper collision remains untouched; new branches and imported CC0 props must be validated in Blender and Ymir before acceptance. Two open, walkable clearing pads attached to river and temple routes; skirts only decorative.",
+  "notes": "Action Adventure valley v2: 80-triangle walkable landscape with three 8-triangle branch terraces replaces 88 vertical cliff faces. Routes and respawn logic unchanged; lower ground must be tested with full Ymir and off-course traversal. Curated Kenney props remain source assets.",
   "clearings": [
     {
       "id": "river_basin",
