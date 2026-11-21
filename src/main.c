@@ -43,7 +43,12 @@ static sat_mesh_t ground = {
 };
 static uint8_t viewer;
 enum { DBG_OFF, DBG_COMPACT, DBG_PHYSICS, DBG_CAMERA, DBG_RENDER, DBG_MEMORY, DBG_COUNT };
+#ifdef XTREME_STAGE_ADVENTURE
+/* Playable framing first. Debug pages are still available via Y. */
+static unsigned page=DBG_OFF, vectors;
+#else
 static unsigned page=DBG_COMPACT, vectors;
+#endif
 static xtreme_clock_t sim_clock;
 static sat_ascii_font_t debug_font;
 static sat_hud_t debug_hud;
@@ -191,8 +196,15 @@ static int ground_query(void* ctx,const sat_vec3_t* origin,sat_fx16_t length,
     return 1;
 }
 static sat_result_t chase_step(void) {
+#ifdef XTREME_STAGE_ADVENTURE
+    /* Sonic Adventure-inspired chase: close to the actor, show the ground
+     * ahead, and avoid the distant map-editor / 32X prototype composition. */
+    const sat_vec3_t eye={0,FX(7)/2,FX(7)};
+    const sat_vec3_t target={player.velocity.x*3,FX(1),-FX(3)+player.velocity.z*3};
+#else
     const sat_vec3_t eye={0,FX(5),FX(10)};
     const sat_vec3_t target={player.velocity.x*4,FX(1),-FX(4)+player.velocity.z*4};
+#endif
     sat_result_t rc=sat_follow_camera3d_set_offsets(&chase,&eye,&target);
     if(rc!=SAT_OK)return rc;
     rc=sat_follow_camera3d_step(&chase,&player.feet,chase_snap,&chase_eye,&chase_target);
@@ -202,7 +214,12 @@ static sat_result_t chase_step(void) {
 static sat_result_t follow_player(void) {
     if(chase_snap){sat_result_t rc=chase_step();if(rc!=SAT_OK)return rc;}
     const sat_vec3_t up={0,FX(1),0};
-    return sat_camera3d_init(&camera,&chase_eye,&chase_target,&up,FX(65),
+#ifdef XTREME_STAGE_ADVENTURE
+    const sat_fx16_t fov=FX(60);
+#else
+    const sat_fx16_t fov=FX(65);
+#endif
+    return sat_camera3d_init(&camera,&chase_eye,&chase_target,&up,fov,
         sat_fx16_div(FX(WIDTH),FX(HEIGHT)),FX(1),FX(240));
 }
 static xtreme_input_t sample_input(const sat_pad_state_t* pad) {
@@ -229,7 +246,8 @@ volatile uint32_t xtreme_world_commands;
 static const uint16_t colors[] = {
     SAT_RGB555(9,21,7), SAT_RGB555(21,16,6), SAT_RGB555(16,14,12),
     SAT_RGB555(5,15,5), SAT_RGB555(16,11,4),
-    SAT_RGB555(7,23,28)
+    SAT_RGB555(7,23,28),
+    SAT_RGB555(10,18,7), SAT_RGB555(12,19,7)
 };
 static const uint16_t marker_colors[] = {
     SAT_RGB555(4,12,31), SAT_RGB555(31,26,2), SAT_RGB555(31,4,4),
@@ -272,10 +290,39 @@ static sat_result_t submit(const sat_quad3_t* q, uint16_t rgb) {
     };
     return sat_scene_submit_quad(&scene,q,&material,0u);
 }
+/* Coarse fixed-point offscreen rejection for Adventure only. Render
+ * scenery within 55m laterally, 60m behind and 85m ahead; panoramic camera
+ * mode retains all geometry. Physics always sees the full collision world.
+ * Use the face bounding box, not its centroid, to avoid culling long ground
+ * quads at the sector border. */
+static int stage_quad_relevant(const stage_face_t* f) {
+#ifdef XTREME_STAGE_ADVENTURE
+    if(!viewer) {
+        sat_fx16_t lo_x=INT32_MAX,hi_x=INT32_MIN;
+        sat_fx16_t lo_z=INT32_MAX,hi_z=INT32_MIN;
+        for(unsigned j=0;j<4;++j) {
+            const sat_vec3_t* v=&stage_vertices[f->v[j]];
+            if(v->x<lo_x)lo_x=v->x;
+            if(v->x>hi_x)hi_x=v->x;
+            if(v->z<lo_z)lo_z=v->z;
+            if(v->z>hi_z)hi_z=v->z;
+        }
+        if((int64_t)hi_x<(int64_t)player.feet.x-FX(55) ||
+           (int64_t)lo_x>(int64_t)player.feet.x+FX(55) ||
+           (int64_t)hi_z<(int64_t)player.feet.z-FX(85) ||
+           (int64_t)lo_z>(int64_t)player.feet.z+FX(60))
+            return 0;
+    }
+#else
+    (void)f;
+#endif
+    return 1;
+}
 static sat_result_t draw_stage(void) {
     sat_result_t rc;
     for (unsigned i=0; i<STAGE_FACE_COUNT; ++i) {
         const stage_face_t* f = &stage_faces[i];
+        if(!stage_quad_relevant(f)) continue;
         sat_quad3_t quad;
         for (unsigned k=0;k<4;++k) quad.v[k] = stage_vertices[f->v[k]];
         rc = submit(&quad, colors[f->color]);
@@ -284,6 +331,12 @@ static sat_result_t draw_stage(void) {
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i) {
         const stage_entity_t* e = &stage_entities[i];
         const sat_vec3_t p = e->pos;
+#ifdef XTREME_STAGE_ADVENTURE
+        if(!viewer && ((int64_t)p.x<(int64_t)player.feet.x-FX(55) ||
+                        (int64_t)p.x>(int64_t)player.feet.x+FX(55) ||
+                        (int64_t)p.z<(int64_t)player.feet.z-FX(85) ||
+                        (int64_t)p.z>(int64_t)player.feet.z+FX(60))) continue;
+#endif
         const sat_fx16_t r = e->kind == 1 ? FX(1)/2 : FX(1);
         /* Two crossed diamonds, diagnostic markers only. */
         sat_quad3_t q = {{{p.x,p.y+r,p.z},{p.x+r,p.y,p.z},
