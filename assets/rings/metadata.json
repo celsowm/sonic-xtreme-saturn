@@ -1,0 +1,103 @@
+{
+  "title": "X-Treme Ring Sprites",
+  "author": "Mr. Malfunction",
+  "mod_url": "https://gamebanana.com/mods/537401",
+  "archive_sha256": "16e64620bd0b378b9a8523092fd88f222c0dcbe9da65f66c63decfcd3d6895f0",
+  "source": "Sonic X-Treme prototype artwork adapted for Sonic Adventure DX; not an independently verified Saturn build rip",
+  "dependency": "Animated Sprite Rings (SADX)",
+  "frame_names": [
+    "ring1.png",
+    "ring2.png",
+    "ring3.png",
+    "ring4.png",
+    "ring5.png",
+    "ring6.png",
+    "ring7.png",
+    "ring8.png",
+    "ring9.png",
+    "ring10.png",
+    "ring11.png",
+    "ring12.png",
+    "ring13.png",
+    "ring14.png",
+    "ring15.png",
+    "ring16.png"
+  ],
+  "width": 32,
+  "height": 32,
+  "frame_increment_sim_ticks": 2,
+  "transparency_alpha_threshold": 128,
+  "opaque_rgb": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      33,
+      24,
+      0
+    ],
+    [
+      49,
+      33,
+      0
+    ],
+    [
+      74,
+      57,
+      0
+    ],
+    [
+      99,
+      82,
+      0
+    ],
+    [
+      123,
+      99,
+      0
+    ],
+    [
+      156,
+      123,
+      0
+    ],
+    [
+      189,
+      156,
+      0
+    ],
+    [
+      222,
+      181,
+      8
+    ],
+    [
+      255,
+      206,
+      8
+    ],
+    [
+      255,
+      239,
+      8
+    ],
+    [
+      255,
+      255,
+      16
+    ],
+    [
+      255,
+      255,
+      33
+    ],
+    [
+      255,
+      255,
+      57
+    ]
+  ],
+  "license": "Original SEGA-derived artwork; fan-mod adaptation by Mr. Malfunction. No CC0/open-content claim. User supplied archive for this project."
+}
