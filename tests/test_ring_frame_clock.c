@@ -1,4 +1,4 @@
-#include "ring_sprites.h"
+#include "ring_frame_clock.h"
 #include <assert.h>
 #include <stdio.h>
 
