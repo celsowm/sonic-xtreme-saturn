@@ -1,11 +1,24 @@
 #!/usr/bin/env bash
 # Controlled Ymir A/B: same game HEAD + stable, published LibSaturn revision.
-# Never reset the developer's LibSaturn checkout or rewrite ymir-evidence.
+# Automatically push the sanitized ZIP and screenshots to a SEPARATE GitHub
+# evidence branch. Never reset the developer's SDK or rewrite full-run evidence.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEV="$(cd "$ROOT/.." && pwd)"
 PIN="08e39e9dfb235a2ad88c17c690178c5ab0927e6f"
+EVIDENCE_BRANCH="ymir-sdk-control-evidence"
+
+# Recover the latest local ZIP without rebuilding or re-running the emulator:
+#   bash scripts/qualify-jade-sdk-control-mac.sh --upload-last
+# This also uploads the last successful/review run made before auto-upload.
+if [[ "${1:-}" == "--upload-last" ]]; then
+  cd "$ROOT"
+  exec python3 scripts/qualify-ymir.py --publish-latest \
+    --evidence-branch "$EVIDENCE_BRANCH" --expected-sdk "$PIN"
+fi
+[[ $# -eq 0 ]] || { printf '[sdk-control] Unexpected option: %s\n' "$*" >&2; exit 2; }
+
 die(){ printf '[sdk-control] %s\n' "$*" >&2; exit 2; }
 
 SOURCE="${LIBSATURN_SOURCE:-$DEV/lib-saturn}"
@@ -42,8 +55,10 @@ if [[ -z "${LIBSATURN_BIOS:-}" && -f "$SOURCE/bios/firmware/mpr-17933.bin" ]]; t
   export LIBSATURN_BIOS="$SOURCE/bios/firmware/mpr-17933.bin"
 fi
 
-# Isolate the SDK build and install; the developer's SDK prefix/cache and
-# checkout are never touched. qualify-ymir.py already writes its own ZIP.
+# Isolate the SDK build and install; developer SDK prefix/cache and checkout
+# remain untouched. The harness uploads only a *sanitized* ZIP and screenshots
+# to the dedicated ymir-sdk-control-evidence branch, including REVIEW/FAILED
+# diagnostic runs, leaving the full-run ymir-evidence branch intact.
 export LIBSATURN_SOURCE="$WORKTREE"
 export LIBSATURN_BUILD="$ROOT/build/sdk-control-build-$PIN"
 export LIBSATURN_PREFIX="$ROOT/build/sdk-control-prefix-$PIN"
@@ -51,7 +66,8 @@ export XTREME_STAGE_LAYOUT=adventure
 
 cd "$ROOT"
 set +e
-python3 scripts/qualify-ymir.py --require-sonic --no-publish \
+python3 scripts/qualify-ymir.py --require-sonic \
+  --evidence-branch "$EVIDENCE_BRANCH" \
   --case idle --case curve_route --case offroad_right
 rc=$?
 set -e
@@ -115,7 +131,9 @@ for name,case in summary.get("cases",{}).items():
               f"({case.get('render_profile_decode_error','no record')})")
 if summary.get("sdk_commit")!=pin or summary.get("game_commit")!=game:
     raise SystemExit("[sdk-control] Revision mismatch; A/B is invalid")
-print("[sdk-control] Compare with the previous Ymir 20/s / p95 50–51ms. "
-      "This ZIP was NOT published.")
+print("[sdk-control] GitHub evidence: "
+      "https://github.com/celsowm/sonic-xtreme-saturn/tree/ymir-sdk-control-evidence/latest")
+print("[sdk-control] ZIP and screenshots are published automatically unless a "
+      "network/permission error was reported above.")
 PY
 exit "$rc"
