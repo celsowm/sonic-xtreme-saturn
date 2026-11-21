@@ -340,9 +340,16 @@ def sanitize_text(work, bios, probe):
             if source and source!="/":cleaned=cleaned.replace(source,replacement)
         if cleaned!=original:f.write_text(cleaned,encoding="utf-8")
 
-def publish(archive, work, summary):
-    """Push a standalone evidence tree. Never check out or modify main."""
-    branch="ymir-evidence"
+EVIDENCE_BRANCHES=("ymir-evidence","ymir-sdk-control-evidence")
+
+def publish(archive, work, summary, branch="ymir-evidence"):
+    """Publish the sanitized ZIP and screenshots without touching main/index.
+
+    The SDK-control runs use a dedicated branch so a 3-case experiment never
+    overwrites the 5-case production qualification under ymir-evidence.
+    """
+    if branch not in EVIDENCE_BRANCHES:
+        raise ValueError("unsupported evidence branch: "+branch)
     ref="refs/heads/"+branch
     url=subprocess.check_output(["git","-C",str(ROOT),"remote","get-url","origin"],text=True).strip()
     allowed=("https://github.com/celsowm/sonic-xtreme-saturn.git",
@@ -384,11 +391,13 @@ def publish(archive, work, summary):
         # A normal non-force push rejects concurrent, divergent publications.
         subprocess.run(["git","-C",str(ROOT),"push","origin",commit+":"+ref],check=True)
     print("[xtreme] GitHub ZIP: https://github.com/celsowm/sonic-xtreme-saturn/blob/"+commit+"/latest/return.zip",flush=True)
-    print("[xtreme] Results: https://github.com/celsowm/sonic-xtreme-saturn/tree/ymir-evidence/latest",flush=True)
+    print("[xtreme] Results: https://github.com/celsowm/sonic-xtreme-saturn/tree/"+branch+"/latest",flush=True)
     print("[xtreme] Evidence commit: "+commit,flush=True)
 
-def republish_latest():
-    """Retry publication of an existing complete return ZIP without booting Ymir."""
+def republish_latest(branch="ymir-evidence", expected_sdk=None):
+    """Upload last sanitized ZIP without rebuilding or replaying Ymir."""
+    if branch not in EVIDENCE_BRANCHES:
+        raise ValueError("unsupported evidence branch: "+branch)
     candidates=sorted((ROOT/"build").glob("ymir-evidence-*-return.zip"),
                       key=lambda p:p.stat().st_mtime,reverse=True)
     if not candidates:
@@ -410,8 +419,10 @@ def republish_latest():
                     dst.parent.mkdir(parents=True,exist_ok=True)
                     with z.open(item) as src,dst.open("wb") as out:shutil.copyfileobj(src,out)
             summary=json.loads((work/"summary.json").read_text())
+            if expected_sdk and summary.get("sdk_commit")!=expected_sdk:
+                raise ValueError("latest ZIP SDK differs from pinned SDK; refusing to upload unrelated evidence")
             print("[xtreme] Republishing",archive.name,"game",summary["game_commit"],"status",summary["status"],flush=True)
-            publish(archive,work,summary)
+            publish(archive,work,summary,branch)
         return 0
     except (OSError,ValueError,RuntimeError,KeyError,zipfile.BadZipFile,subprocess.CalledProcessError) as exc:
         print(f"[xtreme] Retry failed: {type(exc).__name__}: {exc}",file=sys.stderr)
@@ -425,10 +436,13 @@ def main():
     p.add_argument("--case",action="append",choices=[c[0] for c in active_cases])
     p.add_argument("--timeout",type=int,default=600)
     p.add_argument("--require-sonic",action="store_true",help="fail if private Sonic R C/H/SKA are missing")
-    p.add_argument("--no-publish",action="store_true",help="keep ZIP local instead of publishing to the public GitHub evidence branch")
-    p.add_argument("--publish-latest",action="store_true",help="retry GitHub push of the newest local return ZIP without rebuilding")
+    p.add_argument("--no-publish",action="store_true",help="explicitly retain evidence locally (default: publish to GitHub)")
+    p.add_argument("--publish-latest",action="store_true",help="upload newest local sanitized ZIP without rebuilding Ymir")
+    p.add_argument("--evidence-branch",choices=EVIDENCE_BRANCHES,default="ymir-evidence",
+                   help="destination evidence branch (SDK control has its own branch)")
+    p.add_argument("--expected-sdk",help="with --publish-latest, reject archives built using a different SDK")
     a=p.parse_args()
-    if a.publish_latest:return republish_latest()
+    if a.publish_latest:return republish_latest(a.evidence_branch,a.expected_sdk)
     sdk=Path(os.environ.get("LIBSATURN_SOURCE",str(DEV/"lib-saturn"))).expanduser()
     if not (sdk/"CMakeLists.txt").exists(): sdk=DEV/"libsaturn"
     probe=a.probe or Path(os.environ.get("YMIR_PROBE",str(sdk/"harness/build-macos/probe")))
@@ -644,8 +658,8 @@ def main():
         print(f"\n[xtreme] {summary['status']}: {archive}",flush=True)
         if not a.no_publish:
             try:
-                publish(archive,work,summary)
-            except (OSError,RuntimeError,subprocess.CalledProcessError) as exc:
+                publish(archive,work,summary,a.evidence_branch)
+            except (OSError,ValueError,RuntimeError,subprocess.CalledProcessError) as exc:
                 print(f"[xtreme] GitHub publish failed: {type(exc).__name__}. ZIP retained: {archive}",file=sys.stderr,flush=True)
                 publish_failed=True
     if publish_failed:return 2
