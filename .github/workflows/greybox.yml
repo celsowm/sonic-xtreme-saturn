@@ -21,6 +21,8 @@ jobs:
       - run: python -m unittest discover -s tests
       - run: cc -std=c11 -Wall -Wextra -Werror -I sdk-source/include -I src src/controller.c tests/test_controller.c -o /tmp/controller-test && /tmp/controller-test
       - run: cc -std=c11 -Wall -Wextra -Werror -I src tests/test_debug_clock.c -o /tmp/debug-clock-test && /tmp/debug-clock-test
+      - run: cc -std=c11 -Wall -Wextra -Werror -I src tests/test_stage_visibility.c -o /tmp/stage-visibility-test && /tmp/stage-visibility-test
+      - run: cc -std=c11 -Wall -Wextra -Werror -I src tests/test_stage_lod.c -o /tmp/stage-lod-test && /tmp/stage-lod-test
       - run: sudo apt-get update && sudo apt-get install -y blender
       - run: blender --version
       - run: |

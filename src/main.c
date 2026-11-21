@@ -7,6 +7,8 @@
 #include "controller.h"
 #ifdef XTREME_STAGE_ADVENTURE
 #include "stage_textures.h"
+#include "stage_visibility.h"
+#include "stage_lod.h"
 #endif
 #ifdef XTREME_HAS_SONIC
 #include "sonic_actor.h"
@@ -322,11 +324,21 @@ static sat_result_t draw_gold_ring(const sat_vec3_t* pos) {
 #endif
 
 #ifdef XTREME_STAGE_ADVENTURE
-typedef struct {
-    sat_fx16_t lo_x,hi_x,lo_z,hi_z;
-} stage_face_bounds_t;
-static stage_face_bounds_t stage_bounds[STAGE_FACE_COUNT];
+static xtreme_stage_aabb_t stage_bounds[STAGE_FACE_COUNT];
 static sat_quad3_t stage_cached_quads[STAGE_FACE_COUNT];
+static uint8_t stage_lod_near[STAGE_LOD_GROUP_COUNT ? STAGE_LOD_GROUP_COUNT : 1u];
+
+/* One distance decision per palm, not per polygon: bark and canopy always
+ * switch together. Square-distance is unnecessary on SH-2; a conservative
+ * XZ max-axis threshold also avoids expensive per-face 64-bit multiplies.
+ * Gameplay collision does not use any render LOD. */
+static void stage_select_prop_lods(void) {
+    for(unsigned i=0;i<STAGE_LOD_GROUP_COUNT;++i)
+        stage_lod_near[i]=xtreme_stage_lod_choose_near(
+            stage_lod_centers[i].x,stage_lod_centers[i].z,
+            player.feet.x,player.feet.z,stage_lod_near[i]);
+}
+
 /* Baked scenery is immutable. Build its indexed quads and AABBs once during
  * startup instead of gathering four Q16.16 vertices or recalculating
  * bounding boxes every rendered frame. No change to collision or painter. */
@@ -336,7 +348,7 @@ static void stage_prepare_bounds(void) {
         sat_quad3_t* q=&stage_cached_quads[i];
         for(unsigned j=0;j<4;++j)q->v[j]=stage_vertices[f->v[j]];
         const sat_vec3_t* p=&q->v[0];
-        stage_face_bounds_t* out=&stage_bounds[i];
+        xtreme_stage_aabb_t* out=&stage_bounds[i];
         out->lo_x=out->hi_x=p->x;
         out->lo_z=out->hi_z=p->z;
         for(unsigned j=1;j<4;++j){
@@ -350,21 +362,14 @@ static void stage_prepare_bounds(void) {
 }
 #endif
 
-/* Coarse fixed-point offscreen rejection for Adventure only. Render
- * scenery within 55m laterally, 60m behind and 85m ahead; panoramic camera
- * mode retains all geometry. Physics always sees the full collision world.
- * Use the face bounding box, not its centroid, to avoid culling long ground
- * quads at the sector border. */
+/* Adventurerenderer: cheap camera-aware rejection of never-visible polygons.
+ * A broad camera half-space gate saves submit/projection work while retaining
+ * the local continuous terrain. Viewer mode remains unrestricted. The actual
+ * display FOV still belongs to LibSaturn; renderer coverage is Ymir-gated. */
 static int stage_quad_relevant(unsigned i) {
 #ifdef XTREME_STAGE_ADVENTURE
-    if(!viewer){
-        const stage_face_bounds_t* b=&stage_bounds[i];
-        if((int64_t)b->hi_x<(int64_t)player.feet.x-FX(55) ||
-           (int64_t)b->lo_x>(int64_t)player.feet.x+FX(55) ||
-           (int64_t)b->hi_z<(int64_t)player.feet.z-FX(85) ||
-           (int64_t)b->lo_z>(int64_t)player.feet.z+FX(60))
-            return 0;
-    }
+    if(!viewer && !xtreme_stage_aabb_visible(&stage_bounds[i],camera.eye.x,camera.eye.z))
+        return 0;
 #else
     (void)i;
 #endif
@@ -372,9 +377,19 @@ static int stage_quad_relevant(unsigned i) {
 }
 static sat_result_t draw_stage(void) {
     sat_result_t rc;
+#ifdef XTREME_STAGE_ADVENTURE
+    stage_select_prop_lods();
+#endif
     for (unsigned i=0; i<STAGE_FACE_COUNT; ++i) {
         const stage_face_t* f = &stage_faces[i];
         if(!stage_quad_relevant(i)) continue;
+#ifdef XTREME_STAGE_ADVENTURE
+        /* Near/far model *groups* are mutually exclusive. One switch
+         * controls the whole Kenney tree, preserving wood and foliage.
+         * Keep panoramic/debug rendering on the same budgeted LOD path. */
+        if(f->lod==1u && !stage_lod_near[f->lod_group]) continue;
+        if(f->lod==2u && stage_lod_near[f->lod_group]) continue;
+#endif
 #ifdef XTREME_STAGE_ADVENTURE
         /* No flat RGB polygon in Adventure: every baked stage face
          * receives its real resident indexed8 landscape material. */
