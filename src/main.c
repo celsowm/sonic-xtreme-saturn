@@ -23,7 +23,14 @@
 #else
 #define CHARACTER_FACES 2u
 #endif
-#define CAPACITY (STAGE_FACE_COUNT + 2u * STAGE_ENTITY_COUNT + CHARACTER_FACES)
+#ifdef XTREME_STAGE_ADVENTURE
+/* Octagonal, untextured authored ring silhouettes replace editor diamonds.
+ * Eight world quads per ring; non-ring markers remain debug-only. */
+#define MARKER_FACE_RESERVE (8u * STAGE_ENTITY_COUNT)
+#else
+#define MARKER_FACE_RESERVE (2u * STAGE_ENTITY_COUNT)
+#endif
+#define CAPACITY (STAGE_FACE_COUNT + MARKER_FACE_RESERVE + CHARACTER_FACES)
 #define FX(n) ((sat_fx16_t)((n) * 65536))
 _Static_assert(CAPACITY <= 1024u, "scene capacity exceeded");
 
@@ -290,6 +297,27 @@ static sat_result_t submit(const sat_quad3_t* q, uint16_t rgb) {
     };
     return sat_scene_submit_quad(&scene,q,&material,0u);
 }
+#ifdef XTREME_STAGE_ADVENTURE
+static sat_result_t draw_gold_ring(const sat_vec3_t* pos) {
+    /* World-space eight-sided annulus, approximately 1.5 m high.
+     * Not yet a collectible: it visualizes placement, not gameplay state. */
+    static const int32_t outer_x[8]={0,34756,49152,34756,0,-34756,-49152,-34756};
+    static const int32_t outer_y[8]={49152,34756,0,-34756,-49152,-34756,0,34756};
+    static const int32_t inner_x[8]={0,18536,26214,18536,0,-18536,-26214,-18536};
+    static const int32_t inner_y[8]={26214,18536,0,-18536,-26214,-18536,0,18536};
+    for(unsigned i=0;i<8;++i) {
+        const unsigned next=(i+1u)&7u;
+        const sat_quad3_t q={{{pos->x+outer_x[i],pos->y+outer_y[i],pos->z},
+                             {pos->x+outer_x[next],pos->y+outer_y[next],pos->z},
+                             {pos->x+inner_x[next],pos->y+inner_y[next],pos->z},
+                             {pos->x+inner_x[i],pos->y+inner_y[i],pos->z}}};
+        const sat_result_t rc=submit(&q,(i&1u)?SAT_RGB555(29,22,1):SAT_RGB555(31,29,7));
+        if(rc!=SAT_OK)return rc;
+    }
+    return SAT_OK;
+}
+#endif
+
 /* Coarse fixed-point offscreen rejection for Adventure only. Render
  * scenery within 55m laterally, 60m behind and 85m ahead; panoramic camera
  * mode retains all geometry. Physics always sees the full collision world.
@@ -336,6 +364,14 @@ static sat_result_t draw_stage(void) {
                         (int64_t)p.x>(int64_t)player.feet.x+FX(55) ||
                         (int64_t)p.z<(int64_t)player.feet.z-FX(85) ||
                         (int64_t)p.z>(int64_t)player.feet.z+FX(60))) continue;
+        if(e->kind==1u) {
+            rc=draw_gold_ring(&p);
+            if(rc!=SAT_OK)return rc;
+            continue;
+        }
+        /* Other scripted entities have no gameplay mesh yet. Never render
+         * the magenta/cyan editor diamonds in the normal Adventure view. */
+        if(page==DBG_OFF)continue;
 #endif
         const sat_fx16_t r = e->kind == 1 ? FX(1)/2 : FX(1);
         /* Two crossed diamonds, diagnostic markers only. */
