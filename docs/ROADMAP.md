@@ -148,3 +148,18 @@ The Mac ran the newly introduced isolated SDK control script at game commit `788
 | offroad_right | 20 | **20.3** | 50ms | 25ms |
 
 **Diagnosis:** Dependency choice has a material effect on frame scheduling (particularly idle). However, curve/off-road remain over budget under the *earlier* SDK; **both code/dependency revisions and stage rendering cost deserve investigation**. Recent render path performs camera-relative static face filtering, then submits textured stage quads individually, actor mesh and ring quads into a scene-wide painter. A major next step is separating scene submission/projection and painter cost by source class and by frame, then reducing *actually unseen* moving-scene work without damaging near-ground coverage. For current performance, ordinary gameplay requires ≤38ms P95 and ≥29 scene submissions/s; these are not the same as an independent measured display cadence. Do not merge draft PR #2 or silently relax acceptance thresholds.
+
+## Jade Gully source-level renderer instrumentation (XRH1 v1) — pending Ymir
+
+Draft PR #2 now emits an independent **64-completed-frame XRH1 profiler ring** in WRAM-H; the existing XTDB v3 and XFP1 telemetry layouts are left intact. The ring is built using the same `sat_time_ms()` clock as the existing frame profiler; it does not claim GPU timing, VDP1 displayed FPS or measurements outside emulation. Each frame records:
+
+- `scene_begin_ms`: scene initialization before stage submissions;
+- `stage_ms`: static stage quads plus entity/ring submissions;
+- `actor_ms`: Sonic actor transformation/submission;
+- `flush_ms`: trusted LibSaturn painter/VDP1 lowering through scene flush;
+- `stage_faces_tested`, `stage_visibility_skipped`, `stage_lod_skipped`: authored render stage filtering;
+- `stage_submitted`, `marker_submitted`, `actor_submitted`, `total_submitted`, `total_flushed`, `painter_culled`, `painter_clipped`: attribution and renderer work.
+
+The Ymir harness decodes XRH1 through the linker map (falling back to unique magic-scan), verifies attribution per sample, checks that the terminal profiler frame matches the XTDB snapshot, saves `render-profile.json` inside the evidence ZIP, and reports per-class P95 timing. `qualify-jade-sdk-control-mac.sh` prints the counts and timing breakdown while retaining the old LibSaturn `08e39e9` in an isolated worktree; the ZIP is local and is not published over the previous evidence.
+
+The game remains on the draft PR branch. This change **does not optimize the scene or claim a performance recovery**; the next pinned-SDK qualification must identify whether stage submissions, Sonic actor submission or painter flush owns the expensive frames before changing geometry. The instrumentation itself has overhead and should be benchmarked against the previous captured runs.
