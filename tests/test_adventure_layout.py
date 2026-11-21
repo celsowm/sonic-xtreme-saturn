@@ -12,12 +12,20 @@ class AdventureLayoutTests(unittest.TestCase):
         result=validate(self.data)
         self.assertEqual(result["routes"],4)
         self.assertEqual(result["path_segments"],22)
-        self.assertEqual(result["props"],10)
+        self.assertEqual(result["props"],18)
         self.assertEqual(result["walkable_clearings"],2)
-        self.assertEqual(result["face_budget_total"],250)
-        self.assertEqual(result["landmass_triangles"],80)
+        self.assertEqual(result["face_budget_total"],442)
+        self.assertEqual(result["landmass_triangles"],120)
         self.assertEqual(result["branch_terrace_triangles"],24)
-        self.assertLessEqual(result["face_budget_total"],256)
+        self.assertEqual(result["prop_triangle_budget"],232)
+        self.assertLessEqual(result["face_budget_total"],448)
+
+    def test_overlook_has_real_curated_landmarks(self):
+        props={p["id"]:p for p in self.data["set_dressing"]}
+        for name in ("palm_overlook_left","palm_overlook_right","bush_overlook"):
+            self.assertIn(name,props)
+            self.assertGreaterEqual(props[name]["triangles_max"],7)
+        self.assertGreaterEqual(sum(p["asset"].startswith("nature-kit/tree") for p in props.values()),7)
 
     def test_branches_cannot_be_disconnected(self):
         changed=copy.deepcopy(self.data)
