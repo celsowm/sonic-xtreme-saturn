@@ -211,3 +211,52 @@ while prior commits remain in branch history. No need to attach a Mac ZIP.
 Do not claim a speedup, continuity, transparency correctness or independent
 display FPS from the host tests: require full Ymir telemetry and human
 frame-by-frame visual review before accepting this candidate or PR #2.
+
+## Jade Gully frame scheduling and VDP1 synchronisation instrumentation — XSW1 (2026-11-21)
+
+Mac/Ymir game `587f7435`, pinned LibSaturn `08e39e9`: 30 / 28 / 25.5 scene submissions/s in idle, curve, offroad, respectively. The last 64 XFP1 observations show **seven** 48–50ms curve frames (48–50, 56, 64–66), and **nine consecutive** 50ms offroad frames (45–53); no draw timeouts, no late swaps. XRH1 measured ~17–18ms P95 in static stage + markers, ~6ms actor, ~6–8ms painter flush, but did **not** separate app-level VBlank waiting.
+
+**Source inspection of the identical pinned SDK proved the wait location:**
+`sat_app_frame_begin()` in `src/core/app/api.cpp` first invokes
+`sat_wait_vblank()`; `sat_wait_vblank()` in `src/graphics/video.cpp`
+runs `scu::wait_vblank()` **and** `vdp1::wait_swap_requested()`.
+`sat_app_frame_end()` calls `sat_end_frame()`, which submits the VDP1
+display list. Thus the startup hypothesis "frame end waits for VBlank" was
+incorrect. The full begin call must be measured, and the API does **not**
+offer an independent breakdown of VBlank vs swap-request wait. No SDK
+source or frame lifecycle was modified.
+
+**New XSW1** standalone WRAM-H record (64 completed frames, version 1,
+16×32-bit words per frame, zero inter-frame gap on the first sample) measures
+`frame_interval_ms` (exactly XFP1 interval), `begin_ms` (time spent in
+whole `sat_app_frame_begin` call), `end_ms` (whole
+`sat_app_frame_end` call), `prior_end_gap_ms` (previous call's return
+to this call's entry), and `active_work_ms` (begin return to end entry).
+It also records hardware field count before/after **each** call and
+the respective cumulative delta of VDP1 draw waits, late swaps and
+draw timeouts. Instrumentation uses `sat_time_ms()` and
+`sat_field_count()` (not GPU timer), and costs extra SDK calls itself;
+compare with the uninstrumented baseline before accepting cadence changes.
+
+The Ymir reader validates exact sequential frame IDs and field ordering,
+correlates the 64-frame XSW1 ring with **exact** XFP1 frame intervals,
+writes `frame-sync.json` into the automatically published sanitized ZIP,
+and emits per-case `frame_sync` including `slow_frames` (interval ≥45ms)
+in `summary.json`. Each slow record contains its matching begin, end,
+CPU-work, field counts and wait deltas. Incorrect, missing or truncated
+XSW1 data triggers the `frame_sync_available` qualification check.
+Existing XTDB v3, XFP1 and XRH1 formats remain unchanged.
+
+**Run on Mac (automatically publishes ZIP, summary and screenshots):**
+```bash
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/qualify-jade-sdk-control-mac.sh
+```
+Inspect `ymir-sdk-control-evidence/latest/summary.json`,
+`latest/curve_route/frame-sync.json` and
+`latest/offroad_right/frame-sync.json`. A large
+`begin_ms` with little `end_ms` points toward time spent in the
+begin helper (VBlank/swap + setup); a large `active_work_ms` indicates
+CPU/HUD/painter workload. Field counts and draw-wait deltas distinguish
+the situation further. Even after this, screen presentation FPS is not
+independently established. This feature is **measurement only**; do not
+claim a 30/s fix or merge draft PR #2 yet.
