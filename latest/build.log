@@ -1,9 +1,9 @@
 COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 [xtreme] SDK source: <GAME>/build/sdk-control-08e39e9dfb235a2ad88c17c690178c5ab0927e6f
 08e39e9dfb235a2ad88c17c690178c5ab0927e6f
-...........................................
+.............................................
 ----------------------------------------------------------------------
-Ran 43 tests in 0.253s
+Ran 45 tests in 0.249s
 
 OK
 stage visibility gate ok
@@ -313,13 +313,13 @@ ninja: no work to do.
 -- Found assembler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc
 -- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
 -- Repository Sonic R skeletal actor: <GAME>/assets/sonic-r/lod-160
--- Configuring done (0.4s)
+-- Configuring done (0.6s)
 -- Generating done (0.0s)
 -- Build files have been written to: <GAME>/build/game
 [0/2] Re-checking globbed directories...
 [1/10] Generating generated/greybox.h, generated/collision.h
-[2/10] Building C object CMakeFiles/xtreme.dir/src/stage_textures.c.obj
-[3/10] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
+[2/10] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
+[3/10] Building C object CMakeFiles/xtreme.dir/src/stage_textures.c.obj
 [4/10] Building C object CMakeFiles/xtreme.dir/src/ring_sprites.c.obj
 [5/10] Building C object CMakeFiles/xtreme.dir/src/sonic_actor.c.obj
 [6/10] Building C object CMakeFiles/xtreme.dir/assets/sonic-r/lod-160/sonic.c.obj
@@ -327,12 +327,12 @@ ninja: no work to do.
 [8/10] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
 [9/10] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 311148 initialized bytes match ELF
+-- [boot-memory] _start=0x06004000, 312420 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 311148, 'flags': 0, 'record_offset': 37092} IP observations=[]
--- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 351 MODE1/2352 sectors
--- [check] disc image OK: 351 MODE1/2352 sectors
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 312420, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 352 MODE1/2352 sectors
+-- [check] disc image OK: 352 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
 [adventure] Baked continuous landscape verified: {'render_triangles': 461, 'collision_triangles': 168, 'collision_vertices': 188, 'markers': 13, 'palm_lod_groups': 7}
 [xtreme] Disc: <GAME>/build/game/disc/xtreme.cue

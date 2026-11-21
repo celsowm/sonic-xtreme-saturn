@@ -9,14 +9,14 @@
   "textures": 148,
   "joints": 11,
   "clip": 1,
-  "ticks": 138,
-  "draws": 61,
-  "animation_ms": 0,
-  "skin_ms": 1,
-  "draw_ms": 4,
-  "pos_x": 240277,
-  "pos_y": 253897,
-  "pos_z": -2201004,
+  "ticks": 137,
+  "draws": 66,
+  "animation_ms": 1,
+  "skin_ms": 0,
+  "draw_ms": 5,
+  "pos_x": 222597,
+  "pos_y": 266088,
+  "pos_z": -2161423,
   "registry_capacity": 164,
   "init_stage": 7,
   "vram_free": 264232,
@@ -24,11 +24,11 @@
   "clip_changes": 4,
   "takeoffs": 0,
   "landings": 1,
-  "ground_ticks": 125,
+  "ground_ticks": 124,
   "air_ticks": 13,
   "position_m": [
-    3.6663360595703125,
-    3.8741607666015625,
-    -33.58465576171875
+    3.3965606689453125,
+    4.0601806640625,
+    -32.98069763183594
   ]
 }
