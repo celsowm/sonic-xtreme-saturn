@@ -31,30 +31,9 @@ sys.path.insert(0,str(toolkit))
 from libsaturn_toolkit.exporter import export_bundle
 
 
-def import_cc0_prop(item,materials):
-    """Read a curated GLB with its node transforms, then decimate it.
-
-    The original model, textures and provenance remain unchanged in assets/.
-    Render mesh is stored in world coordinates; it has NO collision marker.
-    """
-    path=ROOT/"assets/kenney"/item["asset"]
-    # Read only the already-vetted, uncompressed GLB geometry. The generic
-    # Blender glTF importer requires numpy on some Linux builds; the pure
-    # standard-library parser makes CI and Mac authoring reproducible.
-    verts,faces=read_glb_triangles(path)
-    mins=tuple(min(p[i] for p in verts) for i in range(3))
-    maxs=tuple(max(p[i] for p in verts) for i in range(3))
-    extent=maxs[2]-mins[2]
-    if extent<1e-6:
-        raise RuntimeError(f"{path}: zero-height mesh")
-    cx=(maxs[0]+mins[0])/2
-    cy=(maxs[1]+mins[1])/2
-    scale=item["height_m"]/extent
-    x,y,z=item["position"]
-    transformed=[(x+(p[0]-cx)*scale,y+(p[1]-cy)*scale,z+(p[2]-mins[2])*scale) for p in verts]
-    name=f'{item["id"]}_{item["palette"]}'
-    obj=base.mesh_prop(name,transformed,faces,materials[item["palette"]])
-    budget=item["triangles_max"]
+def _decimate_prop_piece(name,transformed,faces,mat,budget,path):
+    """Reduce one original GLB material to a bounded exportable OBJ mesh."""
+    obj=base.mesh_prop(name,transformed,faces,mat)
     if len(obj.data.polygons)>budget:
         bpy.ops.object.select_all(action="DESELECT")
         obj.select_set(True)
@@ -67,21 +46,15 @@ def import_cc0_prop(item,materials):
             dec.ratio=max(0.005,min(0.98,(budget/max(1,count))*0.92))
             bpy.ops.object.modifier_apply(modifier=dec.name)
         if len(obj.data.polygons)>budget:
-            raise RuntimeError(f"{path}: cannot meet face budget {budget} (got {len(obj.data.polygons)})")
+            raise RuntimeError(f"{path}: {name} cannot meet {budget} triangles")
     if len(obj.data.polygons)==0:
-        raise RuntimeError(f"{path}: face reduction removed model")
-    # Blender's decimator can leave many disconnected/orphaned source vertices
-    # even after reducing 500 triangles to 9. The old narrow Saturn OBJ baker
-    # counts all "v" records, including those referenced by no face.
-    # Compact deterministically to ONLY referenced indices, preserving faces.
+        raise RuntimeError(f"{path}: {name} lost all triangles")
+    # The OBJ baker counts every vertex record, even unreferenced source
+    # vertices left by Blender's decimator. Compact to live polygon indices.
     old_mesh=obj.data
     used=sorted({int(idx) for poly in old_mesh.polygons for idx in poly.vertices})
     remap={old:new for new,old in enumerate(used)}
     compact_vertices=[tuple(old_mesh.vertices[idx].co) for idx in used]
-    # Reject face triangles that become collinear AFTER Q16.16 quantization,
-    # exactly as the native Saturn greybox baker does. Simplification can
-    # produce microscopic or flat polygons even when the source GLB is valid.
-    # This only affects imported visual props: never remove walkable faces.
     from tools.bake_greybox import convert_xyz
     fixed_vertices=[convert_xyz(p) for p in compact_vertices]
     compact_faces=[]
@@ -100,32 +73,58 @@ def import_cc0_prop(item,materials):
             continue
         compact_faces.append(idx)
     if not compact_faces:
-        raise RuntimeError(f"{path}: no non-degenerate faces after quantization")
+        raise RuntimeError(f"{path}: {name} has no nondegenerate Q16 faces")
     compact=bpy.data.meshes.new(name+"_compact")
     compact.from_pydata(compact_vertices,[],compact_faces)
     compact.update()
-    compact.materials.append(materials[item["palette"]])
+    compact.materials.append(mat)
     obj.data=compact
     if old_mesh.users==0:bpy.data.meshes.remove(old_mesh)
-    # glTF material assignments do not survive narrow OBJ baking. Partition
-    # the original Kenney palm triangles by elevation into two existing CC0
-    # indexed8 material groups, without increasing the triangle count.
-    if item["asset"].startswith("nature-kit/tree-"):
-        wood,leaves=split_palm_faces(compact_vertices,compact_faces,z,item["height_m"])
-        if wood and leaves:
-            canopy_mesh=bpy.data.meshes.new(name+"_foliage")
-            canopy_mesh.from_pydata(compact_vertices,[],leaves)
-            canopy_mesh.update()
-            canopy_mesh.materials.append(materials["canopy"])
-            obj.data=canopy_mesh
-            base.mesh_prop(item["id"]+"_wood",compact_vertices,wood,materials["wood"])
-            if compact.users==0:bpy.data.meshes.remove(compact)
-            print(f'[adventure] {item["id"]} two-tone: {len(wood)} bark, {len(leaves)} foliage triangles')
-        else:
-            print(f'[adventure] {item["id"]} palette split unavailable after LOD; single material')
     obj["saturn_mesh"]="render"
-    print(f'[adventure] {item["id"]}: {len(faces)} -> {len(obj.data.polygons)} triangles; {len(used)} live vertices; removed {removed} zero-area faces; budget {budget}')
+    print(f"[adventure] {name}: {len(faces)} -> {len(compact_faces)} triangles; {len(used)} live vertices; removed {removed}; cap {budget}")
     return obj
+
+
+def import_cc0_prop(item,materials):
+    """Import actual Kenney geometry and preserve *source* material boundaries.
+
+    Trees have separate woodBark / leafsGreen GLB primitives. Each primitive
+    receives its own decimation budget, otherwise a single 17-triangle mesh
+    can erase the trunk and leave a green floating crown. No new polygons
+    or guessed height classification are introduced after decimation.
+    """
+    path=ROOT/"assets/kenney"/item["asset"]
+    verts,faces,face_materials,material_names=read_glb_triangles(path,with_materials=True)
+    mins=tuple(min(p[i] for p in verts) for i in range(3))
+    maxs=tuple(max(p[i] for p in verts) for i in range(3))
+    extent=maxs[2]-mins[2]
+    if extent<1e-6:
+        raise RuntimeError(f"{path}: zero-height mesh")
+    cx=(maxs[0]+mins[0])/2
+    cy=(maxs[1]+mins[1])/2
+    scale=item["height_m"]/extent
+    x,y,z=item["position"]
+    transformed=[(x+(p[0]-cx)*scale,y+(p[1]-cy)*scale,z+(p[2]-mins[2])*scale) for p in verts]
+    budget=item["triangles_max"]
+    if item["asset"].startswith("nature-kit/tree-"):
+        wood,leaves=split_palm_faces(faces,face_materials,material_names)
+        # A minimum 4-triangle trunk survives LOD; leaves own the rest.
+        trunk_budget=max(4,budget//4)
+        groups=(("wood",wood,trunk_budget),("canopy",leaves,budget-trunk_budget))
+    else:
+        groups=((item["palette"],faces,budget),)
+    built=[]
+    total=0
+    for label,group_faces,limit in groups:
+        obj=_decimate_prop_piece(f'{item["id"]}_{label}',transformed,group_faces,
+                                 materials[label],limit,path)
+        built.append(obj)
+        total+=len(obj.data.polygons)
+    if total>budget:
+        raise RuntimeError(f"{path}: combined LOD exceeds authored {budget}-triangle cap")
+    if len(groups)==2:
+        print(f'[adventure] {item["id"]}: original Kenney wood/foliage groups retained ({total} total triangles)')
+    return built[0]
 
 
 def valley_landmass(main,materials):
