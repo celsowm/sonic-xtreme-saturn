@@ -52,6 +52,8 @@ cc -std=c11 -Wall -Wextra -Werror -I src tests/test_stage_lod.c -o build/stage-l
 build/stage-lod-test
 cc -std=c11 -Wall -Wextra -Werror -I src tests/test_render_profile.c -o build/render-profile-test
 build/render-profile-test
+cc -std=c11 -Wall -Wextra -Werror -I src tests/test_ring_frame_clock.c -o build/ring-frame-clock-test
+build/ring-frame-clock-test
 STAGE_LAYOUT="${XTREME_STAGE_LAYOUT:-classic}"
 case "$STAGE_LAYOUT" in
     classic)
