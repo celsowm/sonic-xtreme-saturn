@@ -323,18 +323,21 @@ typedef struct {
     sat_fx16_t lo_x,hi_x,lo_z,hi_z;
 } stage_face_bounds_t;
 static stage_face_bounds_t stage_bounds[STAGE_FACE_COUNT];
-/* Baked scenery is immutable. Compute its AABBs once during startup instead
- * of scanning 4 vertices for every candidate, every displayed frame.
- * Physics always uses the entire unchanged collision mesh. */
+static sat_quad3_t stage_cached_quads[STAGE_FACE_COUNT];
+/* Baked scenery is immutable. Build its indexed quads and AABBs once during
+ * startup instead of gathering four Q16.16 vertices or recalculating
+ * bounding boxes every rendered frame. No change to collision or painter. */
 static void stage_prepare_bounds(void) {
     for(unsigned i=0;i<STAGE_FACE_COUNT;++i){
         const stage_face_t* f=&stage_faces[i];
-        const sat_vec3_t* p=&stage_vertices[f->v[0]];
+        sat_quad3_t* q=&stage_cached_quads[i];
+        for(unsigned j=0;j<4;++j)q->v[j]=stage_vertices[f->v[j]];
+        const sat_vec3_t* p=&q->v[0];
         stage_face_bounds_t* out=&stage_bounds[i];
         out->lo_x=out->hi_x=p->x;
         out->lo_z=out->hi_z=p->z;
         for(unsigned j=1;j<4;++j){
-            p=&stage_vertices[f->v[j]];
+            p=&q->v[j];
             if(p->x<out->lo_x)out->lo_x=p->x;
             if(p->x>out->hi_x)out->hi_x=p->x;
             if(p->z<out->lo_z)out->lo_z=p->z;
@@ -369,9 +372,13 @@ static sat_result_t draw_stage(void) {
     for (unsigned i=0; i<STAGE_FACE_COUNT; ++i) {
         const stage_face_t* f = &stage_faces[i];
         if(!stage_quad_relevant(i)) continue;
+#ifdef XTREME_STAGE_ADVENTURE
+        rc=submit(&stage_cached_quads[i],colors[f->color]);
+#else
         sat_quad3_t quad;
         for (unsigned k=0;k<4;++k) quad.v[k] = stage_vertices[f->v[k]];
         rc = submit(&quad, colors[f->color]);
+#endif
         if (rc != SAT_OK) return rc;
     }
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i) {
