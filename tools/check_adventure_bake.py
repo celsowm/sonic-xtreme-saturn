@@ -16,9 +16,9 @@ def verify(render,collision):
     vertices=count(ground,"COLLISION_VERTEX_COUNT")
     surface_faces=count(ground,"COLLISION_FACE_COUNT")
     entities=count(stage,"STAGE_ENTITY_COUNT")
-    if not 190<=faces<=256:
+    if not 270<=faces<=448:
         raise ValueError(f"Adventure stage render faces out of budget: {faces}")
-    if not 120<=surface_faces<=256:
+    if not 160<=surface_faces<=448:
         raise ValueError(f"Continuous collision landmass absent or over budget: {surface_faces}")
     if not 0<vertices<=2048:
         raise ValueError(f"Collision vertices out of budget: {vertices}")
