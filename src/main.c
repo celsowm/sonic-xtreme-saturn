@@ -328,6 +328,10 @@ static sat_result_t draw_gold_ring(const sat_vec3_t* pos) {
 #ifdef XTREME_STAGE_ADVENTURE
 static xtreme_stage_aabb_t stage_bounds[STAGE_FACE_COUNT];
 static sat_quad3_t stage_cached_quads[STAGE_FACE_COUNT];
+#if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
+/* Recompute only 16 plane coefficients once per actual displayed scene. */
+static xtreme_stage_frustum_t stage_frustum;
+#endif
 static uint8_t stage_lod_near[STAGE_LOD_GROUP_COUNT ? STAGE_LOD_GROUP_COUNT : 1u];
 /* Separate compact instrumentation avoids changing XTDB v3 or XFP1. */
 volatile xtreme_render_history_t xtreme_render_history={
@@ -390,6 +394,13 @@ static int stage_quad_relevant(unsigned i) {
                scene.faces.eye.x,scene.faces.eye.y,scene.faces.eye.z,
                scene.faces.forward.x,scene.faces.forward.y,scene.faces.forward.z))
             return 0;
+#if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
+        /* Only reject faces provably outside one clip-space side of the
+         * current camera, with a safety margin. AABBs spanning the screen
+         * stay intact; never shorten visible floor tiles to hit 30/s. */
+        if(!xtreme_stage_aabb_frustum_relevant(bounds,&stage_frustum))
+            return 0;
+#endif
     }
 #else
     (void)i;
@@ -401,6 +412,9 @@ static sat_result_t draw_stage(void) {
 #ifdef XTREME_STAGE_ADVENTURE
     render_pending=(xtreme_render_sample_t){0};
     render_pending.stage_faces_tested=STAGE_FACE_COUNT;
+#if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
+    xtreme_stage_frustum_prepare(&stage_frustum,scene.faces.view_proj.m);
+#endif
     stage_select_prop_lods();
 #endif
     for (unsigned i=0; i<STAGE_FACE_COUNT; ++i) {
