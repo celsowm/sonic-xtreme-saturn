@@ -129,6 +129,28 @@ for name,case in summary.get("cases",{}).items():
     else:
         print(f"[sdk-control] {name} XRH1: UNAVAILABLE "
               f"({case.get('render_profile_decode_error','no record')})")
+    sw=case.get("frame_sync")
+    if sw:
+        print(f"[sdk-control] {name} XSW1: begin_p95={sw['begin_ms_p95']}ms "
+              f"end_p95={sw['end_ms_p95']}ms work_p95={sw['active_work_ms_p95']}ms "
+              f"gap_p95={sw['prior_end_gap_ms_p95']}ms "
+              f"begin_fields_p95={sw['begin_fields_p95']} "
+              f"end_fields_p95={sw['end_fields_p95']} "
+              f"begin_draw_waits={sw['begin_draw_waits_total']} "
+              f"end_draw_waits={sw['end_draw_waits_total']}")
+        for slow in sw.get("slow_frames",[]):
+            print(f"[sdk-control] {name} slow frame {slow['frame']}: "
+                  f"interval={slow['interval_ms']}ms "
+                  f"begin={slow['begin_call_ms']}ms "
+                  f"end={slow['end_call_ms']}ms "
+                  f"cpu_work={slow['active_work_ms']}ms "
+                  f"begin_fields={slow['begin_fields']} "
+                  f"end_fields={slow['end_fields']} "
+                  f"begin_draw_waits={slow['begin_draw_waits']} "
+                  f"end_draw_waits={slow['end_draw_waits']}")
+    else:
+        print(f"[sdk-control] {name} XSW1: UNAVAILABLE "
+              f"({case.get('frame_sync_decode_error','no record')})")
 if summary.get("sdk_commit")!=pin or summary.get("game_commit")!=game:
     raise SystemExit("[sdk-control] Revision mismatch; A/B is invalid")
 print("[sdk-control] GitHub evidence: "
