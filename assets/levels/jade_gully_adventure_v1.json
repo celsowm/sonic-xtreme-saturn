@@ -639,16 +639,17 @@
     }
   ],
   "budgets": {
-    "render_faces_max": 448,
+    "render_faces_max": 512,
     "vertices_max": 2048,
     "entities_max": 64,
     "max_imported_prop_triangles": 240,
     "texture_vram_reserved_for_actor_bytes": 148000,
     "full_stage_not_yet_qualified": true,
     "landmass_triangles": 120,
-    "branch_terrace_triangles": 24
+    "branch_terrace_triangles": 24,
+    "far_palm_lod_faces_per_instance": 5
   },
-  "notes": "Art v3 candidate: 120-triangle four-material valley, denser near-ground texture repeats, 18 curated Kenney CC0 props with readable silhouettes. Collision follows the terrain strips. Ymir/real Saturn validation pending; 30 FPS target, not a performance claim.",
+  "notes": "Jade art/perf v4 candidate: near-view render-only polygon splitting for repeated Kenney CC0 texels; original valley/route collision preserved. Seven palms have sourced two-material near/far LODs; target-only LOD/culling and 30 FPS visual cadence require new Ymir review.",
   "clearings": [
     {
       "id": "river_basin",
@@ -682,5 +683,13 @@
       "collision": true,
       "theme": "ruins"
     }
-  ]
+  ],
+  "visual_tiling": {
+    "main_route_prefix_segments": 5,
+    "valley_prefix_segments": 6,
+    "valley_bands": [
+      "meadow",
+      "rock"
+    ]
+  }
 }
