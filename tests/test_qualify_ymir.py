@@ -92,7 +92,7 @@ class YmirTelemetryContractTests(unittest.TestCase):
                          for entry in entries))
 
     def test_render_profile_ring_and_header_scan(self):
-        raw=b"\\0"*16+self.render_ring()+b"\\0"*16
+        raw=b"\0"*16+self.render_ring()+b"\0"*16
         profile,address,method=ymir.locate_render_history(raw,[])
         self.assertEqual(method,"header_scan")
         self.assertEqual(address,0x06000010)
