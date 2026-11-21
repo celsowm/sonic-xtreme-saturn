@@ -318,31 +318,49 @@ static sat_result_t draw_gold_ring(const sat_vec3_t* pos) {
 }
 #endif
 
+#ifdef XTREME_STAGE_ADVENTURE
+typedef struct {
+    sat_fx16_t lo_x,hi_x,lo_z,hi_z;
+} stage_face_bounds_t;
+static stage_face_bounds_t stage_bounds[STAGE_FACE_COUNT];
+/* Baked scenery is immutable. Compute its AABBs once during startup instead
+ * of scanning 4 vertices for every candidate, every displayed frame.
+ * Physics always uses the entire unchanged collision mesh. */
+static void stage_prepare_bounds(void) {
+    for(unsigned i=0;i<STAGE_FACE_COUNT;++i){
+        const stage_face_t* f=&stage_faces[i];
+        const sat_vec3_t* p=&stage_vertices[f->v[0]];
+        stage_face_bounds_t* out=&stage_bounds[i];
+        out->lo_x=out->hi_x=p->x;
+        out->lo_z=out->hi_z=p->z;
+        for(unsigned j=1;j<4;++j){
+            p=&stage_vertices[f->v[j]];
+            if(p->x<out->lo_x)out->lo_x=p->x;
+            if(p->x>out->hi_x)out->hi_x=p->x;
+            if(p->z<out->lo_z)out->lo_z=p->z;
+            if(p->z>out->hi_z)out->hi_z=p->z;
+        }
+    }
+}
+#endif
+
 /* Coarse fixed-point offscreen rejection for Adventure only. Render
  * scenery within 55m laterally, 60m behind and 85m ahead; panoramic camera
  * mode retains all geometry. Physics always sees the full collision world.
  * Use the face bounding box, not its centroid, to avoid culling long ground
  * quads at the sector border. */
-static int stage_quad_relevant(const stage_face_t* f) {
+static int stage_quad_relevant(unsigned i) {
 #ifdef XTREME_STAGE_ADVENTURE
-    if(!viewer) {
-        sat_fx16_t lo_x=INT32_MAX,hi_x=INT32_MIN;
-        sat_fx16_t lo_z=INT32_MAX,hi_z=INT32_MIN;
-        for(unsigned j=0;j<4;++j) {
-            const sat_vec3_t* v=&stage_vertices[f->v[j]];
-            if(v->x<lo_x)lo_x=v->x;
-            if(v->x>hi_x)hi_x=v->x;
-            if(v->z<lo_z)lo_z=v->z;
-            if(v->z>hi_z)hi_z=v->z;
-        }
-        if((int64_t)hi_x<(int64_t)player.feet.x-FX(55) ||
-           (int64_t)lo_x>(int64_t)player.feet.x+FX(55) ||
-           (int64_t)hi_z<(int64_t)player.feet.z-FX(85) ||
-           (int64_t)lo_z>(int64_t)player.feet.z+FX(60))
+    if(!viewer){
+        const stage_face_bounds_t* b=&stage_bounds[i];
+        if((int64_t)b->hi_x<(int64_t)player.feet.x-FX(55) ||
+           (int64_t)b->lo_x>(int64_t)player.feet.x+FX(55) ||
+           (int64_t)b->hi_z<(int64_t)player.feet.z-FX(85) ||
+           (int64_t)b->lo_z>(int64_t)player.feet.z+FX(60))
             return 0;
     }
 #else
-    (void)f;
+    (void)i;
 #endif
     return 1;
 }
@@ -350,7 +368,7 @@ static sat_result_t draw_stage(void) {
     sat_result_t rc;
     for (unsigned i=0; i<STAGE_FACE_COUNT; ++i) {
         const stage_face_t* f = &stage_faces[i];
-        if(!stage_quad_relevant(f)) continue;
+        if(!stage_quad_relevant(i)) continue;
         sat_quad3_t quad;
         for (unsigned k=0;k<4;++k) quad.v[k] = stage_vertices[f->v[k]];
         rc = submit(&quad, colors[f->color]);
@@ -567,6 +585,9 @@ int main(void) {
     if(rc!=SAT_OK)return fail(rc);
 #endif
     xtreme_boot_debug.stage=5u; /* character initialized */
+#ifdef XTREME_STAGE_ADVENTURE
+    stage_prepare_bounds();
+#endif
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i)
         if (stage_entities[i].kind==0) xtreme_reset(&player,&stage_entities[i].pos);
     rc=sat_follow_camera3d_init(&chase,&player.feet,4,6,4);
