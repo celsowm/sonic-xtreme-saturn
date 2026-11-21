@@ -14,4 +14,5 @@ export XTREME_STAGE_LAYOUT=adventure
 echo "[adventure] Building authored multi-route scene and running Ymir."
 echo "[adventure] 30 submissions/s is an emulator diagnostic, NOT verified video FPS."
 python3 scripts/qualify-ymir.py --require-sonic \
-  --case idle --case jump_in_place --case curve_route --case hud_pages
+  --case idle --case jump_in_place --case curve_route --case hud_pages \
+  --case offroad_right
