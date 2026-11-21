@@ -1,14 +1,14 @@
-COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '200', '--out', '<GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/wram-high.bin', '--screenshot', '64:<GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0064.png', '--screenshot', '72:<GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0072.png', '--screenshot', '84:<GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0084.png', '--screenshot', '105:<GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0105.png', '--screenshot', '150:<GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0150.png', '--screenshot', '199:<GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0199.png']
-[probe] loaded 3 pad script entries from <GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/input.pad
-[probe] frame 64 -> <GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0064.png (320x224) audio 0
-[probe] frame 72 -> <GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0072.png (320x224) audio 0
-[probe] frame 84 -> <GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0084.png (320x224) audio 0
-[probe] frame 105 -> <GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0105.png (320x224) audio 0
-[probe] frame 150 -> <GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0150.png (320x224) audio 0
-[probe] frame 199 -> <GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/frame-0199.png (320x224) audio 0
-wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/wram-high.bin
+COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '200', '--out', '<GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/wram-high.bin', '--screenshot', '64:<GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0064.png', '--screenshot', '72:<GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0072.png', '--screenshot', '84:<GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0084.png', '--screenshot', '105:<GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0105.png', '--screenshot', '150:<GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0150.png', '--screenshot', '199:<GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0199.png']
+[probe] loaded 3 pad script entries from <GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/input.pad
+[probe] frame 64 -> <GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0064.png (320x224) audio 0
+[probe] frame 72 -> <GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0072.png (320x224) audio 0
+[probe] frame 84 -> <GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0084.png (320x224) audio 0
+[probe] frame 105 -> <GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0105.png (320x224) audio 0
+[probe] frame 150 -> <GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0150.png (320x224) audio 0
+[probe] frame 199 -> <GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/frame-0199.png (320x224) audio 0
+wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/wram-high.bin
 misaligned data accesses: master 0, slave 0
-probe: wrote <GAME>/build/ymir-evidence-3ttjjx9q/jump_in_place/probe.json after 200 frames
+probe: wrote <GAME>/build/ymir-evidence-e60l_r5f/jump_in_place/probe.json after 200 frames
 info  | VDP-Config       | Switched to Software VDP renderer
 debug | SWRender-VDP1    | Enabling threaded VDP1 rendering
 debug | SWRender-VDP2    | Enabling threaded VDP2 rendering
