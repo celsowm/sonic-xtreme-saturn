@@ -5,6 +5,9 @@
 #include "greybox.h"
 #include "collision.h"
 #include "controller.h"
+#ifdef XTREME_STAGE_ADVENTURE
+#include "stage_textures.h"
+#endif
 #ifdef XTREME_HAS_SONIC
 #include "sonic_actor.h"
 #endif
@@ -373,7 +376,12 @@ static sat_result_t draw_stage(void) {
         const stage_face_t* f = &stage_faces[i];
         if(!stage_quad_relevant(i)) continue;
 #ifdef XTREME_STAGE_ADVENTURE
-        rc=submit(&stage_cached_quads[i],colors[f->color]);
+        /* No flat RGB polygon in Adventure: every baked stage face
+         * receives its real resident indexed8 landscape material. */
+        const sat_scene3d_material_t* material=
+            xtreme_stage_texture_material(f->color);
+        if(!material)return SAT_ERR_INVALID_ARG;
+        rc=sat_scene_submit_quad(&scene,&stage_cached_quads[i],material,0u);
 #else
         sat_quad3_t quad;
         for (unsigned k=0;k<4;++k) quad.v[k] = stage_vertices[f->v[k]];
@@ -593,6 +601,10 @@ int main(void) {
 #endif
     xtreme_boot_debug.stage=5u; /* character initialized */
 #ifdef XTREME_STAGE_ADVENTURE
+    /* Upload 8 resident 64x64 landscape textures once after Sonic's
+     * managed CRAM palette, before the first frame; no per-frame upload. */
+    rc=xtreme_stage_textures_init();
+    if(rc!=SAT_OK)return fail(rc);
     stage_prepare_bounds();
 #endif
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i)
