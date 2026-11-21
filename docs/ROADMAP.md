@@ -85,6 +85,14 @@ The first local Adventure probe at game commit `844c24f` **failed before launchi
 
 **Visual review of captured screenshots:** low-poly Kenney props and branching geometry rendered, but the result is still a narrow floating landscape against a solid sky, with visible void, sparse vegetation, minimal environmental texturing and small/distant Sonic in wide camera views. A PASS on four classic-input scripts does **not** prove exploration of the upper canopy, river and temple branches, both broad clearing pads, or completion of an action-adventure stage. The 34 ms p95 has little margin relative to the nominal 33.33 ms 30 FPS budget. Prioritize environment composition and game mechanics jointly with sector-aware rendering/culling, occlusion-safe camera and separately authored route traversal scripts. Then rerun broad regression, Mednafen and physical console qualification.
 
+## Visual rework following user review — contiguous Jade Gully v2
+
+The user rejected the visual quality of the previous four-case Adventure PASS: it resembled a Sonic Mars/32X-era floating-path prototype, not a contiguous action-adventure world. Gameplay correctness alone is not acceptance. [Art acceptance specification](JADE_GULLY_ART_DIRECTION.md).
+
+**Implemented candidate:** a broad collision-enabled 80-triangle valley replaces 88 vertical stage skirts; 24 branch-terrace triangles connect elevated routes, two clearings remain walkable, terrain rises toward the canopy ridge and lowers around the river. Normal Adventure rendering uses a closer 7m/3.5m/60° chase camera, starts with debug HUD hidden, draws simple eight-sided gold ring silhouettes instead of colored editor diamonds, and uses conservative AABB distance culling for scenery (not collision). The earlier, qualified classic layout remains untouched. CMake chooses Adventure-only camera/rendering via `XTREME_STAGE_LAYOUT`. The storyboard and 30 FPS visual target remain.
+
+**Not yet qualified:** this v2 change has not been measured in a post-change Ymir capture, Mednafen or real hardware. Evaluate new images before claiming improved art; use targeted off-road and new route traversals in addition to the previous four smoke cases. The 30 submissions/s, 34ms p95 and zero errors cited for the earlier Adventure variant are baseline evidence, not results for this v2 candidate.
+
 ## P5: production
 Use HLOD and sector residency, VDP2 sky/ground/water where appropriate, audio/music through existing music.h and disc scheduler, prefetch around camera routes. Measure contention during transitions; no required cart. Maintain per-pool memory ledger (WRAM-H/L, VDP1, VDP2, SCSP). Compare overdraw, command count, frame-time percentiles, audio underruns and dropped frames at repeatable route checkpoints. Validate hardware timing independently.
 
