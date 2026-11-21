@@ -16,15 +16,20 @@ def verify(render,collision):
     vertices=count(ground,"COLLISION_VERTEX_COUNT")
     surface_faces=count(ground,"COLLISION_FACE_COUNT")
     entities=count(stage,"STAGE_ENTITY_COUNT")
-    if not 270<=faces<=448:
+    lod_groups=count(stage,"STAGE_LOD_GROUP_COUNT")
+    if not 420<=faces<=512:
         raise ValueError(f"Adventure stage render faces out of budget: {faces}")
-    if not 160<=surface_faces<=448:
+    if not 160<=surface_faces<=512:
         raise ValueError(f"Continuous collision landmass absent or over budget: {surface_faces}")
     if not 0<vertices<=2048:
         raise ValueError(f"Collision vertices out of budget: {vertices}")
+    if lod_groups!=7:
+        raise ValueError(f"Expected seven source-backed two-tone palm LOD groups, got {lod_groups}")
+    if surface_faces!=168:
+        raise ValueError(f"Original collision topology changed unexpectedly: {surface_faces} vs 168")
     if entities!=13:
         raise ValueError(f"Expected 13 action-stage markers, got {entities}")
-    result={"render_triangles":faces,"collision_triangles":surface_faces,"collision_vertices":vertices,"markers":entities}
+    result={"render_triangles":faces,"collision_triangles":surface_faces,"collision_vertices":vertices,"markers":entities,"palm_lod_groups":lod_groups}
     print(f"[adventure] Baked continuous landscape verified: {result}")
     return result
 
