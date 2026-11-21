@@ -86,7 +86,7 @@ def _decimate_prop_piece(name,transformed,faces,mat,budget,path):
     return obj
 
 
-def import_cc0_prop(item,materials):
+def import_cc0_prop(item,materials,far_palm_budget):
     """Import actual Kenney geometry and preserve *source* material boundaries.
 
     Trees have separate woodBark / leafsGreen GLB primitives. Each primitive
@@ -113,7 +113,7 @@ def import_cc0_prop(item,materials):
         # choose LOD per triangle: otherwise foliage and bark switch at
         # different distances, producing "floating" tree fragments.
         trunk_budget=max(4,budget//4)
-        low_budget=json.loads(DEFAULT.read_text())["budgets"]["far_palm_lod_faces_per_instance"]
+        low_budget=far_palm_budget
         groups=(
             ("lod_near_wood",wood,trunk_budget,"wood"),
             ("lod_near_canopy",leaves,budget-trunk_budget,"canopy"),
@@ -297,7 +297,7 @@ def main():
     for entity in data["entities"]:
         base.marker(entity["id"],entity["kind"],tuple(entity["position"]))
     for prop in data["set_dressing"]:
-        import_cc0_prop(prop,materials)
+        import_cc0_prop(prop,materials,data["budgets"]["far_palm_lod_faces_per_instance"])
     # A paper-thin water surface is intentionally visual only, no water physics.
     base.waterfall("gully",-18,77,-4,12,materials["water"])
     bpy.context.view_layer.update()
