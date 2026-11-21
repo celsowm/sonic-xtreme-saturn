@@ -11,6 +11,8 @@
 #include "stage_visibility.h"
 #include "stage_lod.h"
 #include "render_profile.h"
+#include "frame_sync_profile.h"
+#include <saturn/video.h>
 #endif
 #ifdef XTREME_HAS_SONIC
 #include "sonic_actor.h"
@@ -343,6 +345,11 @@ volatile xtreme_render_history_t xtreme_render_history={
     .magic=XTREME_RENDER_HISTORY_MAGIC,.version=1u
 };
 static xtreme_render_sample_t render_pending;
+/* XSW1 is a separate, binary-stable sync trace; do not repurpose XRH1. */
+volatile xtreme_sync_history_t xtreme_sync_history={
+    .magic=XTREME_SYNC_MAGIC,.version=1u
+};
+static xtreme_sync_sample_t sync_pending;
 
 /* One distance decision per palm, not per polygon: bark and canopy always
  * switch together. Square-distance is unnecessary on SH-2; a conservative
@@ -708,12 +715,47 @@ int main(void) {
     uint32_t last=sat_time_ms();
     rate_start=last;
     uint8_t jump_pending=0;
+#ifdef XTREME_STAGE_ADVENTURE
+    uint32_t last_end_done_at=0u;
+    uint8_t have_last_end=0u;
+#endif
     xtreme_boot_debug.stage=6u; /* entering frame loop */
     for (;;) {
         xtreme_boot_debug.stage=7u;
         sat_pad_state_t pad = {0};
+#ifdef XTREME_STAGE_ADVENTURE
+        /* SDK 08e39e9: begin calls sat_wait_vblank(), which includes
+         * VDP1 swap-request waiting; end only submits the VDP1 list.
+         * Time the whole API calls without changing their behavior. */
+        const uint32_t field_before_begin=sat_field_count();
+        sat_vdp1_frame_stats_t vdp_before_begin={0},vdp_after_begin={0};
+        const uint8_t vdp_before_begin_ok=
+            sat_vdp1_frame_stats(&vdp_before_begin)==SAT_OK;
+        const uint32_t begin_called_at=sat_time_ms();
+#endif
         rc = sat_app_frame_begin(SAT_RGB555(10,19,27),SAT_RGB555(10,19,27),&pad);
         if (rc != SAT_OK) return fail(rc);
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t begin_done_at=sat_time_ms();
+        const uint32_t field_after_begin=sat_field_count();
+        const uint8_t vdp_after_begin_ok=
+            sat_vdp1_frame_stats(&vdp_after_begin)==SAT_OK;
+        sync_pending=(xtreme_sync_sample_t){0};
+        sync_pending.frame=xtreme_frames+1u;
+        sync_pending.begin_ms=begin_done_at-begin_called_at;
+        sync_pending.prior_end_gap_ms=have_last_end?
+            begin_called_at-last_end_done_at:0u;
+        sync_pending.field_before_begin=field_before_begin;
+        sync_pending.field_after_begin=field_after_begin;
+        if(vdp_before_begin_ok&&vdp_after_begin_ok) {
+            sync_pending.draw_waits_begin_delta=
+                vdp_after_begin.draw_waits-vdp_before_begin.draw_waits;
+            sync_pending.late_swaps_begin_delta=
+                vdp_after_begin.late_swaps-vdp_before_begin.late_swaps;
+            sync_pending.draw_timeouts_begin_delta=
+                vdp_after_begin.draw_timeouts-vdp_before_begin.draw_timeouts;
+        }
+#endif
         if (pad.pressed & SAT_PAD_START) {
             rc = sat_app_frame_end();
             if (rc != SAT_OK) return fail(rc);
@@ -723,6 +765,10 @@ int main(void) {
         uint32_t elapsed=now-last;
         last=now;
         xtreme_debug.frame_ms=elapsed;
+#ifdef XTREME_STAGE_ADVENTURE
+        /* Identical sample as XFP1, frame index matches both ring cursors. */
+        sync_pending.frame_interval_ms=elapsed;
+#endif
         if(now-rate_start>=1000u){
             xtreme_debug.submit_x10=(uint32_t)(((uint64_t)(xtreme_frames-rate_frames)*10000u)/(now-rate_start));
             rate_start=now;rate_frames=xtreme_frames;
@@ -854,10 +900,39 @@ int main(void) {
         if(sat_vdp1_command_stats(&post)==SAT_OK&&pre_ok&&post.used>=pre.used)
             xtreme_debug.hud_used=post.used-pre.used;
         xtreme_debug.hud_ms=sat_time_ms()-hud_start;
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t field_before_end=sat_field_count();
+        sat_vdp1_frame_stats_t vdp_before_end={0},vdp_after_end={0};
+        const uint8_t vdp_before_end_ok=
+            sat_vdp1_frame_stats(&vdp_before_end)==SAT_OK;
+        const uint32_t end_called_at=sat_time_ms();
+#endif
         rc = sat_app_frame_end();
         if (rc != SAT_OK) return fail(rc);
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t end_done_at=sat_time_ms();
+        sync_pending.active_work_ms=end_called_at-begin_done_at;
+        sync_pending.end_ms=end_done_at-end_called_at;
+        sync_pending.field_before_end=field_before_end;
+        sync_pending.field_after_end=sat_field_count();
+        const uint8_t vdp_after_end_ok=
+            sat_vdp1_frame_stats(&vdp_after_end)==SAT_OK;
+        if(vdp_before_end_ok&&vdp_after_end_ok) {
+            sync_pending.draw_waits_end_delta=
+                vdp_after_end.draw_waits-vdp_before_end.draw_waits;
+            sync_pending.late_swaps_end_delta=
+                vdp_after_end.late_swaps-vdp_before_end.late_swaps;
+            sync_pending.draw_timeouts_end_delta=
+                vdp_after_end.draw_timeouts-vdp_before_end.draw_timeouts;
+        }
+        last_end_done_at=end_done_at;
+        have_last_end=1u;
+#endif
         ++xtreme_frames;
         record_frame_sample();
+#ifdef XTREME_STAGE_ADVENTURE
+        xtreme_sync_history_append(&xtreme_sync_history,&sync_pending);
+#endif
 #ifdef XTREME_STAGE_ADVENTURE
         render_pending.frame=xtreme_frames;
         xtreme_render_history_append(&xtreme_render_history,&render_pending);
