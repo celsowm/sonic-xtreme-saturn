@@ -336,7 +336,7 @@ static void stage_select_prop_lods(void) {
     for(unsigned i=0;i<STAGE_LOD_GROUP_COUNT;++i)
         stage_lod_near[i]=xtreme_stage_lod_choose_near(
             stage_lod_centers[i].x,stage_lod_centers[i].z,
-            player.feet.x,player.feet.z);
+            player.feet.x,player.feet.z,stage_lod_near[i]);
 }
 
 /* Baked scenery is immutable. Build its indexed quads and AABBs once during
