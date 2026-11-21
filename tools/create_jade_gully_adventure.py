@@ -22,7 +22,7 @@ import create_jade_gully as base
 from tools.validate_adventure_layout import DEFAULT,validate
 from tools.read_kenney_glb import read_glb_triangles
 from tools.prop_materials import split_palm_faces
-from tools.adventure_tiling import refine_first_segments,split_quad_across
+from tools.adventure_tiling import refine_first_segments,split_quad_across,make_valley_grid,sample_valley_height
 
 args=sys.argv[sys.argv.index("--")+1:] if "--" in sys.argv else []
 if len(args)!=2:
@@ -86,7 +86,7 @@ def _decimate_prop_piece(name,transformed,faces,mat,budget,path):
     return obj
 
 
-def import_cc0_prop(item,materials,far_palm_budget):
+def import_cc0_prop(item,materials,far_palm_budget,valley_grid):
     """Import actual Kenney geometry and preserve *source* material boundaries.
 
     Trees have separate woodBark / leafsGreen GLB primitives. Each primitive
@@ -105,6 +105,12 @@ def import_cc0_prop(item,materials,far_palm_budget):
     cy=(maxs[1]+mins[1])/2
     scale=item["height_m"]/extent
     x,y,z=item["position"]
+    if item.get("snap_to_valley",False):
+        original_z=z
+        z=sample_valley_height(valley_grid,x,y)
+        if abs(z-original_z)>8.0:
+            raise RuntimeError(f"{path}: ground snap exceeded 8 m; fix authored position ({original_z} -> {z})")
+        print(f'[adventure] {item["id"]}: natural base height {original_z:.2f} -> valley {z:.2f} m')
     transformed=[(x+(p[0]-cx)*scale,y+(p[1]-cy)*scale,z+(p[2]-mins[2])*scale) for p in verts]
     budget=item["triangles_max"]
     if item["asset"].startswith("nature-kit/tree-"):
@@ -145,7 +151,7 @@ def import_cc0_prop(item,materials,far_palm_budget):
     return built[0]
 
 
-def valley_landmass(main,materials,tiling):
+def valley_landmass(grid,materials,tiling):
     """Independent render-only near texture repeats over unchanged collision.
 
     The original four collision bands remain exactly as before. Replace only
@@ -153,21 +159,7 @@ def valley_landmass(main,materials,tiling):
     polygons, each mapped to the existing 64x64 Kenney indexed8 source art.
     No extra VDP1 texture storage, bespoke UV hardware or collision triangles.
     """
-    rows=[(main[0][0],-12,main[0][2],main[0][3]),*main]
-    refined=[]
-    for i,point in enumerate(rows):
-        refined.append(point)
-        if i<4 and i+1<len(rows):
-            following=rows[i+1]
-            refined.append(tuple((point[k]+following[k])*0.5 for k in range(4)))
-    offsets=(-48.0,-20.0,0.0,20.0,48.0)
     bands=("canopy","terrace","meadow","rock")
-    grid=[]
-    for x,y,z,width in refined:
-        left=4.0 if 24<=y<=95 else 2.0
-        river=-4.5 if 35<=y<=79 else 1.3
-        levels=(left+6.0,left,-0.5,river,river+6.0)
-        grid.append([(x+dx,y,z+dz) for dx,dz in zip(offsets,levels)])
     for col,material in enumerate(bands):
         verts=[]
         quads=[]
@@ -277,7 +269,8 @@ def main():
     # Build surrounding solid ground first. Main and branching ribbons are
     # kept at their exact old coordinates; the valley is a separate walkable
     # mesh for exploration and safe landings beyond the track edges.
-    valley_landmass(data["routes"][0]["stations"],materials,data["visual_tiling"])
+    valley_grid=make_valley_grid(data["routes"][0]["stations"])
+    valley_landmass(valley_grid,materials,data["visual_tiling"])
     for route in data["routes"]:
         top=base.ribbon(route["id"]+"_route",route["stations"],materials[route["id"]])
         base.collision_copy(top)
@@ -297,7 +290,7 @@ def main():
     for entity in data["entities"]:
         base.marker(entity["id"],entity["kind"],tuple(entity["position"]))
     for prop in data["set_dressing"]:
-        import_cc0_prop(prop,materials,data["budgets"]["far_palm_lod_faces_per_instance"])
+        import_cc0_prop(prop,materials,data["budgets"]["far_palm_lod_faces_per_instance"],valley_grid)
     # A paper-thin water surface is intentionally visual only, no water physics.
     base.waterfall("gully",-18,77,-4,12,materials["water"])
     bpy.context.view_layer.update()
