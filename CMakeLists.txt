@@ -23,6 +23,12 @@ add_executable(xtreme src/main.c src/controller.c "${GENERATED}" "${GENERATED_CO
 set(XTREME_STAGE_LAYOUT "classic" CACHE STRING "Selected level layout: classic|adventure")
 if(XTREME_STAGE_LAYOUT STREQUAL "adventure")
     target_compile_definitions(xtreme PRIVATE XTREME_STAGE_ADVENTURE=1)
+    # Optional exact same-stage A/B for conservative screen-plane culling.
+    # OFF preserves the prior per-quad camera-plane + authored XZ path.
+    option(XTREME_STAGE_FRUSTUM_GATE "Conservative static face frustum rejection" ON)
+    if(XTREME_STAGE_FRUSTUM_GATE)
+        target_compile_definitions(xtreme PRIVATE XTREME_STAGE_FRUSTUM_GATE=1)
+    endif()
     # Real Kenney CC0 art is committed as PNGs. Generate just the SH-2 native
     # index8 arrays at build time; no Python package or network access needed.
     set(STAGE_TEXTURE_INPUTS)
