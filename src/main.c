@@ -669,7 +669,16 @@ int main(void) {
         if (rc!=SAT_OK) return fail(rc);
         const uint32_t flush_start=sat_time_ms();
         xtreme_debug.scene_ms=flush_start-scene_start;
+#ifdef XTREME_STAGE_ADVENTURE
+        /* All Sonic indexed textures and the RGB stage palette are uploaded
+         * once and stay resident for the entire game. No unload or mutation
+         * between queueing and flush: use the SDK's immutable-material path
+         * to avoid a per-face validation census in the busy Adventure scene.
+         * Capacity/rollback/owner-generation safety checks remain active. */
+        rc=sat_scene_flush_trusted(&scene);
+#else
         rc=sat_scene_flush(&scene);
+#endif
         xtreme_debug.flush_ms=sat_time_ms()-flush_start;
         if(rc!=SAT_OK&&rc!=SAT_ERR_CAPACITY)return fail(rc);
         if(rc!=SAT_OK){xtreme_debug.error=rc;xtreme_error=rc;}
