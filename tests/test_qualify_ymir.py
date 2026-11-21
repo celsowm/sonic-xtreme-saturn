@@ -70,6 +70,14 @@ class YmirTelemetryContractTests(unittest.TestCase):
                 self.assertTrue(ymir.pad(events).startswith("0 NONE\n"))
                 self.assertGreater(frames, 100)
 
+    def test_adventure_only_offroad_replay(self):
+        self.assertEqual(len(ymir.ADVENTURE_CASES),1)
+        name,frames,events,shots=ymir.ADVENTURE_CASES[0]
+        self.assertEqual(name,"offroad_right")
+        self.assertEqual(frames,180)
+        self.assertIn((65,"RIGHT",52),events)
+        self.assertTrue(all(0<=n<frames for n in shots))
+
     def test_legacy_proxy_telemetry_remains_independent(self):
         self.assertEqual(ymir.SIZE, 336)
         self.assertEqual(len(ymir.NAMES), 84)
