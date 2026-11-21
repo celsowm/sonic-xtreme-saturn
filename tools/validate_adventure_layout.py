@@ -94,11 +94,16 @@ def validate(data, asset_root=None):
     limit=data["budgets"]["max_imported_prop_triangles"]
     if used_budget>limit:raise ValueError("prop budget exceeded")
     segments=sum(len(x["stations"])-1 for x in paths)
-    # One paper-thin waterfall: two tris, purely visual.
-    # Walkable clearing quad (2 triangles) + 4 visual skirt quads (8).
-    estimated_render_faces=segments*6+used_budget+2+10*len(clearings)
+    # Main valley: 11 sections x 5 columns -> 80 render/collision triangles.
+    # Side banks on the three branches need two triangles per segment.
+    landmass_triangles=(len(routes["main"])-1)*4*2
+    bank_triangles=sum((len(s)-1)*2 for name,s in routes.items() if name!="main")
+    corridor_triangles=segments*2
+    # Wide clearing: a walkable top quad and four sloped border quads (10).
+    estimated_render_faces=(corridor_triangles+landmass_triangles+
+                            bank_triangles+used_budget+2+10*len(clearings))
     if estimated_render_faces>data["budgets"]["render_faces_max"]:
-        raise ValueError("render budget exceeded: routes+cliff skirts+props")
+        raise ValueError("render budget exceeded: continuous valley, branch banks, paths and props")
     if data["budgets"]["render_faces_max"]>256:
         raise ValueError("unsupported single-stage face capacity")
     return {
@@ -109,7 +114,9 @@ def validate(data, asset_root=None):
         "walkable_clearings":len(clearings),
         "path_segments":segments,
         "corridor_triangles":segments*2,
-        "cliff_triangles":segments*4,
+        "landmass_triangles":landmass_triangles,
+        "branch_terrace_triangles":bank_triangles,
+        "cliff_triangles":0,
         "prop_triangle_budget":used_budget,
         "face_budget_total":estimated_render_faces,
         "face_capacity":data["budgets"]["render_faces_max"],
