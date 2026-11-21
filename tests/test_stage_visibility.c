@@ -87,6 +87,21 @@ int main(void) {
     assert(xtreme_stage_aabb_frustum_relevant(&on_edge,&frustum));
     assert(xtreme_stage_aabb_frustum_relevant(&straddles,&frustum));
 
+    /* A whole authored block is rejected only when every constituent
+     * quad is off-screen. If ONE quad crosses the FOV, the enlarged AABB
+     * must keep the entire group; no contiguous terrain holes. */
+    xtreme_stage_aabb_t group=right_of_screen;
+    assert(!xtreme_stage_aabb_frustum_relevant(&group,&frustum));
+    xtreme_stage_aabb_merge(&group,&in_front);
+    assert(group.lo_x<=in_front.lo_x && group.hi_x>=right_of_screen.hi_x);
+    assert(group.lo_z<=in_front.lo_z && group.hi_z>=right_of_screen.hi_z);
+    assert(xtreme_stage_aabb_frustum_relevant(&group,&frustum));
+    /* Camera in the middle of a large strip: no center-only rejection. */
+    xtreme_stage_aabb_t panorama=BOX(-80,80,-13,-8);
+    xtreme_stage_aabb_merge(&group,&panorama);
+    assert(xtreme_stage_aabb_frustum_relevant(&group,&frustum));
+    assert(XTREME_STAGE_FRUSTUM_GROUP_SIZE==8u);
+
     /* Camera turned 90 degrees: optical axis +X, screen right = -Z.
      * Culling must adapt instead of reusing spawn's fixed negative-Z view. */
     const int32_t yawed[16]={
