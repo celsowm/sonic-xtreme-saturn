@@ -88,7 +88,7 @@ def read_accessor(obj,binary,index):
         raise ValueError("accessor outside buffer view")
     return [struct.unpack_from(fmt,binary,off+i*stride) for i in range(acc["count"])]
 
-def read_glb_triangles(path):
+def read_glb_triangles(path,with_materials=False):
     obj,binary=open_glb(path)
     nodes=obj.get("nodes",[])
     scenes=obj.get("scenes",[])
@@ -97,6 +97,7 @@ def read_glb_triangles(path):
     if active>=len(scenes):raise ValueError("invalid scene index")
     vertices=[]
     triangles=[]
+    face_materials=[]
     seen=set()
     def walk(index,parent):
         if index<0 or index>=len(nodes):raise ValueError("invalid node index")
@@ -128,6 +129,7 @@ def read_glb_triangles(path):
                     if min(a,b,c)<0 or max(a,b,c)>=len(coords):
                         raise ValueError("out of range GLB index")
                     triangles.append((off+a,off+b,off+c))
+                    face_materials.append(p.get('material',-1))
         for child in node.get("children",[]):
             walk(child,transform)
     for root in scenes[active].get("nodes",[]):
@@ -135,4 +137,7 @@ def read_glb_triangles(path):
     if not vertices or not triangles:raise ValueError("GLB contains no triangles")
     if not all(math.isfinite(v) for xyz in vertices for v in xyz):
         raise ValueError("nonfinite GLB coordinates")
+    if with_materials:
+        names=[m.get('name','') for m in obj.get('materials',[])]
+        return vertices,triangles,face_materials,names
     return vertices,triangles
