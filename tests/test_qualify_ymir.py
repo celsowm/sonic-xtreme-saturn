@@ -42,6 +42,19 @@ class YmirTelemetryContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ymir.locate_sonic(raw, [])
 
+    def test_character_and_physics_must_have_same_completed_frame(self):
+        controller={"ticks":135,"pos_x":262163,"pos_z":-2091936}
+        character={"ticks":135,"pos_x":262163,"pos_z":-2091936}
+        self.assertEqual(ymir.check_sonic_snapshot_alignment(character,controller),
+                         {"actor_sim_sync":True,"actor_position_sync":True})
+        # Regression observed on the old live SXAC symbol: Ymir stopped after
+        # three actor ticks and read old XTDB from the prior completed frame.
+        character.update(ticks=138,pos_z=-2179065)
+        self.assertEqual(ymir.check_sonic_snapshot_alignment(character,controller),
+                         {"actor_sim_sync":False,"actor_position_sync":False})
+        character.update(ticks=135,pos_z=-2091936,pos_x=262164)
+        self.assertFalse(ymir.check_sonic_snapshot_alignment(character,controller)["actor_position_sync"])
+
     def test_recent_frame_history_reports_tail_percentiles(self):
         # A 4-frame synthetic ring after wraparound: only the final four
         # entries count. Slow tail must be visible even at nominal 30 Hz.
