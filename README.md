@@ -49,3 +49,9 @@ Open the resulting BIN/CUE in an emulator with your own BIOS. D-pad or analog mo
 - [Jade Gully design](docs/JADE_GULLY.md)
 - [Asset research and policy](docs/ASSETS.md)
 - [Agent instructions](AGENTS.md)
+
+## Jade Gully visual overhaul v3 (unqualified candidate)
+
+The Adventure generator now builds **120 terrain triangles in four independently textured collision-enabled bands**, retaining all main-road stations and splitting the four closest terrain intervals to avoid a single smeared foreground texture. It arranges **18 curated Kenney CC0 prop instances**, with less aggressive LOD reduction for trees, rather than scattering 10 severely decimated props. The manifest statically estimates **442 environment triangles** under a hard **448-face** stage cap; the existing Sonic actor and rings are accounted for separately in the renderer.
+
+These are real source/baker changes, **not a claim of a prettier Ymir capture**. The new scene has not been built on the user's Mac or compared against the existing screenshots, nor is 30 displayed FPS verified. Run the Adventure qualification above after merging, inspect `idle`, `curve_route` and `offroad_right` screenshots and review the p95/timeout gates. Do not treat a functional PASS as an art approval.

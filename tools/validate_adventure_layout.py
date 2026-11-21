@@ -88,15 +88,15 @@ def validate(data, asset_root=None):
             raise ValueError("unsafe asset path")
         if not (asset_root/rel).is_file():
             raise ValueError(f"missing curated CC0 model: {rel}")
-        if not (3<=prop["triangles_max"]<=16):
+        if not (3<=prop["triangles_max"]<=24):
             raise ValueError("unbounded imported prop LOD")
         used_budget+=prop["triangles_max"]
     limit=data["budgets"]["max_imported_prop_triangles"]
     if used_budget>limit:raise ValueError("prop budget exceeded")
     segments=sum(len(x["stations"])-1 for x in paths)
-    # Main valley: 11 sections x 5 columns -> 80 render/collision triangles.
+    # Main valley: eleven route stations + lead-in + four near-field splits: 15 sections x four bands.
     # Side banks on the three branches need two triangles per segment.
-    landmass_triangles=(len(routes["main"])-1)*4*2
+    landmass_triangles=(len(routes["main"])+min(4,len(routes["main"])))*4*2
     bank_triangles=sum((len(s)-1)*2 for name,s in routes.items() if name!="main")
     corridor_triangles=segments*2
     # Wide clearing: a walkable top quad and four sloped border quads (10).
@@ -104,7 +104,7 @@ def validate(data, asset_root=None):
                             bank_triangles+used_budget+2+10*len(clearings))
     if estimated_render_faces>data["budgets"]["render_faces_max"]:
         raise ValueError("render budget exceeded: continuous valley, branch banks, paths and props")
-    if data["budgets"]["render_faces_max"]>256:
+    if data["budgets"]["render_faces_max"]>448:
         raise ValueError("unsupported single-stage face capacity")
     return {
         "routes":len(paths),

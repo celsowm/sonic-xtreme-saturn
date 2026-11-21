@@ -10,7 +10,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 
 MAX_VERTICES = 2048
-MAX_FACES = 256
+MAX_FACES = 448
 MAX_ENTITIES = 64
 LIMIT = Decimal(256)
 # A pair per object group: alternating faces get subtly different shades.
@@ -22,6 +22,7 @@ PALETTE = {
     "river_route": (0, 3),
     "ruins_route": (2, 4),
     "trunk": (2, 4),
+    "wood": (4, 4),
     "canopy": (3, 3),
     "rock": (2, 4),
     "water": (5, 5),

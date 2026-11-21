@@ -21,6 +21,7 @@ sys.path.insert(0,str(ROOT/"tools"))
 import create_jade_gully as base
 from tools.validate_adventure_layout import DEFAULT,validate
 from tools.read_kenney_glb import read_glb_triangles
+from tools.prop_materials import split_palm_faces
 
 args=sys.argv[sys.argv.index("--")+1:] if "--" in sys.argv else []
 if len(args)!=2:
@@ -30,30 +31,9 @@ sys.path.insert(0,str(toolkit))
 from libsaturn_toolkit.exporter import export_bundle
 
 
-def import_cc0_prop(item,materials):
-    """Read a curated GLB with its node transforms, then decimate it.
-
-    The original model, textures and provenance remain unchanged in assets/.
-    Render mesh is stored in world coordinates; it has NO collision marker.
-    """
-    path=ROOT/"assets/kenney"/item["asset"]
-    # Read only the already-vetted, uncompressed GLB geometry. The generic
-    # Blender glTF importer requires numpy on some Linux builds; the pure
-    # standard-library parser makes CI and Mac authoring reproducible.
-    verts,faces=read_glb_triangles(path)
-    mins=tuple(min(p[i] for p in verts) for i in range(3))
-    maxs=tuple(max(p[i] for p in verts) for i in range(3))
-    extent=maxs[2]-mins[2]
-    if extent<1e-6:
-        raise RuntimeError(f"{path}: zero-height mesh")
-    cx=(maxs[0]+mins[0])/2
-    cy=(maxs[1]+mins[1])/2
-    scale=item["height_m"]/extent
-    x,y,z=item["position"]
-    transformed=[(x+(p[0]-cx)*scale,y+(p[1]-cy)*scale,z+(p[2]-mins[2])*scale) for p in verts]
-    name=f'{item["id"]}_{item["palette"]}'
-    obj=base.mesh_prop(name,transformed,faces,materials[item["palette"]])
-    budget=item["triangles_max"]
+def _decimate_prop_piece(name,transformed,faces,mat,budget,path):
+    """Reduce one original GLB material to a bounded exportable OBJ mesh."""
+    obj=base.mesh_prop(name,transformed,faces,mat)
     if len(obj.data.polygons)>budget:
         bpy.ops.object.select_all(action="DESELECT")
         obj.select_set(True)
@@ -66,21 +46,15 @@ def import_cc0_prop(item,materials):
             dec.ratio=max(0.005,min(0.98,(budget/max(1,count))*0.92))
             bpy.ops.object.modifier_apply(modifier=dec.name)
         if len(obj.data.polygons)>budget:
-            raise RuntimeError(f"{path}: cannot meet face budget {budget} (got {len(obj.data.polygons)})")
+            raise RuntimeError(f"{path}: {name} cannot meet {budget} triangles")
     if len(obj.data.polygons)==0:
-        raise RuntimeError(f"{path}: face reduction removed model")
-    # Blender's decimator can leave many disconnected/orphaned source vertices
-    # even after reducing 500 triangles to 9. The old narrow Saturn OBJ baker
-    # counts all "v" records, including those referenced by no face.
-    # Compact deterministically to ONLY referenced indices, preserving faces.
+        raise RuntimeError(f"{path}: {name} lost all triangles")
+    # The OBJ baker counts every vertex record, even unreferenced source
+    # vertices left by Blender's decimator. Compact to live polygon indices.
     old_mesh=obj.data
     used=sorted({int(idx) for poly in old_mesh.polygons for idx in poly.vertices})
     remap={old:new for new,old in enumerate(used)}
     compact_vertices=[tuple(old_mesh.vertices[idx].co) for idx in used]
-    # Reject face triangles that become collinear AFTER Q16.16 quantization,
-    # exactly as the native Saturn greybox baker does. Simplification can
-    # produce microscopic or flat polygons even when the source GLB is valid.
-    # This only affects imported visual props: never remove walkable faces.
     from tools.bake_greybox import convert_xyz
     fixed_vertices=[convert_xyz(p) for p in compact_vertices]
     compact_faces=[]
@@ -99,45 +73,95 @@ def import_cc0_prop(item,materials):
             continue
         compact_faces.append(idx)
     if not compact_faces:
-        raise RuntimeError(f"{path}: no non-degenerate faces after quantization")
+        raise RuntimeError(f"{path}: {name} has no nondegenerate Q16 faces")
     compact=bpy.data.meshes.new(name+"_compact")
     compact.from_pydata(compact_vertices,[],compact_faces)
     compact.update()
-    compact.materials.append(materials[item["palette"]])
+    compact.materials.append(mat)
     obj.data=compact
     if old_mesh.users==0:bpy.data.meshes.remove(old_mesh)
     obj["saturn_mesh"]="render"
-    print(f'[adventure] {item["id"]}: {len(faces)} -> {len(obj.data.polygons)} triangles; {len(used)} live vertices; removed {removed} zero-area faces; budget {budget}')
+    print(f"[adventure] {name}: {len(faces)} -> {len(compact_faces)} triangles; {len(used)} live vertices; removed {removed}; cap {budget}")
     return obj
 
 
-def valley_landmass(main,mat):
-    """A continuous, fully walkable valley instead of isolated sky bridges.
+def import_cc0_prop(item,materials):
+    """Import actual Kenney geometry and preserve *source* material boundaries.
 
-    Five wide cross-sectional heights follow the MAIN terrain height, with
-    a raised canopy ridge left, a depressed river basin right and elevated
-    far silhouette banks. Render and collision share exact geometry.
-    Only 80 triangles replace the 88 vertical cliff triangles from v1.
+    Trees have separate woodBark / leafsGreen GLB primitives. Each primitive
+    receives its own decimation budget, otherwise a single 17-triangle mesh
+    can erase the trunk and leave a green floating crown. No new polygons
+    or guessed height classification are introduced after decimation.
     """
-    rows=[(main[0][0],-12,main[0][2],main[0][3])]
-    rows.extend(point for i,point in enumerate(main) if i!=1)
+    path=ROOT/"assets/kenney"/item["asset"]
+    verts,faces,face_materials,material_names=read_glb_triangles(path,with_materials=True)
+    mins=tuple(min(p[i] for p in verts) for i in range(3))
+    maxs=tuple(max(p[i] for p in verts) for i in range(3))
+    extent=maxs[2]-mins[2]
+    if extent<1e-6:
+        raise RuntimeError(f"{path}: zero-height mesh")
+    cx=(maxs[0]+mins[0])/2
+    cy=(maxs[1]+mins[1])/2
+    scale=item["height_m"]/extent
+    x,y,z=item["position"]
+    transformed=[(x+(p[0]-cx)*scale,y+(p[1]-cy)*scale,z+(p[2]-mins[2])*scale) for p in verts]
+    budget=item["triangles_max"]
+    if item["asset"].startswith("nature-kit/tree-"):
+        wood,leaves=split_palm_faces(faces,face_materials,material_names)
+        # A minimum 4-triangle trunk survives LOD; leaves own the rest.
+        trunk_budget=max(4,budget//4)
+        groups=(("wood",wood,trunk_budget),("canopy",leaves,budget-trunk_budget))
+    else:
+        groups=((item["palette"],faces,budget),)
+    built=[]
+    total=0
+    for label,group_faces,limit in groups:
+        obj=_decimate_prop_piece(f'{item["id"]}_{label}',transformed,group_faces,
+                                 materials[label],limit,path)
+        built.append(obj)
+        total+=len(obj.data.polygons)
+    if total>budget:
+        raise RuntimeError(f"{path}: combined LOD exceeds authored {budget}-triangle cap")
+    if len(groups)==2:
+        print(f'[adventure] {item["id"]}: original Kenney wood/foliage groups retained ({total} total triangles)')
+    return built[0]
+
+
+def valley_landmass(main,materials):
+    """Continuous collision valley with shorter textured patches near Sonic.
+
+    The original 80-triangle, single-meadow surface stretched one texture
+    across huge faces. Include every main-route station (no floating roadway),
+    split the four nearest longitudinal intervals, and give each cross-valley
+    band a distinct existing Kenney CC0 texture. No UV runtime allocations.
+    Four separate collision copies share identical boundary coordinates.
+    """
+    rows=[(main[0][0],-12,main[0][2],main[0][3]),*main]
+    refined=[]
+    for i,point in enumerate(rows):
+        refined.append(point)
+        if i<4 and i+1<len(rows):
+            following=rows[i+1]
+            refined.append(tuple((point[k]+following[k])*0.5 for k in range(4)))
     offsets=(-48.0,-20.0,0.0,20.0,48.0)
-    vertices=[]
-    quads=[]
-    for x,y,z,width in rows:
+    bands=("canopy","terrace","meadow","rock")
+    grid=[]
+    for x,y,z,width in refined:
         left=4.0 if 24<=y<=95 else 2.0
         river=-4.5 if 35<=y<=79 else 1.3
         levels=(left+6.0,left,-0.5,river,river+6.0)
-        for dx,dz in zip(offsets,levels):
-            vertices.append((x+dx,y,z+dz))
-    for row in range(len(rows)-1):
-        for col in range(len(offsets)-1):
-            a=row*len(offsets)+col
-            b=(row+1)*len(offsets)+col
-            quads.append((a,a+1,b+1,b))
-    land=base.mesh_prop("jade_valley_meadow",vertices,quads,mat)
-    base.collision_copy(land)
-    return land
+        grid.append([(x+dx,y,z+dz) for dx,dz in zip(offsets,levels)])
+    for col,material in enumerate(bands):
+        verts=[]
+        quads=[]
+        for row in grid:
+            verts.extend((row[col],row[col+1]))
+        for i in range(len(grid)-1):
+            n=2*i
+            quads.append((n,n+1,n+3,n+2))
+        obj=base.mesh_prop(f"jade_valley_band_{col}_{material}",verts,quads,materials[material])
+        base.collision_copy(obj)
+    return len(grid)-1
 
 
 def branch_terrace(route,mat,side):
@@ -207,6 +231,7 @@ def main():
         "river":base.material("Basin grass",(0.13,0.48,0.22)),
         "ruins":base.material("Temple path",(0.48,0.47,0.34)),
         "canopy":base.material("CC0 foliage flat",(0.09,0.42,0.14)),
+        "wood":base.material("Palm trunk palette using existing Kenney sandstone",(0.53,0.37,0.20)),
         "rock":base.material("CC0 rock flat",(0.35,0.32,0.26)),
         "water":base.material("Waterfall cyan",(0.19,0.71,0.83)),
         "meadow":base.material("Connected canyon grass",(0.20,0.48,0.13)),
@@ -215,7 +240,7 @@ def main():
     # Build surrounding solid ground first. Main and branching ribbons are
     # kept at their exact old coordinates; the valley is a separate walkable
     # mesh for exploration and safe landings beyond the track edges.
-    valley_landmass(data["routes"][0]["stations"],materials["meadow"])
+    valley_landmass(data["routes"][0]["stations"],materials)
     for route in data["routes"]:
         top=base.ribbon(route["id"]+"_route",route["stations"],materials[route["id"]])
         base.collision_copy(top)

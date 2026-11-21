@@ -430,7 +430,7 @@
         7
       ],
       "height_m": 5,
-      "triangles_max": 8,
+      "triangles_max": 20,
       "palette": "canopy"
     },
     {
@@ -442,7 +442,7 @@
         -1
       ],
       "height_m": 6,
-      "triangles_max": 8,
+      "triangles_max": 20,
       "palette": "canopy"
     },
     {
@@ -454,7 +454,7 @@
         5
       ],
       "height_m": 5,
-      "triangles_max": 8,
+      "triangles_max": 20,
       "palette": "canopy"
     },
     {
@@ -466,7 +466,7 @@
         0
       ],
       "height_m": 3,
-      "triangles_max": 6,
+      "triangles_max": 8,
       "palette": "rock"
     },
     {
@@ -478,7 +478,7 @@
         5
       ],
       "height_m": 3,
-      "triangles_max": 6,
+      "triangles_max": 8,
       "palette": "rock"
     },
     {
@@ -490,7 +490,7 @@
         0
       ],
       "height_m": 7,
-      "triangles_max": 8,
+      "triangles_max": 12,
       "palette": "rock"
     },
     {
@@ -502,7 +502,7 @@
         4
       ],
       "height_m": 5,
-      "triangles_max": 10,
+      "triangles_max": 14,
       "palette": "rock"
     },
     {
@@ -514,7 +514,7 @@
         7
       ],
       "height_m": 5,
-      "triangles_max": 10,
+      "triangles_max": 14,
       "palette": "rock"
     },
     {
@@ -526,7 +526,7 @@
         0
       ],
       "height_m": 2,
-      "triangles_max": 6,
+      "triangles_max": 8,
       "palette": "canopy"
     },
     {
@@ -538,21 +538,117 @@
         4
       ],
       "height_m": 2,
-      "triangles_max": 10,
+      "triangles_max": 12,
+      "palette": "rock"
+    },
+    {
+      "id": "palm_overlook_left",
+      "asset": "nature-kit/tree-palm.glb",
+      "position": [
+        -13,
+        10,
+        10.3
+      ],
+      "height_m": 6.6,
+      "triangles_max": 17,
+      "palette": "canopy"
+    },
+    {
+      "id": "palm_overlook_right",
+      "asset": "nature-kit/tree-palmbend.glb",
+      "position": [
+        16,
+        18,
+        8.4
+      ],
+      "height_m": 6.2,
+      "triangles_max": 17,
+      "palette": "canopy"
+    },
+    {
+      "id": "palm_forest_ridge",
+      "asset": "nature-kit/tree-palm.glb",
+      "position": [
+        -20,
+        40,
+        5
+      ],
+      "height_m": 7,
+      "triangles_max": 17,
+      "palette": "canopy"
+    },
+    {
+      "id": "palm_forest_basin",
+      "asset": "nature-kit/tree-palmbend.glb",
+      "position": [
+        29,
+        52,
+        -2
+      ],
+      "height_m": 6.8,
+      "triangles_max": 17,
+      "palette": "canopy"
+    },
+    {
+      "id": "bush_overlook",
+      "asset": "nature-kit/plant-bush.glb",
+      "position": [
+        -9,
+        24,
+        6
+      ],
+      "height_m": 2.2,
+      "triangles_max": 7,
+      "palette": "canopy"
+    },
+    {
+      "id": "rock_overlook",
+      "asset": "nature-kit/rock-largea.glb",
+      "position": [
+        14,
+        30,
+        4
+      ],
+      "height_m": 2.8,
+      "triangles_max": 7,
+      "palette": "rock"
+    },
+    {
+      "id": "bush_forest",
+      "asset": "nature-kit/plant-bush.glb",
+      "position": [
+        -13,
+        54,
+        4
+      ],
+      "height_m": 2.3,
+      "triangles_max": 7,
+      "palette": "canopy"
+    },
+    {
+      "id": "rock_waterfall",
+      "asset": "nature-kit/rock-largea.glb",
+      "position": [
+        22,
+        79,
+        0.5
+      ],
+      "height_m": 3.5,
+      "triangles_max": 7,
       "palette": "rock"
     }
   ],
   "budgets": {
-    "render_faces_max": 256,
+    "render_faces_max": 448,
     "vertices_max": 2048,
     "entities_max": 64,
-    "max_imported_prop_triangles": 80,
+    "max_imported_prop_triangles": 240,
     "texture_vram_reserved_for_actor_bytes": 148000,
     "full_stage_not_yet_qualified": true,
-    "landmass_triangles": 80,
+    "landmass_triangles": 120,
     "branch_terrace_triangles": 24
   },
-  "notes": "Action Adventure valley v2: 80-triangle walkable landscape with three 8-triangle branch terraces replaces 88 vertical cliff faces. Routes and respawn logic unchanged; lower ground must be tested with full Ymir and off-course traversal. Curated Kenney props remain source assets.",
+  "notes": "Art v3 candidate: 120-triangle four-material valley, denser near-ground texture repeats, 18 curated Kenney CC0 props with readable silhouettes. Collision follows the terrain strips. Ymir/real Saturn validation pending; 30 FPS target, not a performance claim.",
   "clearings": [
     {
       "id": "river_basin",
