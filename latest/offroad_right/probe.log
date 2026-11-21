@@ -1,13 +1,13 @@
-COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '180', '--out', '<GAME>/build/ymir-evidence-qcpufgs3/offroad_right/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-qcpufgs3/offroad_right/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-qcpufgs3/offroad_right/wram-high.bin', '--screenshot', '64:<GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0064.png', '--screenshot', '90:<GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0090.png', '--screenshot', '115:<GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0115.png', '--screenshot', '145:<GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0145.png', '--screenshot', '179:<GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0179.png']
-[probe] loaded 3 pad script entries from <GAME>/build/ymir-evidence-qcpufgs3/offroad_right/input.pad
-[probe] frame 64 -> <GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0064.png (320x224) audio 0
-[probe] frame 90 -> <GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0090.png (320x224) audio 0
-[probe] frame 115 -> <GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0115.png (320x224) audio 0
-[probe] frame 145 -> <GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0145.png (320x224) audio 0
-[probe] frame 179 -> <GAME>/build/ymir-evidence-qcpufgs3/offroad_right/frame-0179.png (320x224) audio 0
-wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-qcpufgs3/offroad_right/wram-high.bin
+COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '180', '--out', '<GAME>/build/ymir-evidence-4glehmkj/offroad_right/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-4glehmkj/offroad_right/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-4glehmkj/offroad_right/wram-high.bin', '--screenshot', '64:<GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0064.png', '--screenshot', '90:<GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0090.png', '--screenshot', '115:<GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0115.png', '--screenshot', '145:<GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0145.png', '--screenshot', '179:<GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0179.png']
+[probe] loaded 3 pad script entries from <GAME>/build/ymir-evidence-4glehmkj/offroad_right/input.pad
+[probe] frame 64 -> <GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0064.png (320x224) audio 0
+[probe] frame 90 -> <GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0090.png (320x224) audio 0
+[probe] frame 115 -> <GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0115.png (320x224) audio 0
+[probe] frame 145 -> <GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0145.png (320x224) audio 0
+[probe] frame 179 -> <GAME>/build/ymir-evidence-4glehmkj/offroad_right/frame-0179.png (320x224) audio 0
+wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-4glehmkj/offroad_right/wram-high.bin
 misaligned data accesses: master 0, slave 0
-probe: wrote <GAME>/build/ymir-evidence-qcpufgs3/offroad_right/probe.json after 180 frames
+probe: wrote <GAME>/build/ymir-evidence-4glehmkj/offroad_right/probe.json after 180 frames
 info  | VDP-Config       | Switched to Software VDP renderer
 debug | SWRender-VDP1    | Enabling threaded VDP1 rendering
 debug | SWRender-VDP2    | Enabling threaded VDP2 rendering
