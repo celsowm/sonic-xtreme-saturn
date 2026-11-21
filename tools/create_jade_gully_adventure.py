@@ -111,33 +111,41 @@ def import_cc0_prop(item,materials):
     return obj
 
 
-def valley_landmass(main,mat):
-    """A continuous, fully walkable valley instead of isolated sky bridges.
+def valley_landmass(main,materials):
+    """Continuous collision valley with shorter textured patches near Sonic.
 
-    Five wide cross-sectional heights follow the MAIN terrain height, with
-    a raised canopy ridge left, a depressed river basin right and elevated
-    far silhouette banks. Render and collision share exact geometry.
-    Only 80 triangles replace the 88 vertical cliff triangles from v1.
+    The original 80-triangle, single-meadow surface stretched one texture
+    across huge faces. Include every main-route station (no floating roadway),
+    split the four nearest longitudinal intervals, and give each cross-valley
+    band a distinct existing Kenney CC0 texture. No UV runtime allocations.
+    Four separate collision copies share identical boundary coordinates.
     """
-    rows=[(main[0][0],-12,main[0][2],main[0][3])]
-    rows.extend(point for i,point in enumerate(main) if i!=1)
+    rows=[(main[0][0],-12,main[0][2],main[0][3]),*main]
+    refined=[]
+    for i,point in enumerate(rows):
+        refined.append(point)
+        if i<4 and i+1<len(rows):
+            following=rows[i+1]
+            refined.append(tuple((point[k]+following[k])*0.5 for k in range(4)))
     offsets=(-48.0,-20.0,0.0,20.0,48.0)
-    vertices=[]
-    quads=[]
-    for x,y,z,width in rows:
+    bands=("canopy","terrace","meadow","rock")
+    grid=[]
+    for x,y,z,width in refined:
         left=4.0 if 24<=y<=95 else 2.0
         river=-4.5 if 35<=y<=79 else 1.3
         levels=(left+6.0,left,-0.5,river,river+6.0)
-        for dx,dz in zip(offsets,levels):
-            vertices.append((x+dx,y,z+dz))
-    for row in range(len(rows)-1):
-        for col in range(len(offsets)-1):
-            a=row*len(offsets)+col
-            b=(row+1)*len(offsets)+col
-            quads.append((a,a+1,b+1,b))
-    land=base.mesh_prop("jade_valley_meadow",vertices,quads,mat)
-    base.collision_copy(land)
-    return land
+        grid.append([(x+dx,y,z+dz) for dx,dz in zip(offsets,levels)])
+    for col,material in enumerate(bands):
+        verts=[]
+        quads=[]
+        for row in grid:
+            verts.extend((row[col],row[col+1]))
+        for i in range(len(grid)-1):
+            n=2*i
+            quads.append((n,n+1,n+3,n+2))
+        obj=base.mesh_prop(f"jade_valley_band_{col}_{material}",verts,quads,materials[material])
+        base.collision_copy(obj)
+    return len(grid)-1
 
 
 def branch_terrace(route,mat,side):
@@ -215,7 +223,7 @@ def main():
     # Build surrounding solid ground first. Main and branching ribbons are
     # kept at their exact old coordinates; the valley is a separate walkable
     # mesh for exploration and safe landings beyond the track edges.
-    valley_landmass(data["routes"][0]["stations"],materials["meadow"])
+    valley_landmass(data["routes"][0]["stations"],materials)
     for route in data["routes"]:
         top=base.ribbon(route["id"]+"_route",route["stations"],materials[route["id"]])
         base.collision_copy(top)
