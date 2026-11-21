@@ -284,10 +284,12 @@ def main():
         if route["id"]=="main":
             fine=refine_first_segments(route["stations"],
                                         data["visual_tiling"]["main_route_prefix_segments"])
-            base.ribbon("main_tiled_route",fine,materials["main"])
             # Original collision copy remains independent. Remove only the
             # redundant coarse *render* ribbon, not its collision mesh.
             bpy.data.objects.remove(top,do_unlink=True)
+            # Keep the _main_route suffix so the narrow OBJ baker assigns
+            # the original Kenney grass-path material, never fallback rock.
+            base.ribbon("main_route",fine,materials["main"])
         if route["id"] in ("upper","river","ruins"):
             branch_terrace(route,materials["terrace"], -1 if route["id"]!="river" else 1)
     for pad in data.get("clearings",[]):
