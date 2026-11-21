@@ -3,9 +3,10 @@ COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 08e39e9dfb235a2ad88c17c690178c5ab0927e6f
 ..............................
 ----------------------------------------------------------------------
-Ran 30 tests in 0.242s
+Ran 30 tests in 0.249s
 
 OK
+stage visibility gate ok
 {
   "branch_terrace_triangles": 24,
   "cliff_triangles": 0,
@@ -65,18 +66,10 @@ Blender quit
 -- Generating done (0.0s)
 -- Build files have been written to: <DEV>/lib-saturn/build/sdk
 [0/2] Re-checking globbed directories...
-[1/10] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/water_view.cpp.obj
-[2/10] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/water_view_apply.cpp.obj
-[3/10] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/water_plane_submit.cpp.obj
-[4/10] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/water_actor_submit.cpp.obj
-[5/10] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/water_regions.cpp.obj
-[6/10] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/water_actor.cpp.obj
-[7/10] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/water_prepare.cpp.obj
-[8/10] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/water_plane.cpp.obj
-[9/10] Linking CXX static library libsaturn.a
+ninja: no work to do.
 -- Install configuration: "Release"
--- Installing: <DEV>/saturn-prefix/lib/libsaturn.a
--- Installing: <DEV>/saturn-prefix/lib/libsaturn_startup.a
+-- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn.a
+-- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn_startup.a
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/sound_driver.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/time.h
@@ -263,10 +256,10 @@ Blender quit
 -- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/sim/src/physics/spatial/entity_stream2.cpp
 -- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/toolchains/sh2eb-elf.cmake
 -- Up-to-date: <DEV>/saturn-prefix/share/libsaturn/LICENSE
--- Installing: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnTargets.cmake
--- Installing: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnTargets-release.cmake
--- Installing: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnConfig.cmake
--- Installing: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnConfigVersion.cmake
+-- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnTargets.cmake
+-- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnTargets-release.cmake
+-- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnConfig.cmake
+-- Up-to-date: <DEV>/saturn-prefix/lib/cmake/LibSaturn/LibSaturnConfigVersion.cmake
 [xtreme] Fresh game configuration with SDK: <DEV>/saturn-prefix
 -- The C compiler identification is GNU 13.2.0
 -- Detecting C compiler ABI info
@@ -284,23 +277,23 @@ Blender quit
 -- Found assembler: <DEV>/saturn-tools/bin/sh2eb-elf-gcc
 -- Found Python3: /opt/homebrew/Frameworks/Python.framework/Versions/3.15/bin/python3.15 (found version "3.15.0") found components: Interpreter
 -- Repository Sonic R skeletal actor: <GAME>/assets/sonic-r/lod-160
--- Configuring done (0.8s)
+-- Configuring done (0.6s)
 -- Generating done (0.0s)
 -- Build files have been written to: <GAME>/build/game
 [0/2] Re-checking globbed directories...
 [1/9] Generating generated/greybox.h, generated/collision.h
-[2/9] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
-[3/9] Building C object CMakeFiles/xtreme.dir/src/stage_textures.c.obj
+[2/9] Building C object CMakeFiles/xtreme.dir/src/stage_textures.c.obj
+[3/9] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
 [4/9] Building C object CMakeFiles/xtreme.dir/src/sonic_actor.c.obj
 [5/9] Building C object CMakeFiles/xtreme.dir/assets/sonic-r/lod-160/sonic.c.obj
 [6/9] Building C object CMakeFiles/xtreme.dir/src/main.c.obj
 [7/9] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
 [8/9] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 284948 initialized bytes match ELF
+-- [boot-memory] _start=0x06004000, 285012 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 284948, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 285012, 'flags': 0, 'record_offset': 37092} IP observations=[]
 -- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 339 MODE1/2352 sectors
 -- [check] disc image OK: 339 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
