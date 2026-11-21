@@ -1,14 +1,15 @@
 COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 [xtreme] SDK source: <GAME>/build/sdk-control-08e39e9dfb235a2ad88c17c690178c5ab0927e6f
 08e39e9dfb235a2ad88c17c690178c5ab0927e6f
-.............................................
+................................................
 ----------------------------------------------------------------------
-Ran 45 tests in 0.249s
+Ran 48 tests in 0.256s
 
 OK
 stage visibility gate ok
 whole-tree stage LOD ok
 render profile ring ok
+frame sync XSW1 ring ok
 authored ring frame clock ok
 {
   "branch_terrace_triangles": 24,
@@ -327,12 +328,12 @@ ninja: no work to do.
 [8/10] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
 [9/10] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 312420 initialized bytes match ELF
+-- [boot-memory] _start=0x06004000, 317212 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 312420, 'flags': 0, 'record_offset': 37092} IP observations=[]
--- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 352 MODE1/2352 sectors
--- [check] disc image OK: 352 MODE1/2352 sectors
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 317212, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 354 MODE1/2352 sectors
+-- [check] disc image OK: 354 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
 [adventure] Baked continuous landscape verified: {'render_triangles': 461, 'collision_triangles': 168, 'collision_vertices': 188, 'markers': 13, 'palm_lod_groups': 7}
 [xtreme] Disc: <GAME>/build/game/disc/xtreme.cue
