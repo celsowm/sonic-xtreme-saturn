@@ -1,9 +1,9 @@
 COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 [xtreme] SDK source: <DEV>/lib-saturn
 04553e1f4865dfa906bc594f64f34677c8f9feb1
-......................
+..........................
 ----------------------------------------------------------------------
-Ran 22 tests in 0.007s
+Ran 26 tests in 0.243s
 
 OK
 {
@@ -253,20 +253,31 @@ ninja: no work to do.
 -- Generating done (0.0s)
 -- Build files have been written to: <GAME>/build/game
 [0/2] Re-checking globbed directories...
-[1/8] Generating generated/greybox.h, generated/collision.h
-[2/8] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
-[3/8] Building C object CMakeFiles/xtreme.dir/src/sonic_actor.c.obj
-[4/8] Building C object CMakeFiles/xtreme.dir/assets/sonic-r/lod-160/sonic.c.obj
-[5/8] Building C object CMakeFiles/xtreme.dir/src/main.c.obj
-[6/8] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
+[1/10] Generating generated/greybox.h, generated/collision.h
+[2/10] Quantizing Kenney CC0 PNG terrain textures for VDP1 indexed8
+[cc0] grass-path: 233 source RGB colors => 31 visible INDEX8 colors
+[cc0] sand-path: 249 source RGB colors => 31 visible INDEX8 colors
+[cc0] rock-grey: 251 source RGB colors => 31 visible INDEX8 colors
+[cc0] forest-leaves: 236 source RGB colors => 31 visible INDEX8 colors
+[cc0] sandstone: 252 source RGB colors => 31 visible INDEX8 colors
+[cc0] waterfall: 255 source RGB colors => 31 visible INDEX8 colors
+[cc0] meadow-grass: 235 source RGB colors => 31 visible INDEX8 colors
+[cc0] moss-bank: 239 source RGB colors => 31 visible INDEX8 colors
+[cc0] VDP1 total: 8 x 64x64 = 32,768 bytes; one 256-color CRAM bank
+[3/10] Building C object CMakeFiles/xtreme.dir/src/controller.c.obj
+[4/10] Building C object CMakeFiles/xtreme.dir/src/stage_textures.c.obj
+[5/10] Building C object CMakeFiles/xtreme.dir/src/sonic_actor.c.obj
+[6/10] Building C object CMakeFiles/xtreme.dir/assets/sonic-r/lod-160/sonic.c.obj
+[7/10] Building C object CMakeFiles/xtreme.dir/src/main.c.obj
+[8/10] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
-[7/8] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 242928 initialized bytes match ELF
+[9/10] Creating Saturn disc image xtreme
+-- [boot-memory] _start=0x06004000, 276984 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 242928, 'flags': 0, 'record_offset': 37092} IP observations=[]
--- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 318 MODE1/2352 sectors
--- [check] disc image OK: 318 MODE1/2352 sectors
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 276984, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 335 MODE1/2352 sectors
+-- [check] disc image OK: 335 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
 [adventure] Baked continuous landscape verified: {'render_triangles': 238, 'collision_triangles': 128, 'collision_vertices': 115, 'markers': 13}
 [xtreme] Disc: <GAME>/build/game/disc/xtreme.cue

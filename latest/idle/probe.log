@@ -1,11 +1,11 @@
-COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '130', '--out', '<GAME>/build/ymir-evidence-4glehmkj/idle/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-4glehmkj/idle/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-4glehmkj/idle/wram-high.bin', '--screenshot', '40:<GAME>/build/ymir-evidence-4glehmkj/idle/frame-0040.png', '--screenshot', '90:<GAME>/build/ymir-evidence-4glehmkj/idle/frame-0090.png', '--screenshot', '129:<GAME>/build/ymir-evidence-4glehmkj/idle/frame-0129.png']
-[probe] loaded 1 pad script entries from <GAME>/build/ymir-evidence-4glehmkj/idle/input.pad
-[probe] frame 40 -> <GAME>/build/ymir-evidence-4glehmkj/idle/frame-0040.png (320x224) audio 0
-[probe] frame 90 -> <GAME>/build/ymir-evidence-4glehmkj/idle/frame-0090.png (320x224) audio 0
-[probe] frame 129 -> <GAME>/build/ymir-evidence-4glehmkj/idle/frame-0129.png (320x224) audio 0
-wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-4glehmkj/idle/wram-high.bin
+COMMAND: ['<YMIR_PROBE>', '--iso', '<GAME>/build/game/disc/xtreme.cue', '--bin', '<GAME>/build/game/xtreme.app.bin', '--bios', '<BIOS>', '--frames', '130', '--out', '<GAME>/build/ymir-evidence-b5v230gu/idle/probe.json', '--pad-script', '<GAME>/build/ymir-evidence-b5v230gu/idle/input.pad', '--dump-wram-high', '<GAME>/build/ymir-evidence-b5v230gu/idle/wram-high.bin', '--screenshot', '40:<GAME>/build/ymir-evidence-b5v230gu/idle/frame-0040.png', '--screenshot', '90:<GAME>/build/ymir-evidence-b5v230gu/idle/frame-0090.png', '--screenshot', '129:<GAME>/build/ymir-evidence-b5v230gu/idle/frame-0129.png']
+[probe] loaded 1 pad script entries from <GAME>/build/ymir-evidence-b5v230gu/idle/input.pad
+[probe] frame 40 -> <GAME>/build/ymir-evidence-b5v230gu/idle/frame-0040.png (320x224) audio 0
+[probe] frame 90 -> <GAME>/build/ymir-evidence-b5v230gu/idle/frame-0090.png (320x224) audio 0
+[probe] frame 129 -> <GAME>/build/ymir-evidence-b5v230gu/idle/frame-0129.png (320x224) audio 0
+wrote 1048576 bytes of High WRAM to <GAME>/build/ymir-evidence-b5v230gu/idle/wram-high.bin
 misaligned data accesses: master 0, slave 0
-probe: wrote <GAME>/build/ymir-evidence-4glehmkj/idle/probe.json after 130 frames
+probe: wrote <GAME>/build/ymir-evidence-b5v230gu/idle/probe.json after 130 frames
 info  | VDP-Config       | Switched to Software VDP renderer
 debug | SWRender-VDP1    | Enabling threaded VDP1 rendering
 debug | SWRender-VDP2    | Enabling threaded VDP2 rendering
