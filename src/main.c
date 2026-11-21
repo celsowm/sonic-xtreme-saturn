@@ -699,6 +699,11 @@ int main(void) {
         record_frame_sample();
         xtreme_debug.frames=xtreme_frames;
         xtreme_boot_debug.frames=xtreme_frames;
+#ifdef XTREME_HAS_SONIC
+        /* SXAC and XTDB are both sampled at the completed-frame boundary.
+         * No live animation state leaks into a Ymir WRAM snapshot. */
+        xtreme_sonic_publish_debug();
+#endif
         publish_debug(xtreme_frames);
     }
     (void)sat_shutdown();
