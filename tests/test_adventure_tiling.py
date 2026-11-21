@@ -1,5 +1,7 @@
 import unittest
-from tools.adventure_tiling import midpoint,refine_first_segments,split_quad_across
+from tools.adventure_tiling import midpoint,refine_first_segments,split_quad_across,make_valley_grid,sample_valley_height
+from tools.validate_adventure_layout import DEFAULT
+import json
 
 
 class AdventureTilingTests(unittest.TestCase):
@@ -26,6 +28,22 @@ class AdventureTilingTests(unittest.TestCase):
         self.assertEqual(right[2],c)
         self.assertEqual(left[3],d)
         self.assertEqual(midpoint(a,b),left[1])
+
+    def test_prop_elevation_uses_actual_valley_cross_sections(self):
+        manifest=json.loads(DEFAULT.read_text())
+        grid=make_valley_grid(manifest["routes"][0]["stations"])
+        # Every original cross-section height remains exact at its five points.
+        for row in grid:
+            for x,y,z in row:
+                self.assertAlmostEqual(sample_valley_height(grid,x,y),z,places=5)
+        snapped=[p for p in manifest["set_dressing"] if p.get("snap_to_valley")]
+        self.assertEqual(len(snapped),14)
+        for prop in snapped:
+            x,y,z=prop["position"]
+            ground=sample_valley_height(grid,x,y)
+            self.assertLessEqual(abs(z-ground),8.0,prop["id"])
+        with self.assertRaises(ValueError):
+            sample_valley_height(grid,500,50)
 
     def test_reject_unbounded_tessellation(self):
         with self.assertRaises(ValueError):
