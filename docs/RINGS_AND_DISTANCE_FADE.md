@@ -151,3 +151,35 @@ palette bank 6 is already occupied by any managed Sonic texture at runtime,
 change the upload allocation to a verified non-conflicting palette slot
 before approving. No new display-frame-rate claim until a hardware-capable
 render qualification.
+
+## 4. Automatic Mac-to-GitHub evidence handoff (SDK control)
+
+**Default behavior now publishes the ZIP automatically**, including `review`
+and failed build diagnostics, to the isolated
+`ymir-sdk-control-evidence` branch. The source-level tests and the
+`--no-publish` override in the underlying harness remain available for
+intentional local-only runs, but the normal
+`scripts/qualify-jade-sdk-control-mac.sh` wrapper never opts out.
+
+```sh
+# After obtaining the latest branch: run Ymir, push ZIP + JSON + screenshots
+bash scripts/qualify-jade-sdk-control-mac.sh
+
+# Already ran the previous script? Send the LAST local ZIP, no new Ymir run:
+bash scripts/qualify-jade-sdk-control-mac.sh --upload-last
+```
+
+Read back from the GitHub connector with
+`ref=ymir-sdk-control-evidence`, paths
+`latest/summary.json`, `latest/return.zip`,
+`latest/idle/frame-0090.png`,
+`latest/curve_route/frame-0125.png`,
+`latest/offroad_right/frame-0145.png`.
+The existing full five-case qualification continues to use the
+`ymir-evidence` branch independently. Neither publisher checks out or
+modifies `main` or the developer's working-tree index; the Mac must have
+working GitHub push credentials and DNS. If publication fails, the ZIP stays
+locally in `build/`, and the `--upload-last` command can retry when
+connectivity returns. Personal file paths in log/map/json metadata are
+sanitized before packing and pushing; BIOS, RAM dumps, and private ROM
+binaries are not included.
