@@ -5,6 +5,7 @@
 #include "ring_sprites.h"
 #include "ring_texture_data.h"
 #include <saturn/vdp1.h>
+#include <saturn/color.h> /* SAT_RGB555: standalone ring module needs direct header */
 
 static sat_vdp1_texture_t ring_textures[XTREME_RING_FRAME_COUNT];
 static sat_scene3d_material_t ring_materials[XTREME_RING_FRAME_COUNT];
