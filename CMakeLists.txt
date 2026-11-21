@@ -23,6 +23,7 @@ add_executable(xtreme src/main.c src/controller.c "${GENERATED}" "${GENERATED_CO
 set(XTREME_STAGE_LAYOUT "classic" CACHE STRING "Selected level layout: classic|adventure")
 if(XTREME_STAGE_LAYOUT STREQUAL "adventure")
     target_compile_definitions(xtreme PRIVATE XTREME_STAGE_ADVENTURE=1)
+    target_sources(xtreme PRIVATE src/stage_textures.c)
 elseif(NOT XTREME_STAGE_LAYOUT STREQUAL "classic")
     message(FATAL_ERROR "Unknown XTREME_STAGE_LAYOUT: ${XTREME_STAGE_LAYOUT}")
 endif()
