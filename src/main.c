@@ -9,6 +9,7 @@
 #include "stage_textures.h"
 #include "stage_visibility.h"
 #include "stage_lod.h"
+#include "render_profile.h"
 #endif
 #ifdef XTREME_HAS_SONIC
 #include "sonic_actor.h"
@@ -327,6 +328,11 @@ static sat_result_t draw_gold_ring(const sat_vec3_t* pos) {
 static xtreme_stage_aabb_t stage_bounds[STAGE_FACE_COUNT];
 static sat_quad3_t stage_cached_quads[STAGE_FACE_COUNT];
 static uint8_t stage_lod_near[STAGE_LOD_GROUP_COUNT ? STAGE_LOD_GROUP_COUNT : 1u];
+/* Separate compact instrumentation avoids changing XTDB v3 or XFP1. */
+volatile xtreme_render_history_t xtreme_render_history={
+    .magic=XTREME_RENDER_HISTORY_MAGIC,.version=1u
+};
+static xtreme_render_sample_t render_pending;
 
 /* One distance decision per palm, not per polygon: bark and canopy always
  * switch together. Square-distance is unnecessary on SH-2; a conservative
@@ -378,17 +384,27 @@ static int stage_quad_relevant(unsigned i) {
 static sat_result_t draw_stage(void) {
     sat_result_t rc;
 #ifdef XTREME_STAGE_ADVENTURE
+    render_pending=(xtreme_render_sample_t){0};
+    render_pending.stage_faces_tested=STAGE_FACE_COUNT;
     stage_select_prop_lods();
 #endif
     for (unsigned i=0; i<STAGE_FACE_COUNT; ++i) {
         const stage_face_t* f = &stage_faces[i];
-        if(!stage_quad_relevant(i)) continue;
+        if(!stage_quad_relevant(i)) {
+#ifdef XTREME_STAGE_ADVENTURE
+            ++render_pending.stage_visibility_skipped;
+#endif
+            continue;
+        }
 #ifdef XTREME_STAGE_ADVENTURE
         /* Near/far model *groups* are mutually exclusive. One switch
          * controls the whole Kenney tree, preserving wood and foliage.
          * Keep panoramic/debug rendering on the same budgeted LOD path. */
-        if(f->lod==1u && !stage_lod_near[f->lod_group]) continue;
-        if(f->lod==2u && stage_lod_near[f->lod_group]) continue;
+        if((f->lod==1u && !stage_lod_near[f->lod_group]) ||
+           (f->lod==2u && stage_lod_near[f->lod_group])) {
+            ++render_pending.stage_lod_skipped;
+            continue;
+        }
 #endif
 #ifdef XTREME_STAGE_ADVENTURE
         /* No flat RGB polygon in Adventure: every baked stage face
@@ -404,6 +420,11 @@ static sat_result_t draw_stage(void) {
 #endif
         if (rc != SAT_OK) return rc;
     }
+#ifdef XTREME_STAGE_ADVENTURE
+    /* Count only accepted world-stage submissions; renderer/painter culls
+     * and clipped triangles are reported separately after scene flush. */
+    render_pending.stage_submitted=scene.submitted_faces;
+#endif
     for (unsigned i=0;i<STAGE_ENTITY_COUNT;++i) {
         const stage_entity_t* e = &stage_entities[i];
         const sat_vec3_t p = e->pos;
@@ -432,6 +453,10 @@ static sat_result_t draw_stage(void) {
         rc = submit(&q,marker_colors[e->kind]);
         if (rc != SAT_OK) return rc;
     }
+#ifdef XTREME_STAGE_ADVENTURE
+    render_pending.marker_submitted=
+        scene.submitted_faces-render_pending.stage_submitted;
+#endif
     return SAT_OK;
 }
 static sat_result_t draw_player(void) {
@@ -718,11 +743,24 @@ int main(void) {
         xtreme_debug.hud_reserved=reserved;
         rc = sat_scene_begin(&scene,&camera,camera.near_z,WIDTH,HEIGHT,reserved);
         if (rc != SAT_OK) return fail(rc);
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t stage_start=sat_time_ms();
+#endif
         rc = draw_stage();
         if (rc != SAT_OK) return fail(rc);
+#ifdef XTREME_STAGE_ADVENTURE
+        const uint32_t actor_start=sat_time_ms();
+        render_pending.scene_begin_ms=stage_start-scene_start;
+        render_pending.stage_ms=actor_start-stage_start;
+        const uint32_t before_actor=scene.submitted_faces;
+#endif
         rc=draw_player();
         if (rc!=SAT_OK) return fail(rc);
         const uint32_t flush_start=sat_time_ms();
+#ifdef XTREME_STAGE_ADVENTURE
+        render_pending.actor_ms=flush_start-actor_start;
+        render_pending.actor_submitted=scene.submitted_faces-before_actor;
+#endif
         xtreme_debug.scene_ms=flush_start-scene_start;
 #ifdef XTREME_STAGE_ADVENTURE
         /* All Sonic indexed textures and the RGB stage palette are uploaded
@@ -735,6 +773,13 @@ int main(void) {
         rc=sat_scene_flush(&scene);
 #endif
         xtreme_debug.flush_ms=sat_time_ms()-flush_start;
+#ifdef XTREME_STAGE_ADVENTURE
+        render_pending.flush_ms=xtreme_debug.flush_ms;
+        render_pending.total_submitted=scene.submitted_faces;
+        render_pending.total_flushed=scene.flushed_faces;
+        render_pending.painter_culled=scene.culled_faces;
+        render_pending.painter_clipped=scene.clipped_faces;
+#endif
         if(rc!=SAT_OK&&rc!=SAT_ERR_CAPACITY)return fail(rc);
         if(rc!=SAT_OK){xtreme_debug.error=rc;xtreme_error=rc;}
         xtreme_world_commands=scene.world_commands;
@@ -761,6 +806,10 @@ int main(void) {
         if (rc != SAT_OK) return fail(rc);
         ++xtreme_frames;
         record_frame_sample();
+#ifdef XTREME_STAGE_ADVENTURE
+        render_pending.frame=xtreme_frames;
+        xtreme_render_history_append(&xtreme_render_history,&render_pending);
+#endif
         xtreme_debug.frames=xtreme_frames;
         xtreme_boot_debug.frames=xtreme_frames;
 #ifdef XTREME_HAS_SONIC
