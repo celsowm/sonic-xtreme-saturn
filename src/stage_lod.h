@@ -9,12 +9,14 @@
  */
 static inline uint8_t xtreme_stage_lod_choose_near(
     int32_t center_x, int32_t center_z,
-    int32_t actor_x, int32_t actor_z) {
+    int32_t actor_x, int32_t actor_z,
+    uint8_t was_near) {
     int64_t dx=(int64_t)center_x-actor_x;
     int64_t dz=(int64_t)center_z-actor_z;
     if(dx<0)dx=-dx;
     if(dz<0)dz=-dz;
-    const int64_t threshold=(int64_t)(27*65536);
+    /* Hysteresis prevents a stationary camera from flickering at 27 m. */
+    const int64_t threshold=(int64_t)((was_near?30:24)*65536);
     return (uint8_t)(dx<=threshold && dz<=threshold);
 }
 #endif
