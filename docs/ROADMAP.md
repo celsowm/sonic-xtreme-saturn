@@ -136,3 +136,15 @@ The newest full five-case Ymir replay **did execute the v4 candidate** at game c
 Critically, the previous **same-PR candidate** that achieved 30/s at idle used a **different SDK commit** (`08e39e9dfb235a2ad88c17c690178c5ab0927e6f`). The newer `f4ca95f` was not retrievable from the public `celsowm/libsaturn` GitHub commit endpoint at the time of review. It may exist only locally or on another remote; do not attribute the regression to either the engine or level artwork without controlling the dependency revision.
 
 Added `scripts/qualify-jade-sdk-control-mac.sh`: checks out the immutable published `08e39e9` in a **separate** LibSaturn worktree, uses isolated build/install directories and the existing Ymir probe and BIOS, runs **idle/curve/offroad with exactly the current game checkout**, saves evidence only as a local ZIP with `--no-publish`, and prints the measured P95 and submission rates. It does **not** reset the developer's SDK or overwrite `ymir-evidence/latest`. If the controlled replay is still slow, optimize the application rendering/LOD; if it recovers, bisect SDK revisions and validate both with the same art before accepting an engine regression hypothesis. Keep PR #2 a draft until repeatable Ymir visual and performance evidence is available.
+
+## Jade Gully SDK-controlled Ymir result — confirmed (2026-11-21)
+
+The Mac ran the newly introduced isolated SDK control script at game commit `788bb1cb452b2b391da59969c4054283f67eb0a5`, with its unmodified local LibSaturn at `f4ca95f21259e3771e4788fc27064a9bffad51ff` and the published, detached control LibSaturn at `08e39e9dfb235a2ad88c17c690178c5ab0927e6f`. No game source changed between the prior v4 qualification and this controlled replay; only diagnostic script/docs. The resulting archive is on the user's Mac at `build/ymir-evidence-a0961jku-return.zip`; it was **not published** to `ymir-evidence`.
+
+| Ymir scenario | Local SDK f4ca95f scene submissions/s | Control SDK 08e39e9 scene submissions/s | Control P95 frame | Control scene P95 |
+|---|---:|---:|---:|---:|
+| idle | 20 | **30** | **34ms** | 23ms |
+| curve_route | 20 | **23** | 50ms | 25ms |
+| offroad_right | 20 | **20.3** | 50ms | 25ms |
+
+**Diagnosis:** Dependency choice has a material effect on frame scheduling (particularly idle). However, curve/off-road remain over budget under the *earlier* SDK; **both code/dependency revisions and stage rendering cost deserve investigation**. Recent render path performs camera-relative static face filtering, then submits textured stage quads individually, actor mesh and ring quads into a scene-wide painter. A major next step is separating scene submission/projection and painter cost by source class and by frame, then reducing *actually unseen* moving-scene work without damaging near-ground coverage. For current performance, ordinary gameplay requires ≤38ms P95 and ≥29 scene submissions/s; these are not the same as an independent measured display cadence. Do not merge draft PR #2 or silently relax acceptance thresholds.
