@@ -77,6 +77,21 @@ for name,case in summary.get("cases",{}).items():
     print(f"[sdk-control] {name}: rate={t.get('submission_rate_hz')} scene/s "
           f"p95={f.get('frame_ms_p95')}ms scene={f.get('scene_ms_p95')}ms "
           f"checks_failed={failed}")
+    rp=case.get("render_profile")
+    if rp:
+        last=rp.get("terminal") or {}
+        print(f"[sdk-control] {name} XRH1: begin={rp['scene_begin_ms_p95']}ms "
+              f"stage={rp['stage_ms_p95']}ms actor={rp['actor_ms_p95']}ms "
+              f"flush={rp['flush_ms_p95']}ms (all p95); "
+              f"stage_submit={last.get('stage_submitted')} "
+              f"marker_submit={last.get('marker_submitted')} "
+              f"actor_submit={last.get('actor_submitted')} "
+              f"vis_skip={last.get('stage_visibility_skipped')} "
+              f"lod_skip={last.get('stage_lod_skipped')} "
+              f"painter_culled={last.get('painter_culled')}")
+    else:
+        print(f"[sdk-control] {name} XRH1: UNAVAILABLE "
+              f"({case.get('render_profile_decode_error','no record')})")
 if summary.get("sdk_commit")!=pin or summary.get("game_commit")!=game:
     raise SystemExit("[sdk-control] Revision mismatch; A/B is invalid")
 print("[sdk-control] Compare with the previous Ymir 20/s / p95 50–51ms. "
