@@ -69,4 +69,59 @@ static inline int xtreme_stage_aabb_may_be_in_front(
     return max_depth> -((int64_t)65536*65536);
 }
 
+
+/* Plane-budgeted conservative frustum gate for real authored static faces.
+ * Uses the identical ROW-MAJOR view-projection matrix that LibSaturn uses
+ * for sat_project_vertices(). For an OpenGL clip-space point, visible implies
+ *  -w <= x <= w, -w <= y <= w. A quad lies entirely outside a side
+ * if even the most favourable AABB support corner has a NEGATIVE (w +/- x/y).
+ *
+ * All coefficients/positions are signed Q16.16. Accumulate their products
+ * in int64_t (Q32.32). The -2-world-unit homogeneous margin intentionally
+ * retains geometry near boundaries and differences from fixed-point rounding.
+ * Do NOT use the box center: terrain quads span long camera seams.
+ * No depth/far-plane clipping here, so near terrain and near-clip fallbacks
+ * are unchanged. Caller must bypass the gate in panorama/debug viewer mode.
+ */
+typedef struct xtreme_stage_frustum {
+    int32_t planes[4][4]; /* left, right, bottom, top; x,y,z,constant */
+    uint8_t valid;
+} xtreme_stage_frustum_t;
+
+static inline void xtreme_stage_frustum_prepare(
+    xtreme_stage_frustum_t* out,const int32_t* view_proj) {
+    if(!out)return;
+    out->valid=0u;
+    if(!view_proj)return;
+    for(unsigned plane=0;plane<4u;++plane) {
+        const unsigned axis=plane<2u?0u:1u;
+        const int sign=(plane&1u)?-1:1;
+        for(unsigned i=0;i<4u;++i) {
+            const int64_t coefficient=
+                (int64_t)view_proj[12u+i]+sign*(int64_t)view_proj[axis*4u+i];
+            if(coefficient>INT32_MAX || coefficient<INT32_MIN)return;
+            out->planes[plane][i]=(int32_t)coefficient;
+        }
+    }
+    out->valid=1u;
+}
+
+static inline int xtreme_stage_aabb_frustum_relevant(
+    const xtreme_stage_aabb_t* b,const xtreme_stage_frustum_t* frustum) {
+    if(!frustum || !frustum->valid)return 1;
+    /* Margin is larger than per-product Q16 rounding error. The extra
+     * world unit also protects near-FOV edge texture/polygon coverage. */
+    const int64_t margin=2LL*65536*65536;
+    for(unsigned plane=0;plane<4u;++plane) {
+        const int32_t* p=frustum->planes[plane];
+        const int64_t max_plane=
+            (int64_t)p[0]*(p[0]>=0?b->hi_x:b->lo_x)+
+            (int64_t)p[1]*(p[1]>=0?b->hi_y:b->lo_y)+
+            (int64_t)p[2]*(p[2]>=0?b->hi_z:b->lo_z)+
+            (int64_t)p[3]*65536;
+        if(max_plane< -margin)return 0;
+    }
+    return 1;
+}
+
 #endif
