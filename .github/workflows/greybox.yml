@@ -64,6 +64,9 @@ jobs:
           python tools/bake_greybox.py build/jade-adventure/jade_gully.render.obj build/jade-adventure/jade_gully.json build/jade-adventure/greybox.h --collision build/jade-adventure/jade_gully.collision.obj --collision-output build/jade-adventure/collision.h
           python tools/check_adventure_bake.py build/jade-adventure/greybox.h build/jade-adventure/collision.h
           cc -std=c11 -Wall -Wextra -Werror -DXTREME_STAGE_ADVENTURE=1 -fsyntax-only -I sdk-source/include -I src -I build/jade-adventure src/main.c
+          # Exercise the actual frustum-enabled compilation path as well as
+          # the OFF fallback; errors must not escape the source-only CI.
+          cc -std=c11 -Wall -Wextra -Werror -DXTREME_STAGE_ADVENTURE=1 -DXTREME_STAGE_FRUSTUM_GATE=1 -fsyntax-only -I sdk-control/include -I src -I build/jade-adventure src/main.c
           python tools/bake_stage_textures.py assets/textures/jade-gully build/jade-adventure/stage_texture_data.h
           python tools/bake_stage_textures.py assets/textures/jade-gully build/jade-adventure-repeat/stage_texture_data.h
           cmp build/jade-adventure/stage_texture_data.h build/jade-adventure-repeat/stage_texture_data.h
