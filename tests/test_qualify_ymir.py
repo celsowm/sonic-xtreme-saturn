@@ -149,7 +149,9 @@ class YmirTelemetryContractTests(unittest.TestCase):
         self.assertEqual(sync["total_frames_recorded"],66)
         self.assertEqual(sync["last_frames"][0]["frame"],3)
         self.assertEqual(sync["terminal"]["frame"],66)
-        self.assertEqual(sync["begin_ms_p95"],17)
+        # Only 3/64 frames are slow: nearest-rank P95 is still 5ms.
+        self.assertEqual(sync["begin_ms_p95"],5)
+        self.assertEqual(max(x["begin_ms"] for x in sync["last_frames"]),17)
         self.assertEqual(sync["end_ms_p95"],1)
         self.assertEqual(sync["begin_fields_p95"],1)
 
