@@ -91,6 +91,67 @@ def locate_frame_history(raw,maps):
     off,values=found[0]
     return values,0x06000000+off,"header_scan"
 
+# XRH1 v1 is separate from the existing XTDB and frame pacing XFP1.
+# Per-frame intervals come from sat_time_ms(), not direct GPU measurements.
+RENDER_CAPACITY=64
+RENDER_FIELDS=("frame scene_begin_ms stage_ms actor_ms flush_ms "
+               "stage_faces_tested stage_visibility_skipped stage_lod_skipped "
+               "stage_submitted marker_submitted actor_submitted total_submitted "
+               "total_flushed painter_culled painter_clipped").split()
+RENDER_WORDS=len(RENDER_FIELDS)
+RENDER_MAGIC=0x58524831
+
+def decode_render_history(raw,offset):
+    need=16+RENDER_CAPACITY*RENDER_WORDS*4
+    if offset<0 or offset+need>len(raw):
+        raise ValueError("XRH1 ring outside WRAM-H")
+    magic,version,count,nxt=struct.unpack_from(">4I",raw,offset)
+    if magic!=RENDER_MAGIC or version!=1 or count>RENDER_CAPACITY or nxt<count:
+        raise ValueError("invalid XRH1 v1 header")
+    samples=[]
+    start=(nxt-count)%RENDER_CAPACITY
+    for i in range(count):
+        pos=(start+i)%RENDER_CAPACITY
+        values=struct.unpack_from(">"+str(RENDER_WORDS)+"I",
+                                 raw,offset+16+pos*RENDER_WORDS*4)
+        sample=dict(zip(RENDER_FIELDS,values))
+        if (sample["stage_submitted"]+sample["marker_submitted"]+
+                sample["actor_submitted"] != sample["total_submitted"]):
+            raise ValueError("XRH1 unattributed submissions")
+        if (sample["stage_visibility_skipped"]+sample["stage_lod_skipped"]+
+                sample["stage_submitted"] > sample["stage_faces_tested"]):
+            raise ValueError("XRH1 impossible stage visibility counters")
+        samples.append(sample)
+    return {
+        "version":version,"count":count,"total_frames_recorded":nxt,
+        "last_frames":samples,
+        "scene_begin_ms_p95":percentile_nearest_rank([x["scene_begin_ms"] for x in samples],95),
+        "stage_ms_p95":percentile_nearest_rank([x["stage_ms"] for x in samples],95),
+        "actor_ms_p95":percentile_nearest_rank([x["actor_ms"] for x in samples],95),
+        "flush_ms_p95":percentile_nearest_rank([x["flush_ms"] for x in samples],95),
+        "stage_submitted_p95":percentile_nearest_rank([x["stage_submitted"] for x in samples],95),
+        "painter_culled_p95":percentile_nearest_rank([x["painter_culled"] for x in samples],95),
+        "terminal":samples[-1] if samples else None
+    }
+
+def locate_render_history(raw,maps):
+    for p in maps:
+        m=re.search(r"0x([0-9a-fA-F]+)\\s+_?xtreme_render_history\\b",
+                    p.read_text(errors="replace"))
+        if m:
+            address=int(m[1],16)
+            return decode_render_history(raw,address-0x06000000),address,"map"
+    found=[]
+    sig=struct.pack(">II",RENDER_MAGIC,1)
+    for m in re.finditer(re.escape(sig),raw):
+        if m.start()%4:continue
+        try:found.append((m.start(),decode_render_history(raw,m.start())))
+        except (ValueError,struct.error):continue
+    if len(found)!=1:
+        raise ValueError(f"expected unique XRH1 ring, found {len(found)}")
+    off,values=found[0]
+    return values,0x06000000+off,"header_scan"
+
 BOOT_NAMES=("magic version stage error main_entries frames").split()
 BOOT_SIZE=4*len(BOOT_NAMES)
 
@@ -468,6 +529,20 @@ def main():
                     (d/"frame-pacing.json").write_text(json.dumps(hist,indent=2)+"\n")
                 except (ValueError,OSError,struct.error) as exc:
                     result["frame_pacing_decode_error"]=str(exc)
+                if is_adventure:
+                    try:
+                        profile,profile_addr,profile_method=locate_render_history(raw,maps)
+                        result["render_profile"]=profile
+                        result["render_profile_address"]=hex(profile_addr)
+                        result["render_profile_method"]=profile_method
+                        (d/"render-profile.json").write_text(json.dumps(profile,indent=2)+"\n")
+                    except (ValueError,OSError,struct.error) as exc:
+                        result["render_profile_decode_error"]=str(exc)
+                    profile=result.get("render_profile")
+                    last_profile=profile.get("terminal") if profile else None
+                    result["checks"]["render_profile_available"]=(
+                        profile is not None and profile["count"]>=30 and
+                        last_profile is not None and last_profile["frame"]==t["frames"])
                 if sonic_present:
                     hist=result.get("frame_pacing")
                     result["checks"]["frame_history_available"]=(hist is not None and hist["count"]>=30)
