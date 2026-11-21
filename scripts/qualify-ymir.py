@@ -152,6 +152,107 @@ def locate_render_history(raw,maps):
     off,values=found[0]
     return values,0x06000000+off,"header_scan"
 
+# XSW1: app-frame timing, kept independent of XRH1 stage/actor/flush.
+# sat_app_frame_begin() contains sat_wait_vblank + swap-request wait.
+SYNC_MAGIC=0x58535731
+SYNC_CAPACITY=64
+SYNC_FIELDS=("frame frame_interval_ms begin_ms end_ms "
+             "prior_end_gap_ms active_work_ms "
+             "field_before_begin field_after_begin field_before_end field_after_end "
+             "draw_waits_begin_delta draw_waits_end_delta "
+             "late_swaps_begin_delta late_swaps_end_delta "
+             "draw_timeouts_begin_delta draw_timeouts_end_delta").split()
+SYNC_WORDS=len(SYNC_FIELDS)
+
+def decode_sync_history(raw, offset):
+    need=16+SYNC_CAPACITY*SYNC_WORDS*4
+    if offset<0 or offset+need>len(raw):
+        raise ValueError("XSW1 ring outside WRAM-H")
+    magic,version,count,nxt=struct.unpack_from(">4I",raw,offset)
+    if magic!=SYNC_MAGIC or version!=1 or count>SYNC_CAPACITY or nxt<count:
+        raise ValueError("invalid XSW1 header")
+    samples=[]
+    start=(nxt-count)%SYNC_CAPACITY
+    for i in range(count):
+        pos=(start+i)%SYNC_CAPACITY
+        values=struct.unpack_from(">"+str(SYNC_WORDS)+"I",raw,
+                                 offset+16+pos*SYNC_WORDS*4)
+        sample=dict(zip(SYNC_FIELDS,values))
+        if sample["frame"]!=nxt-count+i+1:
+            raise ValueError("XSW1 out-of-order frame index")
+        if (sample["field_after_begin"]<sample["field_before_begin"] or
+                sample["field_after_end"]<sample["field_before_end"]):
+            raise ValueError("XSW1 invalid field order")
+        samples.append(sample)
+    def p95(name):
+        return percentile_nearest_rank([x[name] for x in samples],95)
+    return {
+        "version":version,"count":count,"total_frames_recorded":nxt,
+        "last_frames":samples,
+        "begin_ms_p50":percentile_nearest_rank([x["begin_ms"] for x in samples],50),
+        "begin_ms_p95":p95("begin_ms"),
+        "end_ms_p95":p95("end_ms"),
+        "active_work_ms_p95":p95("active_work_ms"),
+        "prior_end_gap_ms_p95":p95("prior_end_gap_ms"),
+        "begin_fields_p95":percentile_nearest_rank(
+            [x["field_after_begin"]-x["field_before_begin"] for x in samples],95),
+        "end_fields_p95":percentile_nearest_rank(
+            [x["field_after_end"]-x["field_before_end"] for x in samples],95),
+        "begin_draw_waits_total":sum(x["draw_waits_begin_delta"] for x in samples),
+        "end_draw_waits_total":sum(x["draw_waits_end_delta"] for x in samples),
+        "terminal":samples[-1] if samples else None
+    }
+
+def locate_sync_history(raw,maps):
+    for p in maps:
+        m=re.search(r"0x([0-9a-fA-F]+)\s+_?xtreme_sync_history\b",
+                    p.read_text(errors="replace"))
+        if m:
+            addr=int(m[1],16)
+            return decode_sync_history(raw,addr-0x06000000),addr,"map"
+    found=[]
+    magic=struct.pack(">II",SYNC_MAGIC,1)
+    for m in re.finditer(re.escape(magic),raw):
+        if m.start()%4:continue
+        try:found.append((m.start(),decode_sync_history(raw,m.start())))
+        except (ValueError,struct.error):continue
+    if len(found)!=1:
+        raise ValueError(f"expected unique XSW1 ring, found {len(found)}")
+    off,values=found[0]
+    return values,0x06000000+off,"header_scan"
+
+def correlate_slow_frames(frame_history,sync_history,threshold_ms=45):
+    """Match XFP1 begin-to-begin elapsed values against XSW1 per-frame IDs."""
+    if not frame_history or not sync_history:return []
+    sync={s["frame"]:s for s in sync_history["last_frames"]}
+    first=frame_history["total_frames_recorded"]-frame_history["count"]+1
+    slow=[]
+    for i,sample in enumerate(frame_history["last_frames"]):
+        frame=first+i
+        if frame not in sync:continue
+        if sync[frame]["frame_interval_ms"]!=sample["frame_ms"]:
+            raise ValueError("XFP1 / XSW1 frame interval mismatch")
+        if sample["frame_ms"]>=threshold_ms:
+            slow.append({
+                "frame":frame,"interval_ms":sample["frame_ms"],
+                "scene_ms":sample["scene_ms"],
+                "sim_ms":sample["sim_ms"],
+                "flush_ms":sample["flush_ms"],
+                "begin_call_ms":sync[frame]["begin_ms"],
+                "end_call_ms":sync[frame]["end_ms"],
+                "active_work_ms":sync[frame]["active_work_ms"],
+                "prior_end_gap_ms":sync[frame]["prior_end_gap_ms"],
+                "begin_fields":sync[frame]["field_after_begin"]-
+                               sync[frame]["field_before_begin"],
+                "end_fields":sync[frame]["field_after_end"]-
+                             sync[frame]["field_before_end"],
+                "begin_draw_waits":sync[frame]["draw_waits_begin_delta"],
+                "end_draw_waits":sync[frame]["draw_waits_end_delta"],
+                "begin_late_swaps":sync[frame]["late_swaps_begin_delta"],
+                "end_late_swaps":sync[frame]["late_swaps_end_delta"]
+            })
+    return slow
+
 BOOT_NAMES=("magic version stage error main_entries frames").split()
 BOOT_SIZE=4*len(BOOT_NAMES)
 
@@ -557,6 +658,22 @@ def main():
                     result["checks"]["render_profile_available"]=(
                         profile is not None and profile["count"]>=30 and
                         last_profile is not None and last_profile["frame"]==t["frames"])
+                    try:
+                        sync,sync_addr,sync_method=locate_sync_history(raw,maps)
+                        result["frame_sync"]=sync
+                        result["frame_sync_address"]=hex(sync_addr)
+                        result["frame_sync_method"]=sync_method
+                        hist=result.get("frame_pacing")
+                        sync["slow_frames"]=correlate_slow_frames(hist,sync)
+                        (d/"frame-sync.json").write_text(json.dumps(sync,indent=2)+"\n")
+                    except (ValueError,OSError,struct.error) as exc:
+                        result["frame_sync_decode_error"]=str(exc)
+                    sync=result.get("frame_sync")
+                    sync_last=sync.get("terminal") if sync else None
+                    result["checks"]["frame_sync_available"]=(
+                        sync is not None and sync["count"]>=30 and
+                        sync_last is not None and sync_last["frame"]==t["frames"] and
+                        sync["total_frames_recorded"]==t["frames"])
                 if sonic_present:
                     hist=result.get("frame_pacing")
                     result["checks"]["frame_history_available"]=(hist is not None and hist["count"]>=30)
