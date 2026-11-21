@@ -163,3 +163,51 @@ Draft PR #2 now emits an independent **64-completed-frame XRH1 profiler ring** i
 The Ymir harness decodes XRH1 through the linker map (falling back to unique magic-scan), verifies attribution per sample, checks that the terminal profiler frame matches the XTDB snapshot, saves `render-profile.json` inside the evidence ZIP, and reports per-class P95 timing. `qualify-jade-sdk-control-mac.sh` prints the counts and timing breakdown while retaining the old LibSaturn `08e39e9` in an isolated worktree; the ZIP is local and is not published over the previous evidence.
 
 The game remains on the draft PR branch. This change **does not optimize the scene or claim a performance recovery**; the next pinned-SDK qualification must identify whether stage submissions, Sonic actor submission or painter flush owns the expensive frames before changing geometry. The instrumentation itself has overhead and should be benchmarked against the previous captured runs.
+
+## Jade Gully conservative group-frustum optimization (candidate; Ymir pending)
+
+The updated control-RUN evidence at game `25e6542`, SDK `08e39e9`,
+measured 30/24/23 scene submissions/s for idle/curve/offroad. The newly
+textured rings save 28 marker-face submissions in all three runs, but
+moving scenes still miss the 30 scene-submissions/s diagnostic target. Their
+XHR1 stage source remains ~17–18ms P95; actor ~6ms; painter/flush ~7–9ms.
+Observed screenshots show a legible gold/transparent ring and significant
+remaining landscape texture/material quality issues. The original AABB XZ
+visibility heuristic is retained.
+
+**New candidate (not yet measured):** add a conservative four-plane view
+frustum test in `src/stage_visibility.h`, against the exact row-major
+`scene.faces.view_proj.m` used by LibSaturn's per-quad projection. The
+closed-form AABB support corner bounds each entire world-space face group
+against clip planes `w±x`/`w±y` with an additional 2-unit margin.
+All fixed-point products accumulate in signed 64-bit. If any plane excludes
+the *complete* group, its faces can be rejected without calling
+`sat_scene_submit_quad`. Straddling/near-camera/large terrain pieces
+are retained and handled by the normal SDK clipping/painter path.
+
+**SH-2 work budget:** calculate AABBs at scene startup and aggregate
+consecutive 8-face groups; calculate four plane coefficient vectors once
+per scene; evaluate at most ~58 grouped AABBs (461 authored faces) per
+render frame. Unlike testing each quad separately, this avoids thousands
+of extra 64-bit multiplies on the SH-2. Gameplay physics and collision
+are untouched. Offscreen group rejection increments the existing
+`stage_visibility_skipped` counter; no changes to XTDB/XRH1 formats.
+
+Test policy: deterministic host tests check right/left/top/bottom,
+camera yaw, whole-floor span, 2m safety, overflow-to-visible fallback,
+12,000 random AABBs, and group union. CI compiles both ON and OFF
+variants, no feature-specific SDK changes. The implementation defaults
+ON in `XTREME_STAGE_LAYOUT=adventure`, with an exact controlled
+counterfactual possible on the Mac:
+```bash
+# Same pinned SDK, old filtering for direct comparison
+XTREME_STAGE_FRUSTUM_GATE=OFF bash scripts/qualify-jade-sdk-control-mac.sh
+# New full-group frustum gate (default)
+bash scripts/qualify-jade-sdk-control-mac.sh
+```
+**Both commands automatically publish a sanitized ZIP and images** to the
+dedicated `ymir-sdk-control-evidence` branch; the later run owns `latest`
+while prior commits remain in branch history. No need to attach a Mac ZIP.
+Do not claim a speedup, continuity, transparency correctness or independent
+display FPS from the host tests: require full Ymir telemetry and human
+frame-by-frame visual review before accepting this candidate or PR #2.
