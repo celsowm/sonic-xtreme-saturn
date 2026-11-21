@@ -13,6 +13,7 @@
  */
 typedef struct {
     int32_t lo_x, hi_x, lo_z, hi_z;
+    int32_t lo_y, hi_y;
 } xtreme_stage_aabb_t;
 
 static inline int xtreme_stage_aabb_visible(const xtreme_stage_aabb_t *b,
@@ -40,6 +41,32 @@ static inline int xtreme_stage_aabb_visible(const xtreme_stage_aabb_t *b,
        (int64_t)b->lo_x>(int64_t)eye_x+radius)
         return 0;
     return 1;
+}
+
+/* Conservative, camera-orientation-aware early rejection for faces ENTIRELY
+ * behind the eye. LibSaturn's quad projector computes clip-space w for four
+ * corners, then append() increments culled_faces if all w <= 0.
+ * For a rectangular world AABB the maximum forward dot product occurs at
+ * one support corner: pick upper/lower coordinate independently according to
+ * the sign of the camera forward component.
+ *
+ * All numbers are Q16.16; their products are Q32.32 in signed int64.
+ * Keep a full 1-metre safety band behind the eye, since projection-matrix
+ * rounding and near-plane fallback differ near w == 0. Never discard a
+ * partially-front face: the painter still handles clipping/visibility.
+ * This rejects no geometry which can have positive clip-w when forward and
+ * view matrix describe the same camera. It does NOT perform screen/FOV culling.
+ */
+static inline int xtreme_stage_aabb_may_be_in_front(
+    const xtreme_stage_aabb_t* b,
+    int32_t eye_x,int32_t eye_y,int32_t eye_z,
+    int32_t forward_x,int32_t forward_y,int32_t forward_z) {
+    if(!forward_x && !forward_y && !forward_z)return 1;
+    const int64_t x=(int64_t)(forward_x>=0?b->hi_x:b->lo_x)-eye_x;
+    const int64_t y=(int64_t)(forward_y>=0?b->hi_y:b->lo_y)-eye_y;
+    const int64_t z=(int64_t)(forward_z>=0?b->hi_z:b->lo_z)-eye_z;
+    const int64_t max_depth=x*forward_x+y*forward_y+z*forward_z;
+    return max_depth> -((int64_t)65536*65536);
 }
 
 #endif
