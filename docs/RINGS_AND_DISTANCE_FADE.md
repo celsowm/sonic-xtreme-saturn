@@ -105,3 +105,49 @@ the VDP2's blend ratios. An analysis is available in the published
 hardware case study and `examples/distance_fade_3d/README.md`.
 Neither that technique nor this document certifies the visual quality
 of Jade Gully until it is actually integrated.
+
+## 3. Source data supplied and rendered (2026-11-21, candidate)
+
+The owner provided the original downloaded `x-treme_rings_0f59e(1).7z`
+(archive SHA-256 `16e64620bd0b378b9a8523092fd88f222c0dcbe9da65f66c63decfcd3d6895f0`).
+Its own `mod.ini` identifies author **Mr. Malfunction**, version 1.0,
+SADX `sadx.X-TremeRings`, source description *"ring sprites from the Sonic
+X-Treme Prototype"*, and dependency `Animated Sprite Rings`. It is a
+SADX mod, **not a confirmed Saturn prototype build asset**.
+
+The uploaded archive contains `textures/obj_ring.pvmx`: sixteen separately
+embedded 32x32 RGBA PNG frames (`ring1.png`…`ring16.png`) and
+`textures/eff_ring.pvmx`: four 16x16 sparkles (held for a future collection
+effect). `system/sprite.ini` declares `TextureCount=16`,
+`FrameIncrement=2`, `SpriteScale=0.3` for object rings and four frames for
+effects. The 16 main ring frames have only **14 distinct source RGB colors
+whose alpha >= 128**. Transparent index zero is reserved for pixel alpha
+below 128, which discards source antialiasing at fractional coverage; this
+is deliberate hardware conversion, not an alpha-preserving 32-bit texture.
+
+For code-size and reproducibility, the owner-supplied source frames are
+versioned as a compact, checksum-verified, 4bpp-packed
+`assets/rings/xtreme-ring-frames.b64` (lossless for the thresholded
+14-color palette). `tools/bake_xtreme_rings.py` expands that in the **host
+build**, using only Python stdlib. The SH-2 receives sixteen 32x32 INDEX8
+frames, transparent texel index 0, one 256-entry CRAM palette bank 6 and
+16,384 total bytes of VDP1 texture residency. No host .7z unpacker, mod
+loader, network fetch or runtime compression is required. Full provenance
+and palette are in `assets/rings/metadata.json`. The source is **not CC0**,
+and the derived artifact retains SEGA/mod-author ownership context.
+
+The Adventure render path now renders a **single camera-upright billboard**
+per ring instead of the former eight RGB quads, advancing its animation by
+`(physics_ticks / 2) % 16` at fixed 60 Hz. The existing stage collider,
+Sonic actor and map entities remain unchanged, and ring collection remains
+unimplemented. Debug-only markers still function. Normal frame ceiling can
+drop by approximately 28 world submissions if four rings are visible, but
+that is a **source count**, not a measured speedup.
+
+**Acceptance remains Ymir:** inspect transparent center, pixelated
+silhouette, source sequence and frame pacing with the actual Saturn
+palette bank, and compare XRH1 `marker_submitted` with the old 32. If
+palette bank 6 is already occupied by any managed Sonic texture at runtime,
+change the upload allocation to a verified non-conflicting palette slot
+before approving. No new display-frame-rate claim until a hardware-capable
+render qualification.
