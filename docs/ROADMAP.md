@@ -112,3 +112,9 @@ Use HLOD and sector residency, VDP2 sky/ground/water where appropriate, audio/mu
 
 ## Acceptance evidence
 Host tests -> SH-2 build -> deterministic disc -> Ymir captured route -> Mednafen comparison -> physical Saturn. For every run record commit, tool versions, BIOS identifier (never distribute BIOS), inputs, screenshots, frame/field metrics and failures. Include the P1.5 debug HUD pages and telemetry snapshot; compare HUD disabled/enabled replay results. A 30 FPS target is not a result. No unsupported assets in public source or releases.
+
+## Jade Gully v3 art candidate (source changes; not emulator-qualified)
+
+Responding to the visibly sparse v2 gameplay captures, Adventure scene authoring now uses four **textured, collision-enabled** terrain strips and shorter face intervals near the player. It retains all main-route elevation stations. Prop placement increases from 10 to 18 licensed Kenney CC0 instances, with higher per-tree face caps. Stage budget increases from 256 to 448 authored faces (manifest estimate 442), and indexed8 texture sources remain the same. The change is isolated to `XTREME_STAGE_LAYOUT=adventure`; classic camera and level authoring have not been modified.
+
+**Pending acceptance:** run `bash scripts/qualify-jade-adventure-mac.sh` on the Mac; inspect actual screenshots for near-field texture readability, prop silhouettes, gaps and terrain occlusion; verify Ymir p95/peak frame pacing, VRAM and command headroom, full controller/actor synchrony and off-road collision. If performance fails, favor sector culling/LOD and targeted optimization over relaxing 30 FPS gates. Neither a CI check nor an authored face budget proves prettier graphics or 30 FPS on a physical Saturn.
