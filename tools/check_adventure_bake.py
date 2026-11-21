@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 def count(text,macro):
-    m=re.search(r"^#define\\s+"+re.escape(macro)+r"\\s+(\\d+)u\\s*$",text,re.M)
+    m=re.search(r"^#define\s+"+re.escape(macro)+r"\s+(\d+)u\s*$",text,re.M)
     if not m:raise ValueError(f"missing {macro}")
     return int(m.group(1))
 
