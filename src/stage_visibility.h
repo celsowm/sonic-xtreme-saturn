@@ -70,7 +70,7 @@ static inline int xtreme_stage_aabb_may_be_in_front(
 }
 
 
-/* Plane-budgeted conservative frustum gate for real authored static faces.
+/* Plane-budgeted conservative frustum gate for authored static face groups.
  * Uses the identical ROW-MAJOR view-projection matrix that LibSaturn uses
  * for sat_project_vertices(). For an OpenGL clip-space point, visible implies
  *  -w <= x <= w, -w <= y <= w. A quad lies entirely outside a side
@@ -87,6 +87,22 @@ typedef struct xtreme_stage_frustum {
     int32_t planes[4][4]; /* left, right, bottom, top; x,y,z,constant */
     uint8_t valid;
 } xtreme_stage_frustum_t;
+
+/* Eight consecutive authored faces share one conservative world bounds.
+ * Grouping keeps clip-plane tests O(face_count/8) instead of paying 4x3
+ * signed 64-bit multiplies for every near-camera face on the SH-2.
+ * A mixed/large group is kept, never reduced: only wholly off-screen groups
+ * can be rejected. No run-time allocation, terrain or collider changes. */
+#define XTREME_STAGE_FRUSTUM_GROUP_SIZE 8u
+static inline void xtreme_stage_aabb_merge(
+    xtreme_stage_aabb_t* dst,const xtreme_stage_aabb_t* src) {
+    if(src->lo_x<dst->lo_x)dst->lo_x=src->lo_x;
+    if(src->hi_x>dst->hi_x)dst->hi_x=src->hi_x;
+    if(src->lo_y<dst->lo_y)dst->lo_y=src->lo_y;
+    if(src->hi_y>dst->hi_y)dst->hi_y=src->hi_y;
+    if(src->lo_z<dst->lo_z)dst->lo_z=src->lo_z;
+    if(src->hi_z>dst->hi_z)dst->hi_z=src->hi_z;
+}
 
 static inline void xtreme_stage_frustum_prepare(
     xtreme_stage_frustum_t* out,const int32_t* view_proj) {
