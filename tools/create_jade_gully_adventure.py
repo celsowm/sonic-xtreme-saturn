@@ -21,6 +21,7 @@ sys.path.insert(0,str(ROOT/"tools"))
 import create_jade_gully as base
 from tools.validate_adventure_layout import DEFAULT,validate
 from tools.read_kenney_glb import read_glb_triangles
+from tools.prop_materials import split_palm_faces
 
 args=sys.argv[sys.argv.index("--")+1:] if "--" in sys.argv else []
 if len(args)!=2:
@@ -106,6 +107,22 @@ def import_cc0_prop(item,materials):
     compact.materials.append(materials[item["palette"]])
     obj.data=compact
     if old_mesh.users==0:bpy.data.meshes.remove(old_mesh)
+    # glTF material assignments do not survive narrow OBJ baking. Partition
+    # the original Kenney palm triangles by elevation into two existing CC0
+    # indexed8 material groups, without increasing the triangle count.
+    if item["asset"].startswith("nature-kit/tree-"):
+        wood,leaves=split_palm_faces(compact_vertices,compact_faces,z,item["height_m"])
+        if wood and leaves:
+            canopy_mesh=bpy.data.meshes.new(name+"_foliage")
+            canopy_mesh.from_pydata(compact_vertices,[],leaves)
+            canopy_mesh.update()
+            canopy_mesh.materials.append(materials["canopy"])
+            obj.data=canopy_mesh
+            base.mesh_prop(item["id"]+"_wood",compact_vertices,wood,materials["wood"])
+            if compact.users==0:bpy.data.meshes.remove(compact)
+            print(f'[adventure] {item["id"]} two-tone: {len(wood)} bark, {len(leaves)} foliage triangles')
+        else:
+            print(f'[adventure] {item["id"]} palette split unavailable after LOD; single material')
     obj["saturn_mesh"]="render"
     print(f'[adventure] {item["id"]}: {len(faces)} -> {len(obj.data.polygons)} triangles; {len(used)} live vertices; removed {removed} zero-area faces; budget {budget}')
     return obj
@@ -215,6 +232,7 @@ def main():
         "river":base.material("Basin grass",(0.13,0.48,0.22)),
         "ruins":base.material("Temple path",(0.48,0.47,0.34)),
         "canopy":base.material("CC0 foliage flat",(0.09,0.42,0.14)),
+        "wood":base.material("Palm trunk palette using existing Kenney sandstone",(0.53,0.37,0.20)),
         "rock":base.material("CC0 rock flat",(0.35,0.32,0.26)),
         "water":base.material("Waterfall cyan",(0.19,0.71,0.83)),
         "meadow":base.material("Connected canyon grass",(0.20,0.48,0.13)),
