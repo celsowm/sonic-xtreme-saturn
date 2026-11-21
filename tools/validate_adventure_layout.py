@@ -88,6 +88,14 @@ def validate(data, asset_root=None):
             raise ValueError("unsafe asset path")
         if not (asset_root/rel).is_file():
             raise ValueError(f"missing curated CC0 model: {rel}")
+        snap=prop.get("snap_to_valley",False)
+        if type(snap) is not bool:
+            raise ValueError("snap_to_valley must be boolean")
+        if snap and rel.as_posix() not in ("nature-kit/tree-palm.glb",
+                                          "nature-kit/tree-palmbend.glb",
+                                          "nature-kit/rock-largea.glb",
+                                          "nature-kit/plant-bush.glb"):
+            raise ValueError("only natural landscape props may snap to valley")
         if not (3<=prop["triangles_max"]<=24):
             raise ValueError("unbounded imported prop LOD")
         used_budget+=prop["triangles_max"]
