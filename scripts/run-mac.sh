@@ -74,7 +74,7 @@ GAME_TOOLCHAIN="$SDK/share/libsaturn/toolchains/sh2eb-elf.cmake"
 [[ -f "$SDK/lib/cmake/LibSaturn/LibSaturnConfig.cmake" ]] || die "installed LibSaturn package missing: $SDK"
 echo "[xtreme] Fresh game configuration with SDK: $SDK"
 SONIC_ASSET_DIR="${XTREME_SONIC_DIR:-$ROOT/assets/sonic-r/lod-160}"
-cmake --fresh -S "$ROOT" -B "$ROOT/build/game" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$GAME_TOOLCHAIN" -DCMAKE_PREFIX_PATH="$SDK" -DLibSaturn_DIR="$SDK/lib/cmake/LibSaturn" -DXTREME_GREYBOX_DIR="$STAGE_DIR" -DXTREME_SONIC_DIR="$SONIC_ASSET_DIR"
+cmake --fresh -S "$ROOT" -B "$ROOT/build/game" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$GAME_TOOLCHAIN" -DCMAKE_PREFIX_PATH="$SDK" -DLibSaturn_DIR="$SDK/lib/cmake/LibSaturn" -DXTREME_GREYBOX_DIR="$STAGE_DIR" -DXTREME_SONIC_DIR="$SONIC_ASSET_DIR" -DXTREME_STAGE_LAYOUT="$STAGE_LAYOUT"
 cmake --build "$ROOT/build/game" --target xtreme_disc
 CUE="$ROOT/build/game/disc/xtreme.cue"
 [[ -f "$CUE" ]] || die "disc missing"
