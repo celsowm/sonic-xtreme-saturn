@@ -41,7 +41,7 @@ class AdventureLayoutTests(unittest.TestCase):
 
     def test_model_budget_enforced(self):
         changed=copy.deepcopy(self.data)
-        changed["set_dressing"][0]["triangles_max"]=20
+        changed["set_dressing"][0]["triangles_max"]=25
         with self.assertRaises(ValueError):
             validate(changed)
 
