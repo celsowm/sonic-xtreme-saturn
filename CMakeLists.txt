@@ -20,6 +20,12 @@ add_custom_command(OUTPUT "${GENERATED}" "${GENERATED_COLLISION}"
     DEPENDS "${GREYBOX_OBJ}" "${GREYBOX_JSON}" "${GREYBOX_COLLISION}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_greybox.py"
     VERBATIM)
 add_executable(xtreme src/main.c src/controller.c "${GENERATED}" "${GENERATED_COLLISION}")
+set(XTREME_STAGE_LAYOUT "classic" CACHE STRING "Selected level layout: classic|adventure")
+if(XTREME_STAGE_LAYOUT STREQUAL "adventure")
+    target_compile_definitions(xtreme PRIVATE XTREME_STAGE_ADVENTURE=1)
+elseif(NOT XTREME_STAGE_LAYOUT STREQUAL "classic")
+    message(FATAL_ERROR "Unknown XTREME_STAGE_LAYOUT: ${XTREME_STAGE_LAYOUT}")
+endif()
 # The requested Sonic R source and generated LOD are ordinary tracked
 # repository assets, not dependencies on an individual Mac's private folder.
 # Alternate LODs may be selected explicitly for performance comparisons.
