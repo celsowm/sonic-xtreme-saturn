@@ -231,6 +231,12 @@ CASES=[
     ("hud_off_route",190,[(20,"Y",5),(35,"Y",5),(50,"Y",5),(65,"Y",5),(80,"Y",5),(100,"UP",48),(155,"A",6)],[99,140,189]),
 ]
 
+ADVENTURE_CASES=[
+    # Move sideways off the 4m ribbon and cross the continuous valley floor.
+    # Stronger than "boot PASS": tests collision support outside the old path.
+    ("offroad_right",180,[(65,"RIGHT",52)],[64,90,115,145,179]),
+]
+
 def checks(name,t):
     out={"guest_running":t["frames"]>0 and t["ticks"]>0,
          "world_error_zero":t["error"]==0,"hud_error_zero":t["hud_error"]==0,
@@ -240,6 +246,10 @@ def checks(name,t):
         out.update(jump_observed=t["jumps"]>=1,landed=t["landings"]>=2 and t["grounded"]==1,no_respawn=t["respawns"]==0)
     if name=="fall_reset":out.update(respawn_observed=t["respawns"]>=2)
     if name=="curve_route":out.update(progress=t["pos_z"]<-24*65536,steered=t["pos_x"]>2*65536,no_respawn=t["respawns"]==0,grounded=t["grounded"]==1)
+    if name=="offroad_right":
+        out.update(left_original_road=t["pos_x"]>12*65536,
+                   still_grounded=t["grounded"]==1,
+                   no_respawn=t["respawns"]==0)
     return out
 
 
@@ -337,7 +347,9 @@ def republish_latest():
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--probe",type=Path);p.add_argument("--bios",type=Path)
-    p.add_argument("--case",action="append",choices=[c[0] for c in CASES])
+    is_adventure=os.environ.get("XTREME_STAGE_LAYOUT")=="adventure"
+    active_cases=CASES + (ADVENTURE_CASES if is_adventure else [])
+    p.add_argument("--case",action="append",choices=[c[0] for c in active_cases])
     p.add_argument("--timeout",type=int,default=600)
     p.add_argument("--require-sonic",action="store_true",help="fail if private Sonic R C/H/SKA are missing")
     p.add_argument("--no-publish",action="store_true",help="keep ZIP local instead of publishing to the public GitHub evidence branch")
@@ -395,7 +407,7 @@ def main():
         for file in ("greybox.h","collision.h"):
             src=game/"generated"/file
             if src.is_file():shutil.copy2(src,build_dir/file)
-        for name,frames,events,shots in CASES:
+        for name,frames,events,shots in active_cases:
             if a.case and name not in a.case:continue
             d=work/name;d.mkdir()
             script=d/"input.pad";script.write_text(pad(events))
