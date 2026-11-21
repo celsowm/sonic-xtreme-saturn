@@ -54,6 +54,91 @@ int main(void) {
     xtreme_stage_aabb_t close=BOX(-1,1,0,1);
     assert(xtreme_stage_aabb_may_be_in_front(
         &close,0,0,0,0,0,M(-1)));
+    /* Canonical row-major fixed-point camera, facing -Z, with a 90-degree
+     * clip-space cone: x and y in [-w,+w], w=-z. The production camera
+     * uses a tighter FOV, but the plane/AABB proof is the same. */
+    const int32_t camera_forward[16]={
+        M(1),0,0,0,
+        0,M(1),0,0,
+        0,0,M(1),0,
+        0,0,-M(1),0
+    };
+    xtreme_stage_frustum_t frustum={0};
+    xtreme_stage_frustum_prepare(&frustum,camera_forward);
+    assert(frustum.valid);
+    xtreme_stage_aabb_t in_front=BOX(-3,3,-14,-8);
+    assert(xtreme_stage_aabb_frustum_relevant(&in_front,&frustum));
+
+    /* Entirely outside the field of view (by >2m safety distance). */
+    xtreme_stage_aabb_t right_of_screen=BOX(18,25,-12,-10);
+    xtreme_stage_aabb_t left_of_screen=BOX(-25,-18,-12,-10);
+    assert(!xtreme_stage_aabb_frustum_relevant(&right_of_screen,&frustum));
+    assert(!xtreme_stage_aabb_frustum_relevant(&left_of_screen,&frustum));
+    xtreme_stage_aabb_t high=BOX(-3,3,-8,-6);
+    high.lo_y=M(12);high.hi_y=M(20);
+    xtreme_stage_aabb_t low=BOX(-3,3,-8,-6);
+    low.lo_y=M(-20);low.hi_y=M(-12);
+    assert(!xtreme_stage_aabb_frustum_relevant(&high,&frustum));
+    assert(!xtreme_stage_aabb_frustum_relevant(&low,&frustum));
+    /* Retain huge floor pieces crossing the edge and all near-camera art. */
+    xtreme_stage_aabb_t wide_cross=BOX(-3,35,-11,-9);
+    assert(xtreme_stage_aabb_frustum_relevant(&wide_cross,&frustum));
+    xtreme_stage_aabb_t on_edge=BOX(10,11,-10,-9);
+    assert(xtreme_stage_aabb_frustum_relevant(&on_edge,&frustum));
+    assert(xtreme_stage_aabb_frustum_relevant(&straddles,&frustum));
+
+    /* Camera turned 90 degrees: optical axis +X, screen right = -Z.
+     * Culling must adapt instead of reusing spawn's fixed negative-Z view. */
+    const int32_t yawed[16]={
+        0,0,-M(1),0,
+        0,M(1),0,0,
+        0,0,M(1),0,
+        M(1),0,0,0
+    };
+    xtreme_stage_frustum_prepare(&frustum,yawed);
+    assert(xtreme_stage_aabb_frustum_relevant(&right_of_screen,&frustum));
+    xtreme_stage_aabb_t yawed_offside=BOX(8,10,-33,-30);
+    assert(!xtreme_stage_aabb_frustum_relevant(&yawed_offside,&frustum));
+    assert(xtreme_stage_aabb_frustum_relevant(&wide_cross,&frustum));
+
+    /* Overflow/invalid matrix disables the optimization, not the scenery. */
+    int32_t broken[16]={0};
+    broken[12]=INT32_MAX;broken[0]=INT32_MAX;
+    xtreme_stage_frustum_prepare(&frustum,broken);
+    assert(!frustum.valid);
+    assert(xtreme_stage_aabb_frustum_relevant(&right_of_screen,&frustum));
+    xtreme_stage_frustum_prepare(&frustum,0);
+    assert(!frustum.valid);
+
+    /* Deterministic random AABBs: any box with a corner inside all
+     * canonical clip half-spaces MUST survive the conservative gate.
+     * This detects sign errors and aggressive center-only culling. */
+    xtreme_stage_frustum_prepare(&frustum,camera_forward);
+    uint32_t seed=0x23A11E53u;
+    for(unsigned n=0;n<12000u;++n) {
+        int32_t coords[3],half[3];
+        for(unsigned k=0;k<3u;++k) {
+            seed=seed*1664525u+1013904223u;
+            coords[k]=M((int32_t)(seed%127u)-63);
+            seed=seed*1664525u+1013904223u;
+            half[k]=M((int32_t)(seed%15u));
+        }
+        xtreme_stage_aabb_t aabb={
+            .lo_x=coords[0]-half[0],.hi_x=coords[0]+half[0],
+            .lo_y=coords[1]-half[1],.hi_y=coords[1]+half[1],
+            .lo_z=coords[2]-half[2],.hi_z=coords[2]+half[2]
+        };
+        int any_inside=0;
+        for(unsigned mask=0;mask<8u;++mask) {
+            const int32_t x=mask&1u?aabb.hi_x:aabb.lo_x;
+            const int32_t y=mask&2u?aabb.hi_y:aabb.lo_y;
+            const int32_t z=mask&4u?aabb.hi_z:aabb.lo_z;
+            if(z<0 && x>=z && x<=-z && y>=z && y<=-z)
+                any_inside=1;
+        }
+        if(any_inside)
+            assert(xtreme_stage_aabb_frustum_relevant(&aabb,&frustum));
+    }
     puts("stage visibility gate ok");
     return 0;
 }
