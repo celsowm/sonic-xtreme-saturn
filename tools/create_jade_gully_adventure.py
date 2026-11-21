@@ -111,29 +111,58 @@ def import_cc0_prop(item,materials):
     return obj
 
 
-def cliff_skirt(route,mat,depth=5.0):
-    """Visual underside beneath every ribbon segment, with no wall physics."""
-    points=route["stations"]
-    left=[]
-    right=[]
+def valley_landmass(main,mat):
+    """A continuous, fully walkable valley instead of isolated sky bridges.
+
+    Five wide cross-sectional heights follow the MAIN terrain height, with
+    a raised canopy ridge left, a depressed river basin right and elevated
+    far silhouette banks. Render and collision share exact geometry.
+    Only 80 triangles replace the 88 vertical cliff triangles from v1.
+    """
+    rows=[(main[0][0],-12,main[0][2],main[0][3])]
+    rows.extend(point for i,point in enumerate(main) if i!=1)
+    offsets=(-48.0,-20.0,0.0,20.0,48.0)
+    vertices=[]
+    quads=[]
+    for x,y,z,width in rows:
+        left=4.0 if 24<=y<=95 else 2.0
+        river=-4.5 if 35<=y<=79 else 1.3
+        levels=(left+6.0,left,-0.5,river,river+6.0)
+        for dx,dz in zip(offsets,levels):
+            vertices.append((x+dx,y,z+dz))
+    for row in range(len(rows)-1):
+        for col in range(len(offsets)-1):
+            a=row*len(offsets)+col
+            b=(row+1)*len(offsets)+col
+            quads.append((a,a+1,b+1,b))
+    land=base.mesh_prop("jade_valley_meadow",vertices,quads,mat)
+    base.collision_copy(land)
+    return land
+
+
+def branch_terrace(route,mat,side):
+    """One low-poly sloping edge for elevated branches (not a vertical wall)."""
     import math
-    for i,(x,y,z,width) in enumerate(points):
-        a=points[max(0,i-1)];b=points[min(len(points)-1,i+1)]
-        dx=b[0]-a[0];dy=b[1]-a[1]
-        norm=math.hypot(dx,dy)
-        if norm<1e-6:raise ValueError("coincident cliff station")
-        rx,ry=dy/norm*width,-dx/norm*width
-        left.append((x-rx,y-ry,z))
-        right.append((x+rx,y+ry,z))
+    points=route["stations"]
     verts=[]
     faces=[]
-    for side in (left,right):
-        for i in range(len(side)-1):
-            a=side[i];b=side[i+1]
-            j=len(verts)
-            verts.extend((a,b,(b[0],b[1],b[2]-depth),(a[0],a[1],a[2]-depth)))
-            faces.append((j,j+1,j+2,j+3))
-    return base.mesh_prop(f'{route["id"]}_cliff_rock',verts,faces,mat)
+    for i,(x,y,z,width) in enumerate(points):
+        before=points[max(0,i-1)]
+        after=points[min(len(points)-1,i+1)]
+        dx=after[0]-before[0]
+        dy=after[1]-before[1]
+        length=math.hypot(dx,dy)
+        if length<=0.0001:raise ValueError("coincident branch stations")
+        nx=side*dy/length
+        ny=-side*dx/length
+        verts.extend((
+            (x+nx*width,y+ny*width,z),
+            (x+nx*(width+7),y+ny*(width+7),z-2.8),
+        ))
+        if i:
+            n=2*i
+            faces.append((n-2,n-1,n+1,n))
+    return base.mesh_prop(f'{route["id"]}_terrace',verts,faces,mat)
 
 
 def clearing_pad(pad,materials):
@@ -175,11 +204,18 @@ def main():
         "canopy":base.material("CC0 foliage flat",(0.09,0.42,0.14)),
         "rock":base.material("CC0 rock flat",(0.35,0.32,0.26)),
         "water":base.material("Waterfall cyan",(0.19,0.71,0.83)),
+        "meadow":base.material("Connected canyon grass",(0.20,0.48,0.13)),
+        "terrace":base.material("Raised route embankment",(0.34,0.44,0.15)),
     }
+    # Build surrounding solid ground first. Main and branching ribbons are
+    # kept at their exact old coordinates; the valley is a separate walkable
+    # mesh for exploration and safe landings beyond the track edges.
+    valley_landmass(data["routes"][0]["stations"],materials["meadow"])
     for route in data["routes"]:
         top=base.ribbon(route["id"]+"_route",route["stations"],materials[route["id"]])
         base.collision_copy(top)
-        cliff_skirt(route,materials["rock"],depth=5.0)
+        if route["id"] in ("upper","river","ruins"):
+            branch_terrace(route,materials["terrace"], -1 if route["id"]!="river" else 1)
     for pad in data.get("clearings",[]):
         clearing_pad(pad,materials)
     for entity in data["entities"]:
