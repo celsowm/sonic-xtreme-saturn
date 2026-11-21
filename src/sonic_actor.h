@@ -3,9 +3,10 @@
 #include <saturn/scene.h>
 #include "controller.h"
 
-/* Optional, locally built character presentation. Only compiled when the
- * private generated sonic.c/sonic.h are present. No proprietary files live
- * in Git and the greybox build remains independent of this module. */
+/* Optional animated Sonic presentation built from versioned
+ * assets/sonic-r/lod-160/{sonic.c,sonic.h}. The legacy blue-proxy stage
+ * remains buildable when the optional character source is absent.
+ * See assets/sonic-r/ATTRIBUTION.md for third-party rights. */
 sat_result_t xtreme_sonic_init(void);
 sat_result_t xtreme_sonic_tick(const xtreme_player_t* player);
 /* Publish only the complete character state once per completed video frame. */
