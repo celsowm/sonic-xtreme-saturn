@@ -23,7 +23,22 @@ add_executable(xtreme src/main.c src/controller.c "${GENERATED}" "${GENERATED_CO
 set(XTREME_STAGE_LAYOUT "classic" CACHE STRING "Selected level layout: classic|adventure")
 if(XTREME_STAGE_LAYOUT STREQUAL "adventure")
     target_compile_definitions(xtreme PRIVATE XTREME_STAGE_ADVENTURE=1)
-    target_sources(xtreme PRIVATE src/stage_textures.c)
+    # Real Kenney CC0 art is committed as PNGs. Generate just the SH-2 native
+    # index8 arrays at build time; no Python package or network access needed.
+    set(STAGE_TEXTURE_INPUTS)
+    foreach(name IN ITEMS grass-path sand-path rock-grey forest-leaves
+                          sandstone waterfall meadow-grass moss-bank)
+        list(APPEND STAGE_TEXTURE_INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/jade-gully/${name}.png")
+    endforeach()
+    set(STAGE_TEXTURE_HEADER "${CMAKE_CURRENT_BINARY_DIR}/generated/stage_texture_data.h")
+    add_custom_command(OUTPUT "${STAGE_TEXTURE_HEADER}"
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_stage_textures.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/jade-gully"
+            "${STAGE_TEXTURE_HEADER}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_stage_textures.py" ${STAGE_TEXTURE_INPUTS}
+        COMMENT "Quantizing Kenney CC0 PNG terrain textures for VDP1 indexed8"
+        VERBATIM)
+    target_sources(xtreme PRIVATE src/stage_textures.c "${STAGE_TEXTURE_HEADER}")
 elseif(NOT XTREME_STAGE_LAYOUT STREQUAL "classic")
     message(FATAL_ERROR "Unknown XTREME_STAGE_LAYOUT: ${XTREME_STAGE_LAYOUT}")
 endif()
