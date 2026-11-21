@@ -50,6 +50,8 @@ cc -std=c11 -Wall -Wextra -Werror -I src tests/test_stage_visibility.c -o build/
 build/stage-visibility-test
 cc -std=c11 -Wall -Wextra -Werror -I src tests/test_stage_lod.c -o build/stage-lod-test
 build/stage-lod-test
+cc -std=c11 -Wall -Wextra -Werror -I src tests/test_render_profile.c -o build/render-profile-test
+build/render-profile-test
 STAGE_LAYOUT="${XTREME_STAGE_LAYOUT:-classic}"
 case "$STAGE_LAYOUT" in
     classic)
