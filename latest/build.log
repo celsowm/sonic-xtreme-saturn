@@ -1,17 +1,19 @@
 COMMAND: ['bash', 'scripts/run-mac.sh', '--build-only']
 [xtreme] SDK source: <DEV>/lib-saturn
-08ad63b5923c97e498078628192a64ad66ce50a2
-....................
+04553e1f4865dfa906bc594f64f34677c8f9feb1
+.....................
 ----------------------------------------------------------------------
-Ran 20 tests in 0.005s
+Ran 21 tests in 0.007s
 
 OK
 {
-  "cliff_triangles": 88,
+  "branch_terrace_triangles": 24,
+  "cliff_triangles": 0,
   "corridor_triangles": 44,
   "entities": 13,
-  "face_budget_total": 234,
+  "face_budget_total": 250,
   "face_capacity": 256,
+  "landmass_triangles": 80,
   "path_segments": 22,
   "prop_triangle_budget": 80,
   "props": 10,
@@ -20,7 +22,7 @@ OK
   "zones": 6
 }
 [xtreme] Building stage layout: adventure
-[adventure] Contract validated: {'routes': 4, 'zones': 6, 'entities': 13, 'props': 10, 'walkable_clearings': 2, 'path_segments': 22, 'corridor_triangles': 44, 'cliff_triangles': 88, 'prop_triangle_budget': 80, 'face_budget_total': 234, 'face_capacity': 256}
+[adventure] Contract validated: {'routes': 4, 'zones': 6, 'entities': 13, 'props': 10, 'walkable_clearings': 2, 'path_segments': 22, 'corridor_triangles': 44, 'landmass_triangles': 80, 'branch_terrace_triangles': 24, 'cliff_triangles': 0, 'prop_triangle_budget': 80, 'face_budget_total': 250, 'face_capacity': 256}
 [adventure] palm_start: 186 -> 7 triangles; 21 live vertices; removed 0 zero-area faces; budget 8
 [adventure] palm_basin: 200 -> 7 triangles; 21 live vertices; removed 0 zero-area faces; budget 8
 [adventure] palm_temple: 186 -> 7 triangles; 21 live vertices; removed 0 zero-area faces; budget 8
@@ -41,9 +43,93 @@ Blender quit
 -- Generating done (0.0s)
 -- Build files have been written to: <DEV>/lib-saturn/build/sdk
 [0/2] Re-checking globbed directories...
-[1/4] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/water.cpp.obj
-[2/4] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/water_sim.cpp.obj
-[3/4] Linking CXX static library libsaturn.a
+[1/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/runtime/state.cpp.obj
+[2/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/runtime/irq.cpp.obj
+[3/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/runtime/smpc.cpp.obj
+[4/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/runtime/time.cpp.obj
+[5/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/math2d/api.cpp.obj
+[6/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/2d/palette/api.cpp.obj
+[7/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/runtime/dma.cpp.obj
+[8/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/runtime/panic.cpp.obj
+[9/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/2d/rendering/runtime.cpp.obj
+[10/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/app/core.cpp.obj
+[11/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/character_render.cpp.obj
+[12/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/2d/sprites/batch.cpp.obj
+[13/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/2d/screen.cpp.obj
+[14/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/clip.cpp.obj
+[15/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/character.cpp.obj
+[16/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/camera/follow.cpp.obj
+[17/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/skin_parallel.cpp.obj
+[18/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/camera/orbit.cpp.obj
+[19/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/skeleton.cpp.obj
+[20/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/geometry/model_upload.cpp.obj
+[21/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/geometry/model.cpp.obj
+[22/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/api.cpp.obj
+[23/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/materials/pool.cpp.obj
+[24/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/geometry/transform.cpp.obj
+[25/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/2d/rendering/api.cpp.obj
+[26/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/math3d/api.cpp.obj
+[27/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/fade.cpp.obj
+[28/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/api.cpp.obj
+[29/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/managed_texture.cpp.obj
+[30/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/2d/textures/api.cpp.obj
+[31/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/water.cpp.obj
+[32/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/transform.cpp.obj
+[33/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/scene.cpp.obj
+[34/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/view_cache_world.cpp.obj
+[35/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/view_cache.cpp.obj
+[36/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/parallel.cpp.obj
+[37/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/world_lod_fade.cpp.obj
+[38/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/character_asset.cpp.obj
+<DEV>/lib-saturn/src/graphics/3d/animation/character_asset.cpp: In function 'sat_result_t sat_character_asset_decode(void*, uint32_t, sat_skeleton_clip_t*, uint16_t, sat_model_texture_asset_t*, uint16_t, sat_character_asset_t*)':
+<DEV>/lib-saturn/src/graphics/3d/animation/character_asset.cpp:41:35: warning: enumerated and non-enumerated type in conditional expression [-Wextra]
+   41 |         h[SAT_CHAR_PALETTES]>(lut4?SAT_CHARACTER_MAX_LUT_BLOCKS:1u) || !h[SAT_CHAR_CLIPS] || h[SAT_CHAR_CLIPS]>65535 ||
+      |                               ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[39/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/geometry/mesh.cpp.obj
+[40/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/color_offset.cpp.obj
+[41/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/fx_compositor.cpp.obj
+[42/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/color_calc.cpp.obj
+[43/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/world_lod_governor.cpp.obj
+[44/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/compose.cpp.obj
+[45/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp1/api.cpp.obj
+[46/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/core/geometry/mesh_api.cpp.obj
+[47/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/special.cpp.obj
+[48/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/sprite_shadow.cpp.obj
+[49/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/api.cpp.obj
+[50/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/tate_fb.cpp.obj
+[51/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/video.cpp.obj
+[52/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/floor.cpp.obj
+[53/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/api.cpp.obj
+[54/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/audio/playback/api.cpp.obj
+[55/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/movie/player.cpp.obj
+[56/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/animation/skin.cpp.obj
+[57/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/hal/scu/scu.cpp.obj
+[58/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/audio/playback/voice.cpp.obj
+[59/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/audio/playback/sound.cpp.obj
+[60/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/collision.cpp.obj
+[61/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/api.cpp.obj
+[62/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/rendering/indexed.cpp.obj
+[63/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/input/api.cpp.obj
+[64/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/terrain2.cpp.obj
+[65/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/character2.cpp.obj
+[66/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/transform.cpp.obj
+[67/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/sweep.cpp.obj
+[68/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/follow_camera2d.cpp.obj
+[69/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/water_volume.cpp.obj
+[70/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/physics2_world.cpp.obj
+[71/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/sweep_full.cpp.obj
+[72/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/vdp2/layers.cpp.obj
+[73/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/spatial/2d.cpp.obj
+[74/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/spatial/voxel_terrain.cpp.obj
+[75/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/water_sim.cpp.obj
+[76/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/spatial/3d.cpp.obj
+[77/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/2d/path2.cpp.obj
+[78/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/hal/vdp1/vdp1.cpp.obj
+[79/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/collision.cpp.obj
+[80/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/hal/vdp2/vdp2.cpp.obj
+[81/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/graphics/3d/scene/faces.cpp.obj
+[82/84] Building CXX object CMakeFiles/libsaturn_core.dir/src/physics/3d/world.cpp.obj
+[83/84] Linking CXX static library libsaturn.a
 -- Install configuration: "Release"
 -- Installing: <DEV>/saturn-prefix/lib/libsaturn.a
 -- Up-to-date: <DEV>/saturn-prefix/lib/libsaturn_startup.a
@@ -58,7 +144,7 @@ Blender quit
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/anim3d.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/sprite_atlas.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/vdp1_command_batch.h
--- Up-to-date: <DEV>/saturn-prefix/include/saturn/math3d.h
+-- Installing: <DEV>/saturn-prefix/include/saturn/math3d.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/input.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/task.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/character3d.h
@@ -117,7 +203,7 @@ Blender quit
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/texture_memory.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/cdfs.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/follow_camera2d.h
--- Installing: <DEV>/saturn-prefix/include/saturn/water_sim.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/water_sim.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/cdda.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/physics2_world.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/fade3d.h
@@ -137,7 +223,7 @@ Blender quit
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/character_asset_format.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/character2.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/spatial3.h
--- Installing: <DEV>/saturn-prefix/include/saturn/water.h
+-- Up-to-date: <DEV>/saturn-prefix/include/saturn/water.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/resource_plan.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/video.h
 -- Up-to-date: <DEV>/saturn-prefix/include/saturn/exec.h
@@ -261,12 +347,13 @@ Blender quit
 [6/8] Linking CXX executable xtreme.elf; Checking xtreme for static constructors; Creating Saturn binary image for xtreme
 -- [ctors] <GAME>/build/game/xtreme.elf: no static constructors
 [7/8] Creating Saturn disc image xtreme
--- [boot-memory] _start=0x06004000, 241208 initialized bytes match ELF
+-- [boot-memory] _start=0x06004000, 242960 initialized bytes match ELF
 -- [native] validated IP size=4096 bytes; redistributable=False
 -- [check] native AIP instructions, System ID, payloads and handoff OK
--- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 241208, 'flags': 0, 'record_offset': 37092} IP observations=[]
--- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 317 MODE1/2352 sectors
--- [check] disc image OK: 317 MODE1/2352 sectors
+-- [check] ISO first-read OK: {'identifier': '0.BIN;1', 'lba': 33, 'size': 242960, 'flags': 0, 'record_offset': 37092} IP observations=[]
+-- [iso-to-raw] <GAME>/build/game/disc/xtreme.iso -> <GAME>/build/game/disc/xtreme.bin: 318 MODE1/2352 sectors
+-- [check] disc image OK: 318 MODE1/2352 sectors
 -- disc: <GAME>/build/game/disc/xtreme.cue
+[adventure] Baked continuous landscape verified: {'render_triangles': 238, 'collision_triangles': 128, 'collision_vertices': 115, 'markers': 13}
 [xtreme] Disc: <GAME>/build/game/disc/xtreme.cue
 [xtreme] Blender: <GAME>/build/jade-gully-adventure/jade_gully.blend

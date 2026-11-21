@@ -11,7 +11,7 @@
   "clip": 0,
   "ticks": 204,
   "draws": 127,
-  "animation_ms": 1,
+  "animation_ms": 0,
   "skin_ms": 1,
   "draw_ms": 3,
   "pos_x": 0,
