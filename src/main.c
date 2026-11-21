@@ -325,6 +325,23 @@ static sat_result_t draw_gold_ring(const sat_vec3_t* pos) {
 #ifdef XTREME_STAGE_ADVENTURE
 static xtreme_stage_aabb_t stage_bounds[STAGE_FACE_COUNT];
 static sat_quad3_t stage_cached_quads[STAGE_FACE_COUNT];
+static uint8_t stage_lod_near[STAGE_LOD_GROUP_COUNT ? STAGE_LOD_GROUP_COUNT : 1u];
+
+/* One distance decision per palm, not per polygon: bark and canopy always
+ * switch together. Square-distance is unnecessary on SH-2; a conservative
+ * XZ max-axis threshold also avoids expensive per-face 64-bit multiplies.
+ * Gameplay collision does not use any render LOD. */
+static void stage_select_prop_lods(void) {
+    const int64_t threshold=(int64_t)FX(27);
+    for(unsigned i=0;i<STAGE_LOD_GROUP_COUNT;++i) {
+        int64_t dx=(int64_t)stage_lod_centers[i].x-player.feet.x;
+        int64_t dz=(int64_t)stage_lod_centers[i].z-player.feet.z;
+        if(dx<0)dx=-dx;
+        if(dz<0)dz=-dz;
+        stage_lod_near[i]=(dx<=threshold && dz<=threshold);
+    }
+}
+
 /* Baked scenery is immutable. Build its indexed quads and AABBs once during
  * startup instead of gathering four Q16.16 vertices or recalculating
  * bounding boxes every rendered frame. No change to collision or painter. */
@@ -363,9 +380,19 @@ static int stage_quad_relevant(unsigned i) {
 }
 static sat_result_t draw_stage(void) {
     sat_result_t rc;
+#ifdef XTREME_STAGE_ADVENTURE
+    stage_select_prop_lods();
+#endif
     for (unsigned i=0; i<STAGE_FACE_COUNT; ++i) {
         const stage_face_t* f = &stage_faces[i];
         if(!stage_quad_relevant(i)) continue;
+#ifdef XTREME_STAGE_ADVENTURE
+        /* Near/far model *groups* are mutually exclusive. One switch
+         * controls the whole Kenney tree, preserving wood and foliage.
+         * Keep panoramic/debug rendering on the same budgeted LOD path. */
+        if(f->lod==1u && !stage_lod_near[f->lod_group]) continue;
+        if(f->lod==2u && stage_lod_near[f->lod_group]) continue;
+#endif
 #ifdef XTREME_STAGE_ADVENTURE
         /* No flat RGB polygon in Adventure: every baked stage face
          * receives its real resident indexed8 landscape material. */
