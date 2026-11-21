@@ -329,7 +329,12 @@ static sat_result_t draw_gold_ring(const sat_vec3_t* pos) {
 static xtreme_stage_aabb_t stage_bounds[STAGE_FACE_COUNT];
 static sat_quad3_t stage_cached_quads[STAGE_FACE_COUNT];
 #if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
-/* Recompute only 16 plane coefficients once per actual displayed scene. */
+/* The 8-face groups are immutable and measured once at startup. Compute
+ * only 4 clip-space side planes per displayed scene, not per terrain face. */
+#define STAGE_FRUSTUM_GROUP_COUNT \
+    ((STAGE_FACE_COUNT+XTREME_STAGE_FRUSTUM_GROUP_SIZE-1u)/XTREME_STAGE_FRUSTUM_GROUP_SIZE)
+static xtreme_stage_aabb_t stage_group_bounds[STAGE_FRUSTUM_GROUP_COUNT];
+static uint8_t stage_group_visible[STAGE_FRUSTUM_GROUP_COUNT];
 static xtreme_stage_frustum_t stage_frustum;
 #endif
 static uint8_t stage_lod_near[STAGE_LOD_GROUP_COUNT ? STAGE_LOD_GROUP_COUNT : 1u];
@@ -373,6 +378,17 @@ static void stage_prepare_bounds(void) {
             if(p->z>out->hi_z)out->hi_z=p->z;
         }
     }
+#if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
+    for(unsigned g=0;g<STAGE_FRUSTUM_GROUP_COUNT;++g) {
+        const unsigned first=g*XTREME_STAGE_FRUSTUM_GROUP_SIZE;
+        xtreme_stage_aabb_t* const group=&stage_group_bounds[g];
+        *group=stage_bounds[first];
+        unsigned last=first+XTREME_STAGE_FRUSTUM_GROUP_SIZE;
+        if(last>STAGE_FACE_COUNT)last=STAGE_FACE_COUNT;
+        for(unsigned j=first+1u;j<last;++j)
+            xtreme_stage_aabb_merge(group,&stage_bounds[j]);
+    }
+#endif
 }
 #endif
 
@@ -394,13 +410,6 @@ static int stage_quad_relevant(unsigned i) {
                scene.faces.eye.x,scene.faces.eye.y,scene.faces.eye.z,
                scene.faces.forward.x,scene.faces.forward.y,scene.faces.forward.z))
             return 0;
-#if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
-        /* Only reject faces provably outside one clip-space side of the
-         * current camera, with a safety margin. AABBs spanning the screen
-         * stay intact; never shorten visible floor tiles to hit 30/s. */
-        if(!xtreme_stage_aabb_frustum_relevant(bounds,&stage_frustum))
-            return 0;
-#endif
     }
 #else
     (void)i;
@@ -414,12 +423,22 @@ static sat_result_t draw_stage(void) {
     render_pending.stage_faces_tested=STAGE_FACE_COUNT;
 #if defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
     xtreme_stage_frustum_prepare(&stage_frustum,scene.faces.view_proj.m);
+    for(unsigned g=0;g<STAGE_FRUSTUM_GROUP_COUNT;++g) {
+        /* Never apply the optimization to the wide panorama viewer. */
+        stage_group_visible[g]=(uint8_t)(viewer ||
+            xtreme_stage_aabb_frustum_relevant(&stage_group_bounds[g],
+                                              &stage_frustum));
+    }
 #endif
     stage_select_prop_lods();
 #endif
     for (unsigned i=0; i<STAGE_FACE_COUNT; ++i) {
         const stage_face_t* f = &stage_faces[i];
-        if(!stage_quad_relevant(i)) {
+        if(
+#if defined(XTREME_STAGE_ADVENTURE) && defined(XTREME_STAGE_FRUSTUM_GATE) && XTREME_STAGE_FRUSTUM_GATE
+            !stage_group_visible[i/XTREME_STAGE_FRUSTUM_GROUP_SIZE] ||
+#endif
+            !stage_quad_relevant(i)) {
 #ifdef XTREME_STAGE_ADVENTURE
             ++render_pending.stage_visibility_skipped;
 #endif
