@@ -182,7 +182,12 @@ def clearing_pad(pad,materials):
         a=corners[i]; b=corners[(i+1)%4]
         n=len(vertices)
         d=pad["depth_m"]
-        vertices.extend((a,b,(b[0],b[1],b[2]-d),(a[0],a[1],a[2]-d)))
+        # Slope the bank OUTWARD rather than hanging vertical walls in air.
+        # The walkable valley below remains independent collision geometry.
+        extend=1.45
+        bottom_b=(x+(b[0]-x)*extend,y+(b[1]-y)*extend,b[2]-d)
+        bottom_a=(x+(a[0]-x)*extend,y+(a[1]-y)*extend,a[2]-d)
+        vertices.extend((a,b,bottom_b,bottom_a))
         quads.append((n,n+1,n+2,n+3))
     base.mesh_prop(f'{pad["id"]}_skirt_rock',vertices,quads,materials["rock"])
     return top
