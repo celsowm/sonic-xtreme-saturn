@@ -39,6 +39,18 @@ if(XTREME_STAGE_LAYOUT STREQUAL "adventure")
         COMMENT "Quantizing Kenney CC0 PNG terrain textures for VDP1 indexed8"
         VERBATIM)
     target_sources(xtreme PRIVATE src/stage_textures.c "${STAGE_TEXTURE_HEADER}")
+    # Vendor-derived 16x32x32 source ring frames; baked offline to INDEX8.
+    # Keep pixel source and provenance in git, never fetch assets at build.
+    set(RING_TEXTURE_HEADER "${CMAKE_CURRENT_BINARY_DIR}/generated/ring_texture_data.h")
+    add_custom_command(OUTPUT "${RING_TEXTURE_HEADER}"
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_xtreme_rings.py"
+            "${RING_TEXTURE_HEADER}"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tools/bake_xtreme_rings.py"
+                "${CMAKE_CURRENT_SOURCE_DIR}/assets/rings/xtreme-ring-frames.b64"
+                "${CMAKE_CURRENT_SOURCE_DIR}/assets/rings/metadata.json"
+        COMMENT "Baking 16 original X-Treme ring sprite frames for Saturn indexed8"
+        VERBATIM)
+    target_sources(xtreme PRIVATE src/ring_sprites.c "${RING_TEXTURE_HEADER}")
 elseif(NOT XTREME_STAGE_LAYOUT STREQUAL "classic")
     message(FATAL_ERROR "Unknown XTREME_STAGE_LAYOUT: ${XTREME_STAGE_LAYOUT}")
 endif()
