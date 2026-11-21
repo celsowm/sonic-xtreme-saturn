@@ -29,6 +29,22 @@ class BakeTests(unittest.TestCase):
                  b"o mesh_0000_main_route\nf 1 2 3 4\nf 1 3 4\n")
         self.assertEqual([f[4] for f in parse_obj(strip.decode())[1]],[0,0,3])
 
+    def test_grouped_tree_lods_are_baked_together(self):
+        # LOD metadata is indexed by tree name, never by individual face;
+        # wood and foliage must flip together at the same camera distance.
+        verts=b"v 0 0 0\\nv 2 0 0\\nv 0 2 0\\n"
+        groups=b"".join(
+            f"o mesh_{i:04d}_palm_demo_lod_{tier}_{material}\\nf 1 2 3\\n".encode()
+            for i,(tier,material) in enumerate((
+                ("near","wood"),("near","canopy"),("far","wood"),("far","canopy"))))
+        header=emit(verts+groups,json.dumps(SCENE).encode())
+        self.assertIn(b"#define STAGE_LOD_GROUP_COUNT 1u",header)
+        self.assertIn(b"uint8_t lod; uint8_t lod_group;",header)
+        self.assertIn(b"}, 4, 1, 0}",header)
+        self.assertIn(b"}, 3, 2, 0}",header)
+        with self.assertRaises(ValueError):
+            emit(verts+groups.split(b"o mesh_0003_")[0],json.dumps(SCENE).encode())
+
     def test_invalid_obj(self):
         for bad in (b"f 1 2 99", b"f 1 1 2", b"f -1 2 3", b"v NaN 0 0", b"v 257 0 0"):
             with self.assertRaises(ValueError):
