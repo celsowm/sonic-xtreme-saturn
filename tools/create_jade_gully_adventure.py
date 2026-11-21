@@ -22,6 +22,7 @@ import create_jade_gully as base
 from tools.validate_adventure_layout import DEFAULT,validate
 from tools.read_kenney_glb import read_glb_triangles
 from tools.prop_materials import split_palm_faces
+from tools.adventure_tiling import refine_first_segments,split_quad_across
 
 args=sys.argv[sys.argv.index("--")+1:] if "--" in sys.argv else []
 if len(args)!=2:
@@ -108,33 +109,49 @@ def import_cc0_prop(item,materials):
     budget=item["triangles_max"]
     if item["asset"].startswith("nature-kit/tree-"):
         wood,leaves=split_palm_faces(faces,face_materials,material_names)
-        # A minimum 4-triangle trunk survives LOD; leaves own the rest.
+        # Near and far are two completely separate derived meshes. Do not
+        # choose LOD per triangle: otherwise foliage and bark switch at
+        # different distances, producing "floating" tree fragments.
         trunk_budget=max(4,budget//4)
-        groups=(("wood",wood,trunk_budget),("canopy",leaves,budget-trunk_budget))
+        low_budget=json.loads(DEFAULT.read_text())["budgets"]["far_palm_lod_faces_per_instance"]
+        groups=(
+            ("lod_near_wood",wood,trunk_budget,"wood"),
+            ("lod_near_canopy",leaves,budget-trunk_budget,"canopy"),
+            ("lod_far_wood",wood,2,"wood"),
+            ("lod_far_canopy",leaves,low_budget-2,"canopy"),
+        )
     else:
-        groups=((item["palette"],faces,budget),)
+        groups=((item["palette"],faces,budget,item["palette"]),)
     built=[]
     total=0
-    for label,group_faces,limit in groups:
+    near_total=0
+    far_total=0
+    for label,group_faces,limit,material in groups:
         obj=_decimate_prop_piece(f'{item["id"]}_{label}',transformed,group_faces,
-                                 materials[label],limit,path)
+                                 materials[material],limit,path)
         built.append(obj)
-        total+=len(obj.data.polygons)
-    if total>budget:
-        raise RuntimeError(f"{path}: combined LOD exceeds authored {budget}-triangle cap")
-    if len(groups)==2:
-        print(f'[adventure] {item["id"]}: original Kenney wood/foliage groups retained ({total} total triangles)')
+        count=len(obj.data.polygons)
+        if label.startswith("lod_far_"):
+            far_total+=count
+        else:
+            near_total+=count
+        total+=count
+    if near_total>budget:
+        raise RuntimeError(f"{path}: near LOD exceeds authored {budget}-triangle cap")
+    if item["asset"].startswith("nature-kit/tree-"):
+        if far_total>low_budget:
+            raise RuntimeError(f"{path}: far LOD exceeds authored {low_budget} triangles")
+        print(f'[adventure] {item["id"]}: original Kenney wood/foliage retained; near={near_total} far={far_total} faces')
     return built[0]
 
 
-def valley_landmass(main,materials):
-    """Continuous collision valley with shorter textured patches near Sonic.
+def valley_landmass(main,materials,tiling):
+    """Independent render-only near texture repeats over unchanged collision.
 
-    The original 80-triangle, single-meadow surface stretched one texture
-    across huge faces. Include every main-route station (no floating roadway),
-    split the four nearest longitudinal intervals, and give each cross-valley
-    band a distinct existing Kenney CC0 texture. No UV runtime allocations.
-    Four separate collision copies share identical boundary coordinates.
+    The original four collision bands remain exactly as before. Replace only
+    the foreground render object for specified material bands with smaller
+    polygons, each mapped to the existing 64x64 Kenney indexed8 source art.
+    No extra VDP1 texture storage, bespoke UV hardware or collision triangles.
     """
     rows=[(main[0][0],-12,main[0][2],main[0][3]),*main]
     refined=[]
@@ -161,6 +178,26 @@ def valley_landmass(main,materials):
             quads.append((n,n+1,n+3,n+2))
         obj=base.mesh_prop(f"jade_valley_band_{col}_{material}",verts,quads,materials[material])
         base.collision_copy(obj)
+        if material in tiling["valley_bands"]:
+            render_verts=[]
+            render_quads=[]
+            for i in range(len(grid)-1):
+                a,b=grid[i][col],grid[i][col+1]
+                c,d=grid[i+1][col+1],grid[i+1][col]
+                pieces=(split_quad_across(a,b,c,d)
+                        if i<tiling["valley_prefix_segments"]
+                        else ((a,b,c,d),))
+                for piece in pieces:
+                    start=len(render_verts)
+                    render_verts.extend(piece)
+                    render_quads.append((start,start+1,start+2,start+3))
+            tiled_mesh=bpy.data.meshes.new(obj.name+"_near_tiles")
+            tiled_mesh.from_pydata(render_verts,[],render_quads)
+            tiled_mesh.update()
+            tiled_mesh.materials.append(materials[material])
+            # Copy of the ORIGINAL mesh was already marked as collision.
+            obj.data=tiled_mesh
+            print(f"[adventure] {material}: {len(render_quads)} render tiles vs {len(quads)} collision quads")
     return len(grid)-1
 
 
@@ -240,10 +277,17 @@ def main():
     # Build surrounding solid ground first. Main and branching ribbons are
     # kept at their exact old coordinates; the valley is a separate walkable
     # mesh for exploration and safe landings beyond the track edges.
-    valley_landmass(data["routes"][0]["stations"],materials)
+    valley_landmass(data["routes"][0]["stations"],materials,data["visual_tiling"])
     for route in data["routes"]:
         top=base.ribbon(route["id"]+"_route",route["stations"],materials[route["id"]])
         base.collision_copy(top)
+        if route["id"]=="main":
+            fine=refine_first_segments(route["stations"],
+                                        data["visual_tiling"]["main_route_prefix_segments"])
+            base.ribbon("main_tiled_route",fine,materials["main"])
+            # Original collision copy remains independent. Remove only the
+            # redundant coarse *render* ribbon, not its collision mesh.
+            bpy.data.objects.remove(top,do_unlink=True)
         if route["id"] in ("upper","river","ruins"):
             branch_terrace(route,materials["terrace"], -1 if route["id"]!="river" else 1)
     for pad in data.get("clearings",[]):
