@@ -1,5 +1,6 @@
 """Pure-Python regression tests for scenic geometry; no Blender required."""
 import unittest
+import math
 from tools.jade_concept_geometry import mesa_mesh, ribbon_mesh, halfpipe_mesh
 
 
@@ -35,7 +36,7 @@ class ScenicGeometryTests(unittest.TestCase):
         self.assertEqual(len(faces), 14*7)
         self.assertEqual(len(materials), len(faces))
         self.assertAlmostEqual(vertices[0][2], 10)
-        self.assertAlmostEqual(vertices[3][2], 4+6*(1-__import__('math').cos(-__import__('math').pi/2+3*__import__('math').pi/7)))
+        self.assertAlmostEqual(vertices[3][2], 4+6*(1-math.cos(-math.pi/2+3*math.pi/7)))
         self.assert_indexed_mesh(vertices, faces)
 
     def test_reject_invalid_geometry(self):
