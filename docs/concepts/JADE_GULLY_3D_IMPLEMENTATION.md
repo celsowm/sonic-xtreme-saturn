@@ -3,9 +3,13 @@
 **Source:** [Approved 5-region concept art](jade-gully-act1-concept.png).
 This is an original **artist-editable offline reconstruction**, not the original cancelled game's geometry and not a Saturn-exported stage.
 
-## Visual contract
+> **Superseded (2026-11-22):** this v1–v3 contract does not use the painting's real labels
+> (1 ENTRY HILLS, 2 TREE VILLAGE, 3 SKY BRIDGES, 4 HEX LOOP, 5 CANYON BASIN) nor its
+> layout. See [concept v4](JADE_GULLY_CONCEPT_V4.md).
 
-The image's actual labeled regions are followed left-to-right (along +Y in Blender):
+## Visual contract (v1–v3, historical)
+
+The v1–v3 blockout used these regions along +Y in Blender:
 
 | Sector (art) | Blender Y (metres) | Authored landmarks and connections |
 | --- | ---: | --- |

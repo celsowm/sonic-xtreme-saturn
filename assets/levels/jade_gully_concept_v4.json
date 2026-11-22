@@ -1,0 +1,877 @@
+{
+  "schema_version": 4,
+  "name": "Jade Gully Act 1 — painting-faithful concept v4",
+  "coordinates": "metres, Blender RH Z-up; +X = right of the painting, +Y = away from the viewer",
+  "source_concept": "docs/concepts/jade-gully-act1-concept.png",
+  "status": "offline Blender art reconstruction only, NOT Saturn gameplay/collision",
+  "world_bounds": {
+    "x": [-200, 240],
+    "y": [-60, 320],
+    "z": [-70, 120]
+  },
+  "regions": [
+    {
+      "id": "entry_hills",
+      "number": 1,
+      "title": "ENTRY HILLS",
+      "rect": [-146, -13, -6, 122],
+      "notes": ["Open grassy fields", "Rolling terrain & pools", "Exploration and ring routes"],
+      "label_uv": [0.323, 0.842]
+    },
+    {
+      "id": "tree_village",
+      "number": 2,
+      "title": "TREE VILLAGE",
+      "rect": [-189, 128, -53, 233],
+      "notes": ["Elevated walkways & huts", "Multi-level routes", "Hidden rings & shortcuts"],
+      "label_uv": [0.293, 0.25]
+    },
+    {
+      "id": "sky_bridges",
+      "number": 3,
+      "title": "SKY BRIDGES",
+      "rect": [-40, 38, 47, 228],
+      "notes": ["Narrow checker bridges", "Cloud-jump platforms", "Gravity-bending setpieces"],
+      "label_uv": [0.511, 0.214]
+    },
+    {
+      "id": "hex_loop",
+      "number": 4,
+      "title": "HEX LOOP",
+      "rect": [56, 152, 111, 212],
+      "notes": ["Massive hexagonal loop", "Ring trails and half-pipes", "Multiple routes (inside / around)"],
+      "label_uv": [0.69, 0.148]
+    },
+    {
+      "id": "canyon_basin",
+      "number": 5,
+      "title": "CANYON BASIN",
+      "rect": [134, 116, 219, 286],
+      "notes": ["Large multi-level valley", "Waterfalls & water channels", "Wooden platforms & final climb", "Goal platform"],
+      "label_uv": [0.914, 0.453]
+    }
+  ],
+  "routes": [
+    {
+      "id": "main",
+      "kind": "main",
+      "points": [
+        [-114, 5, 6.6],
+        [-90, 19, 6.6],
+        [-72, 39, 6.6],
+        [-84, 59, 9.0],
+        [-102, 77, 12.6],
+        [-96, 97, 12.6],
+        [-108, 115, 22],
+        [-153, 143, 32.6],
+        [-121, 153, 40.6],
+        [-104, 161, 50.6],
+        [-79, 151, 46.6],
+        [-57, 149, 43],
+        [-24, 148, 40.6],
+        [-8, 163, 44],
+        [6, 176, 46.6],
+        [22, 168, 48.6],
+        [34, 178, 51.1],
+        [46, 170, 48],
+        [63, 180, 39],
+        [83, 180, 35.5],
+        [101, 180, 45],
+        [105, 180, 64],
+        [91, 180, 84],
+        [69, 180, 84],
+        [57, 180, 64],
+        [63, 182, 45],
+        [85, 184, 37],
+        [105, 186, 38],
+        [159, 178, 40.6],
+        [166, 200, 52.6],
+        [158, 224, 62.6],
+        [172, 242, 72],
+        [182, 258, 80.6]
+      ]
+    },
+    {
+      "id": "village_drop",
+      "kind": "alternate",
+      "points": [
+        [-121, 153, 40.6],
+        [-161, 163, 30],
+        [-171, 131, 20],
+        [-102, 77, 12.6]
+      ]
+    },
+    {
+      "id": "lower_islands",
+      "kind": "alternate",
+      "points": [
+        [-57, 149, 43],
+        [-28, 110, 18.6],
+        [2, 94, 14.6],
+        [28, 108, 20.6],
+        [44, 136, 30.6],
+        [63, 180, 39]
+      ]
+    },
+    {
+      "id": "hex_bypass",
+      "kind": "alternate",
+      "points": [
+        [46, 170, 48],
+        [77, 208, 44],
+        [103, 208, 36],
+        [159, 178, 40.6]
+      ]
+    }
+  ],
+  "terraces": [
+    {
+      "id": "entry_lawn",
+      "region": "entry_hills",
+      "center": [-94, 23],
+      "size": [64, 52],
+      "top": 6,
+      "corner": 9
+    },
+    {
+      "id": "entry_pool_terrace",
+      "region": "entry_hills",
+      "center": [-44, 21],
+      "size": [42, 48],
+      "top": 3,
+      "corner": 7
+    },
+    {
+      "id": "entry_upper",
+      "region": "entry_hills",
+      "center": [-102, 85],
+      "size": [56, 46],
+      "top": 12,
+      "corner": 8
+    },
+    {
+      "id": "entry_arch_shelf",
+      "region": "entry_hills",
+      "center": [-48, 79],
+      "size": [52, 40],
+      "top": 8,
+      "corner": 7
+    },
+    {
+      "id": "entry_front_ledge",
+      "region": "entry_hills",
+      "center": [-16, 3],
+      "size": [24, 28],
+      "top": 1,
+      "corner": 5
+    },
+    {
+      "id": "village_floor",
+      "region": "tree_village",
+      "center": [-121, 171],
+      "size": [100, 76],
+      "top": 10,
+      "corner": 12
+    },
+    {
+      "id": "canyon_floor",
+      "region": "canyon_basin",
+      "center": [174, 201],
+      "size": [84, 150],
+      "top": 8,
+      "corner": 10
+    },
+    {
+      "id": "canyon_dock",
+      "region": "canyon_basin",
+      "center": [160, 180],
+      "size": [20, 20],
+      "top": 40,
+      "corner": 3
+    },
+    {
+      "id": "canyon_mid",
+      "region": "canyon_basin",
+      "center": [168, 202],
+      "size": [22, 20],
+      "top": 52,
+      "corner": 3
+    },
+    {
+      "id": "canyon_high",
+      "region": "canyon_basin",
+      "center": [156, 226],
+      "size": [22, 20],
+      "top": 62,
+      "corner": 3
+    },
+    {
+      "id": "canyon_goal",
+      "region": "canyon_basin",
+      "center": [184, 260],
+      "size": [32, 28],
+      "top": 80,
+      "corner": 4
+    },
+    {
+      "id": "canyon_left_column",
+      "region": "canyon_basin",
+      "center": [140, 250],
+      "size": [20, 22],
+      "top": 74,
+      "corner": 3
+    },
+    {
+      "id": "canyon_right_column",
+      "region": "canyon_basin",
+      "center": [202, 220],
+      "size": [22, 34],
+      "top": 68,
+      "corner": 3
+    },
+    {
+      "id": "canyon_front_column",
+      "region": "canyon_basin",
+      "center": [196, 148],
+      "size": [26, 24],
+      "top": 30,
+      "corner": 3
+    },
+    {
+      "id": "canyon_far_right",
+      "region": "canyon_basin",
+      "center": [212, 252],
+      "size": [14, 22],
+      "top": 92,
+      "corner": 3
+    },
+    {
+      "id": "canyon_water_block_a",
+      "region": "canyon_basin",
+      "center": [160, 192],
+      "size": [10, 10],
+      "top": 16,
+      "corner": 2
+    },
+    {
+      "id": "canyon_water_block_b",
+      "region": "canyon_basin",
+      "center": [192, 178],
+      "size": [12, 10],
+      "top": 14,
+      "corner": 2
+    },
+    {
+      "id": "canyon_water_block_c",
+      "region": "canyon_basin",
+      "center": [178, 222],
+      "size": [10, 10],
+      "top": 19,
+      "corner": 2
+    },
+    {
+      "id": "canyon_water_block_d",
+      "region": "canyon_basin",
+      "center": [150, 160],
+      "size": [10, 8],
+      "top": 13,
+      "corner": 2
+    },
+    {
+      "id": "canyon_back_column",
+      "region": "canyon_basin",
+      "center": [170, 274],
+      "size": [18, 14],
+      "top": 86,
+      "corner": 3
+    },
+    {
+      "id": "canyon_low_left",
+      "region": "canyon_basin",
+      "center": [144, 182],
+      "size": [12, 12],
+      "top": 24,
+      "corner": 2
+    },
+    {
+      "id": "canyon_low_right",
+      "region": "canyon_basin",
+      "center": [208, 192],
+      "size": [12, 14],
+      "top": 22,
+      "corner": 2
+    }
+  ],
+  "islands": [
+    {
+      "id": "sky_a",
+      "region": "sky_bridges",
+      "center": [-24, 148],
+      "size": [18, 16],
+      "top": 40,
+      "depth": 24
+    },
+    {
+      "id": "sky_b",
+      "region": "sky_bridges",
+      "center": [6, 176],
+      "size": [16, 14],
+      "top": 46,
+      "depth": 22
+    },
+    {
+      "id": "sky_c",
+      "region": "sky_bridges",
+      "center": [34, 178],
+      "size": [14, 12],
+      "top": 50.5,
+      "depth": 20
+    },
+    {
+      "id": "sky_d",
+      "region": "sky_bridges",
+      "center": [24, 140],
+      "size": [12, 12],
+      "top": 34,
+      "depth": 18
+    },
+    {
+      "id": "sky_e",
+      "region": "sky_bridges",
+      "center": [-10, 196],
+      "size": [12, 10],
+      "top": 55,
+      "depth": 18
+    },
+    {
+      "id": "low_a",
+      "region": "sky_bridges",
+      "center": [-28, 110],
+      "size": [22, 18],
+      "top": 18,
+      "depth": 30
+    },
+    {
+      "id": "low_b",
+      "region": "sky_bridges",
+      "center": [2, 94],
+      "size": [20, 16],
+      "top": 14,
+      "depth": 28
+    },
+    {
+      "id": "low_c",
+      "region": "sky_bridges",
+      "center": [28, 108],
+      "size": [18, 16],
+      "top": 20,
+      "depth": 28
+    },
+    {
+      "id": "low_d",
+      "region": "sky_bridges",
+      "center": [44, 136],
+      "size": [16, 14],
+      "top": 30,
+      "depth": 26
+    },
+    {
+      "id": "low_e",
+      "region": "sky_bridges",
+      "center": [-8, 54],
+      "size": [32, 24],
+      "top": 6,
+      "depth": 34
+    },
+    {
+      "id": "low_f",
+      "region": "sky_bridges",
+      "center": [34, 50],
+      "size": [28, 22],
+      "top": 10,
+      "depth": 34
+    },
+    {
+      "id": "low_g",
+      "region": "hex_loop",
+      "center": [81, 180],
+      "size": [34, 20],
+      "top": 24,
+      "depth": 26
+    }
+  ],
+  "hex_loop": {
+    "id": "hex_loop_main",
+    "region": "hex_loop",
+    "center": [81, 180, 60],
+    "radius": 34,
+    "inner_ratio": 0.7,
+    "depth": 30
+  },
+  "arches": [
+    {
+      "id": "entry_grass_arch",
+      "region": "entry_hills",
+      "center": [-48, 79],
+      "base_z": 8,
+      "radius": 18,
+      "thickness": 5,
+      "width": 9
+    }
+  ],
+  "pools": [
+    {
+      "id": "entry_pool_south",
+      "region": "entry_hills",
+      "center": [-46, 19],
+      "size": [28, 32],
+      "z": 3.06
+    },
+    {
+      "id": "entry_pool_arch",
+      "region": "entry_hills",
+      "center": [-48, 81],
+      "size": [26, 18],
+      "z": 8.06
+    },
+    {
+      "id": "entry_pool_west",
+      "region": "entry_hills",
+      "center": [-124, 59],
+      "size": [16, 18],
+      "z": 12.06
+    },
+    {
+      "id": "canyon_basin_water",
+      "region": "canyon_basin",
+      "center": [174, 201],
+      "size": [80, 146],
+      "z": 10.0
+    }
+  ],
+  "waterfalls": [
+    {
+      "id": "entry_front_fall",
+      "region": "entry_hills",
+      "top": [-82, -3.4, 6],
+      "width": 10,
+      "height": 44
+    },
+    {
+      "id": "entry_pool_fall",
+      "region": "entry_hills",
+      "top": [-38, -3.4, 3],
+      "width": 12,
+      "height": 41
+    },
+    {
+      "id": "island_e_fall",
+      "region": "sky_bridges",
+      "top": [-4, 41.6, 6],
+      "width": 9,
+      "height": 44
+    },
+    {
+      "id": "island_f_fall",
+      "region": "sky_bridges",
+      "top": [40, 38.6, 10],
+      "width": 9,
+      "height": 48
+    },
+    {
+      "id": "canyon_front_fall",
+      "region": "canyon_basin",
+      "top": [196, 135.6, 30],
+      "width": 10,
+      "height": 20
+    },
+    {
+      "id": "canyon_mid_fall",
+      "region": "canyon_basin",
+      "top": [168, 191.6, 52],
+      "width": 9,
+      "height": 42
+    },
+    {
+      "id": "canyon_left_fall",
+      "region": "canyon_basin",
+      "top": [140, 238.6, 74],
+      "width": 11,
+      "height": 64
+    },
+    {
+      "id": "canyon_goal_fall",
+      "region": "canyon_basin",
+      "top": [194, 245.6, 80],
+      "width": 12,
+      "height": 70
+    },
+    {
+      "id": "canyon_right_fall",
+      "region": "canyon_basin",
+      "top": [202, 202.6, 68],
+      "width": 10,
+      "height": 58
+    },
+    {
+      "id": "canyon_far_fall",
+      "region": "canyon_basin",
+      "top": [212, 240.6, 92],
+      "width": 8,
+      "height": 82
+    }
+  ],
+  "giant_tree": {
+    "id": "village_giant_tree",
+    "region": "tree_village",
+    "base": [-113, 187, 10],
+    "height": 50,
+    "radius": 12,
+    "canopy_radius": 44
+  },
+  "huts": [
+    {
+      "id": "village_main_hut",
+      "region": "tree_village",
+      "deck": [-104, 161, 50],
+      "size": 18.2,
+      "tiers": 2
+    },
+    {
+      "id": "village_hut_west",
+      "region": "tree_village",
+      "deck": [-153, 143, 32],
+      "size": 10.4,
+      "tiers": 1
+    },
+    {
+      "id": "village_hut_north",
+      "region": "tree_village",
+      "deck": [-135, 207, 58],
+      "size": 10.4,
+      "tiers": 1
+    },
+    {
+      "id": "village_hut_east",
+      "region": "tree_village",
+      "deck": [-79, 151, 46],
+      "size": 10.4,
+      "tiers": 1
+    },
+    {
+      "id": "village_hut_lookout",
+      "region": "tree_village",
+      "deck": [-71, 193, 54],
+      "size": 11.7,
+      "tiers": 1
+    }
+  ],
+  "walkways": [
+    {
+      "id": "village_stairs",
+      "kind": "stairs",
+      "from": [-96, 97, 12.6],
+      "to": [-153, 143, 32]
+    },
+    {
+      "id": "village_rope_west",
+      "kind": "rope",
+      "from": [-153, 143, 32],
+      "to": [-121, 153, 40]
+    },
+    {
+      "id": "village_ramp_main",
+      "kind": "stairs",
+      "from": [-121, 153, 40],
+      "to": [-104, 161, 50]
+    },
+    {
+      "id": "village_rope_east",
+      "kind": "rope",
+      "from": [-104, 161, 50],
+      "to": [-79, 151, 46]
+    },
+    {
+      "id": "village_rope_north",
+      "kind": "rope",
+      "from": [-104, 161, 50],
+      "to": [-135, 207, 58]
+    },
+    {
+      "id": "village_rope_lookout",
+      "kind": "rope",
+      "from": [-104, 161, 50],
+      "to": [-71, 193, 54]
+    },
+    {
+      "id": "village_long_bridge",
+      "kind": "rope",
+      "from": [-79, 151, 46],
+      "to": [-24, 148, 40]
+    },
+    {
+      "id": "sky_checker_ab",
+      "kind": "checker",
+      "from": [-17, 154, 40],
+      "to": [0, 170, 46]
+    },
+    {
+      "id": "sky_checker_bc",
+      "kind": "checker",
+      "from": [13, 176, 46],
+      "to": [28, 178, 50.5]
+    },
+    {
+      "id": "sky_checker_c_hex",
+      "kind": "checker",
+      "from": [40, 176, 50.5],
+      "to": [65, 180, 33]
+    },
+    {
+      "id": "canyon_dock_walk",
+      "kind": "plank",
+      "from": [97, 184, 33],
+      "to": [111, 194, 40]
+    },
+    {
+      "id": "canyon_stairs_mid",
+      "kind": "stairs",
+      "from": [164, 190, 40],
+      "to": [168, 196, 52]
+    },
+    {
+      "id": "canyon_stairs_high",
+      "kind": "stairs",
+      "from": [162, 210, 52],
+      "to": [158, 218, 62]
+    },
+    {
+      "id": "canyon_stairs_goal",
+      "kind": "stairs",
+      "from": [164, 232, 62],
+      "to": [176, 248, 80]
+    },
+    {
+      "id": "canyon_dock_a",
+      "kind": "plank",
+      "from": [165, 192, 16],
+      "to": [178, 222, 19]
+    },
+    {
+      "id": "canyon_dock_b",
+      "kind": "plank",
+      "from": [155, 160, 13],
+      "to": [160, 187, 16]
+    },
+    {
+      "id": "village_rope_lookout_east",
+      "kind": "rope",
+      "from": [-71, 193, 54],
+      "to": [-79, 151, 46]
+    },
+    {
+      "id": "village_stairs_west_north",
+      "kind": "stairs",
+      "from": [-153, 143, 32],
+      "to": [-135, 207, 58]
+    }
+  ],
+  "clouds": [
+    {
+      "id": "cloud_platform_1",
+      "region": "sky_bridges",
+      "center": [-7, 164, 43],
+      "radius": 5
+    },
+    {
+      "id": "cloud_platform_2",
+      "region": "sky_bridges",
+      "center": [20, 158, 42],
+      "radius": 4.5
+    },
+    {
+      "id": "cloud_platform_3",
+      "region": "sky_bridges",
+      "center": [12, 126, 28],
+      "radius": 5
+    }
+  ],
+  "springs": [
+    [-78, 49, 6],
+    [-32, 37, 3],
+    [-94, 97, 12],
+    [2, 94, 14],
+    [28, 108, 20],
+    [-28, 110, 18],
+    [34, 50, 10]
+  ],
+  "start": [-114, 5, 6],
+  "goal": [182, 258, 80],
+  "render": {
+    "width": 1491,
+    "height": 1055,
+    "samples": 48
+  },
+  "overlay": {
+    "title": "JADE GULLY - MAP CONCEPT",
+    "subtitle": "ACT 1  -  LAYOUT / EXPLORATION MAP",
+    "title_uv": [0.354, 0.047],
+    "legend_uv": [0.894, 0.855]
+  },
+  "hills": [
+    {
+      "id": "hill_lawn_west",
+      "region": "entry_hills",
+      "center": [-115, 34],
+      "radii": [10.0, 8.8],
+      "base_z": 6,
+      "height": 7.2
+    },
+    {
+      "id": "hill_lawn_east",
+      "region": "entry_hills",
+      "center": [-70, 6],
+      "radii": [8.8, 7.5],
+      "base_z": 6,
+      "height": 5.4
+    },
+    {
+      "id": "hill_upper_west",
+      "region": "entry_hills",
+      "center": [-120, 96],
+      "radii": [10.0, 10.0],
+      "base_z": 12,
+      "height": 9.0
+    },
+    {
+      "id": "hill_upper_east",
+      "region": "entry_hills",
+      "center": [-84, 84],
+      "radii": [7.5, 7.5],
+      "base_z": 12,
+      "height": 5.4
+    },
+    {
+      "id": "hill_arch_shelf",
+      "region": "entry_hills",
+      "center": [-30, 66],
+      "radii": [7.5, 6.2],
+      "base_z": 8,
+      "height": 5.4
+    },
+    {
+      "id": "hill_pool_terrace",
+      "region": "entry_hills",
+      "center": [-54, 40],
+      "radii": [6.2, 5.0],
+      "base_z": 3,
+      "height": 4.5
+    },
+    {
+      "id": "hill_front_ledge",
+      "region": "entry_hills",
+      "center": [-12, 8],
+      "radii": [6.2, 6.2],
+      "base_z": 1,
+      "height": 4.5
+    }
+  ],
+  "slopes": [
+    {
+      "id": "slope_lawn_upper",
+      "region": "entry_hills",
+      "from": [-84, 44, 6],
+      "to": [-84, 66, 12],
+      "width": 16
+    },
+    {
+      "id": "slope_lawn_arch",
+      "region": "entry_hills",
+      "from": [-66, 44, 6],
+      "to": [-62, 62, 8],
+      "width": 10
+    }
+  ],
+  "spiral": {
+    "id": "village_spiral_stair",
+    "region": "tree_village",
+    "center": [-113, 187],
+    "radius": 22,
+    "z0": 12,
+    "z1": 46,
+    "turns": 1.25,
+    "deck_z": 46
+  },
+  "platforms": [
+    {
+      "id": "canyon_deck_a",
+      "region": "canyon_basin",
+      "deck": [182, 166, 22],
+      "size": 6
+    },
+    {
+      "id": "canyon_deck_b",
+      "region": "canyon_basin",
+      "deck": [146, 206, 30],
+      "size": 5
+    },
+    {
+      "id": "canyon_deck_c",
+      "region": "canyon_basin",
+      "deck": [168, 138, 18],
+      "size": 6
+    },
+    {
+      "id": "canyon_deck_d",
+      "region": "canyon_basin",
+      "deck": [214, 176, 20],
+      "size": 5
+    }
+  ],
+  "channels": [
+    {
+      "id": "channel_goal",
+      "region": "canyon_basin",
+      "from": [188, 270, 80],
+      "to": [194, 247, 80],
+      "width": 5
+    },
+    {
+      "id": "channel_right",
+      "region": "canyon_basin",
+      "from": [202, 234, 68],
+      "to": [202, 204, 68],
+      "width": 5
+    },
+    {
+      "id": "channel_left",
+      "region": "canyon_basin",
+      "from": [140, 259, 74],
+      "to": [140, 240, 74],
+      "width": 5
+    },
+    {
+      "id": "channel_far",
+      "region": "canyon_basin",
+      "from": [212, 261, 92],
+      "to": [212, 242, 92],
+      "width": 4
+    }
+  ],
+  "monitors": [
+    [-104, 30, 6],
+    [-66, 92, 8],
+    [-116, 80, 12],
+    [-18, 0, 1],
+    [-28, 152, 40],
+    [-14, 52, 6],
+    [190, 266, 80]
+  ],
+  "stars": [
+    [-8, 170, 54],
+    [50, 160, 60],
+    [120, 210, 62],
+    [-60, 130, 34],
+    [150, 240, 84]
+  ]
+}

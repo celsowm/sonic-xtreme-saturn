@@ -8,7 +8,12 @@
 
 For the **editable five-region Blender generator**, see [Jade Gully 3D implementation](JADE_GULLY_3D_IMPLEMENTATION.md). The existing [Tree Village V3 kit](TREE_VILLAGE_BLENDER_ASSET_CHECKLIST.md) is a separately qualified small art-source cell. The present single-stage Saturn baker cannot carry the full map.
 
-The actual image labels five regions, translated into +Y progression in the new concept manifest:
+> **Correction (2026-11-22):** the list below does not match the painting. The image labels
+> **1 ENTRY HILLS, 2 TREE VILLAGE, 3 SKY BRIDGES, 4 HEX LOOP, 5 CANYON BASIN**.
+> The painting-faithful reconstruction is [concept v4](JADE_GULLY_CONCEPT_V4.md); the list
+> below is kept only as the history of the v1–v3 blockout.
+
+The v1–v3 blockout used these five regions, translated into +Y progression:
 
 1. **Sonic's Base** — clearing, tutorial, access to optional routes and starter dome.
 2. **Jade Ridges** — checkerboard cliffs, switchbacks, a large hexagonal corkscrew and a lower loop.

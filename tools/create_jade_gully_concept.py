@@ -1,7 +1,9 @@
 """Build the entire Jade Gully Act 1 concept as an editable Blender scene.
 
 Offline 5-sector ART BLOCKOUT, intentionally not exported to the Saturn engine.
-Requires Blender 4.x, not the LibSaturn Blender exporter.
+Runs on Blender 4.x and 5.2 (verified on the Mac's 5.2.2 LTS, 2026-11-22),
+not the LibSaturn Blender exporter. Superseded for fidelity by
+tools/create_jade_gully_concept_v4.py, which follows the painting's real labels.
 
   blender -b --factory-startup --python-exit-code 1 \\
     --python tools/create_jade_gully_concept.py -- build/jade-gully-concept
