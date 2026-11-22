@@ -23,6 +23,20 @@ Authored files:
 - `tests/test_jade_concept.py`: dependency-free checks used before Blender.
 - `scripts/build-jade-concept-mac.sh`: Mac one-command build, producing `.blend`, isometric PNG and plan-view PNG under `build/jade-gully-concept/`.
 
+## Visual pass v2 — 22 November 2026
+
+The previous render confirmed that the v1 scene was only a uniform checkerboard strip with tiny pine-like placeholders, nearly invisible loops, small suspended huts, threadlike water and vertical labels. The new committed source corrects the Blender **art blockout**:
+
+- Hex loops and collectible-look rings now lie in the YZ traversal plane, facing the oblique panoramic camera; loops are enlarged and raised above terrain.
+- Tropical eight-frond palms replace conical pine proxies. A large ancient broadleaf world tree anchors the Bamboo Heights village; its three raised hut decks are linked with segmented planks, posts and sagging ropes.
+- Ten scenic checkerboard mesas break the ridge silhouette into plateaus. Two geometrically curved bamboo halfpipes cross the elevated section.
+- Gully Current receives a wide water surface, foam banks, multi-curtain waterfalls and recognizable pools instead of a single colored line.
+- The starting communications dish, springs, item monitors, additional rings and final emerald goal provide recognizable gameplay landmarks.
+- Five readable, camera-facing region labels replace edge-on vertical names.
+- All meshes are original fan-authoring geometry; existing source Kenney CC0 terrain textures stay packed in the Blender file. This is **not a verified playable Saturn stage**.
+
+The pure-Python geometry library and regression tests are in `tools/jade_concept_geometry.py` and `tests/test_jade_concept_geometry.py`, while `tools/jade_concept_dressing.py` holds visual-only setpieces. The Blender workflow in `.github/workflows/jade-gully-concept.yml` checks these modules and renders actual images. **Visual acceptance remains open until we inspect the newly generated screenshots.**
+
 ## Mac
 
 ```bash
@@ -31,6 +45,7 @@ git fetch origin main
 DEST="$HOME/dev/sonic-xtreme-concept-$(date +%s)"
 git worktree add --detach "$DEST" origin/main
 bash "$DEST/scripts/build-jade-concept-mac.sh"
+open "$DEST/build/jade-gully-concept/jade-gully-concept-isometric.png"
 ```
 
 This uses an isolated detached worktree. It does **not** switch, merge, reset, or alter the developer's current experimental branch. Open `$DEST/build/jade-gully-concept/jade_gully_act1_concept.blend` in Blender. The same command also renders isometric and top-down PNGs. The [GitHub Actions workflow](../../.github/workflows/jade-gully-concept.yml) runs the Blender generator in CI and saves the scene and previews as an artifact when successful. Each large landmass is named `sector_<id>_checker_landmass`; route meshes and line guides have `path_*` / `guide_*` prefixes; landmarks keep their map names. The source PNG is a reference alongside the editable scene, not a texture mapped over the entire ground. Terrain, rock, forest, roof, bamboo, bridge, river and path materials use the already committed **Kenney CC0 PNGs** in `assets/textures/jade-gully/`; source images are packed into the generated `.blend`. The color of rings and visual route guides remains authored.
