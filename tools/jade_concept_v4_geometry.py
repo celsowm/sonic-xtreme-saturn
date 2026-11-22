@@ -147,6 +147,71 @@ def floating_island(polygon, top, band, depth):
     return verts, faces, mats
 
 
+def bridge_deck(stations, width=7.0, thickness=3.0):
+    """Solid, visibly connected approach deck following authored route points.
+
+    Unlike a floating guide line, its grass cap, checker walls and bottom
+    all meet *exactly* at the supplied 3D station endpoints. In particular
+    the hex-adjacent stations can be tilted by the presentation transform
+    BEFORE calling this function. Returns (vertices, faces, materials).
+    Offline art only; no collision or gravity-transition implementation.
+    """
+    if len(stations) < 2 or width <= 0 or thickness <= 0:
+        raise ValueError('bridge needs 2+ stations and positive dimensions')
+    if any(len(p) != 3 or not all(math.isfinite(v) for v in p) for p in stations):
+        raise ValueError('bridge stations must be finite XYZ positions')
+    verts = []
+    for i, p in enumerate(stations):
+        previous = stations[max(0, i - 1)]
+        following = stations[min(len(stations) - 1, i + 1)]
+        dx, dy = following[0] - previous[0], following[1] - previous[1]
+        length = math.hypot(dx, dy)
+        if length < 1e-5:
+            raise ValueError('bridge has degenerate XY tangent')
+        nx, ny = -dy / length * width / 2, dx / length * width / 2
+        verts.extend(((p[0] + nx, p[1] + ny, p[2]),
+                      (p[0] - nx, p[1] - ny, p[2])))
+    n = len(stations) * 2
+    verts += [(x, y, z - thickness) for x, y, z in verts]
+    faces, mats = [], []
+    for i in range(len(stations) - 1):
+        a = i * 2
+        faces.extend(((a, a+1, a+3, a+2),
+                      (n+a+2, n+a+3, n+a+1, n+a),
+                      (n+a, a, a+2, n+a+2),
+                      (a+1, n+a+1, n+a+3, a+3)))
+        mats.extend((TOP, BOTTOM, SIDE, SIDE))
+    faces.extend(((n, n+1, 1, 0), (n-2, n-1, 2*n-1, 2*n-2)))
+    mats.extend((SIDE, SIDE))
+    return verts, faces, mats
+
+
+def village_branch_paths(tree_base, hut_decks):
+    """Deterministic woody supports connecting each treehouse to the trunk.
+
+    Returns one tapered-looking curved path per hut with the terminal point
+    tucked directly beneath its deck. This is visual infrastructure only.
+    """
+    if len(tree_base) != 3:
+        raise ValueError('tree base must be XYZ')
+    bx, by, bz = tree_base
+    paths = {}
+    for name, deck in hut_decks:
+        if name in paths or len(deck) != 3:
+            raise ValueError('duplicate or malformed village deck')
+        x, y, z = deck
+        if z <= bz + 5:
+            raise ValueError('treehouse deck must rise above trunk base')
+        dx, dy = x - bx, y - by
+        paths[name] = [
+            (bx, by, bz + (z-bz) * .57),
+            (bx + dx*.24, by + dy*.24, bz + (z-bz) * .72),
+            (bx + dx*.64, by + dy*.64, z - 5.0),
+            (x, y, z - 1.4),
+        ]
+    return paths
+
+
 def hex_tube(cx, cy, cz, radius, inner_ratio, depth):
     """The painting's massive hexagonal loop, facing the camera along -Y.
 
