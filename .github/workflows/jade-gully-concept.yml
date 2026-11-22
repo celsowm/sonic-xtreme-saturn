@@ -68,7 +68,7 @@ jobs:
           fi
           # Never publish an old render over a newer main revision.
           git fetch origin main
-          if [[ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]]; then
+          if [[ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]]; then
             echo '[jade] Main advanced since build; skipping stale artifact publish'
             exit 0
           fi
