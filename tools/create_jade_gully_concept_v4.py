@@ -796,6 +796,23 @@ def build_props(data, pal):
     for k, (x, y, z) in enumerate(data['springs']):
         prim('cylinder', 'spring_%d_base' % k, (x, y, z + .5), pal['spring_base'], vertices=12, radius=1.8, depth=1.0)
         prim('cylinder', 'spring_%d_pad' % k, (x, y, z + 1.2), pal['spring_top'], vertices=12, radius=1.9, depth=.5)
+    # Aerial routes use visible take-off pads, not fictitious stairs
+    # stretching across the sky. Mark only jump/spring launches that do not
+    # already have a pink spring at that position.
+    existing = [tuple(p) for p in data['springs']]
+    used = set()
+    for transfer in data.get('navigation_transfers', []):
+        if transfer['mode'] != 'spring':
+            continue
+        x, y, z = transfer['from']
+        if any(math.dist((x,y), prev[:2]) < 2 for prev in existing) or (x,y) in used:
+            continue
+        used.add((x,y))
+        name = transfer['id'] + '_launch'
+        prim('cylinder', name + '_base', (x,y,z+.13), pal['spring_base'],
+             vertices=12, radius=2.1, depth=.5)
+        prim('cylinder', name + '_pad', (x,y,z+.45), pal['spring_top'],
+             vertices=12, radius=2.0, depth=.22)
     sx, sy, sz = data['start']
     prim('cylinder', 'start_pad', (sx, sy, sz + .4), pal['spring_top'], vertices=20, radius=5, depth=.8)
     prim('torus', 'start_glow', (sx, sy, sz + .9), pal['pad_glow'], major_radius=5.2, minor_radius=.35)
@@ -880,15 +897,17 @@ def build_items(data, pal):
 def build_rings_and_routes(data, pal):
     overlay = bpy.data.collections.new(OVERLAY)
     bpy.context.scene.collection.children.link(overlay)
+    candidate_overlay = bpy.data.collections.new('JG4_CANDIDATE_ROUTES')
+    bpy.context.scene.collection.children.link(candidate_overlay)
     for route in data['routes']:
         pts = [tuple(p[k] + (1.6 if k == 2 else 0) for k in range(3))
                for p in tilt_hex_points(data, route['points'])]
         curve = geo.catmull_rom(pts, 6)
         if route['kind'] == 'main':
-            tube('route_' + route['id'], curve, pal['route'], 1.05, overlay)
+            tube('route_' + route['id'], curve, pal['route'], .52, overlay)
             for k, (pos, direction) in enumerate(geo.sample_along(curve, 26, 13)):
                 arrow = prim('cone', 'route_arrow_%02d' % k, pos, pal['route'],
-                             vertices=8, radius1=2.8, radius2=0, depth=4.6)
+                             vertices=8, radius1=1.75, radius2=0, depth=2.8)
                 arrow.rotation_euler = Vector(direction).to_track_quat('Z', 'Y').to_euler()
                 bpy.context.scene.collection.objects.unlink(arrow)
                 overlay.objects.link(arrow)
@@ -896,15 +915,18 @@ def build_rings_and_routes(data, pal):
             # Purple is reserved for the reference painting's existing
             # shortcuts. Cyan marks new bridge-supported concept candidates
             # whose physics and Saturn collision remain UNVERIFIED.
-            route_mat = pal['nav_candidate'] if route.get('render_style') == 'candidate' else pal['alt_route']
-            dots = [(p[0], p[1], p[2], .8, 1, 1, 1, 0) for p, _ in geo.sample_along(curve, 3.2)]
-            blob_field('route_' + route['id'] + '_dots', dots, [route_mat], 1, overlay)
+            is_candidate = route.get('render_style') == 'candidate'
+            route_mat = pal['nav_candidate'] if is_candidate else pal['alt_route']
+            layer = candidate_overlay if is_candidate else overlay
+            dots = [(p[0], p[1], p[2], .43, 1, 1, 1, 0)
+                    for p, _ in geo.sample_along(curve, 5.7)]
+            blob_field('route_' + route['id'] + '_dots', dots, [route_mat], 1, layer)
             end, direction = geo.sample_along(curve, geo.polyline_length(curve) - .1)[-1]
             arrow = prim('cone', 'route_' + route['id'] + '_arrow', end, route_mat,
-                         vertices=8, radius1=1.6, radius2=0, depth=3.0)
+                         vertices=8, radius1=1.15, radius2=0, depth=2.0)
             arrow.rotation_euler = Vector(direction).to_track_quat('Z', 'Y').to_euler()
             bpy.context.scene.collection.objects.unlink(arrow)
-            overlay.objects.link(arrow)
+            layer.objects.link(arrow)
     # Ring rows: groups of four along the main route, facing the viewer.
     main = geo.catmull_rom([tuple(p[k] + (3.4 if k == 2 else 0) for k in range(3))
                             for p in tilt_hex_points(data, data['routes'][0]['points'])], 6)
@@ -1394,8 +1416,13 @@ def main():
     scene = bpy.context.scene
     overlay = bpy.data.collections[OVERLAY]
 
+    candidate_layer = bpy.data.collections['JG4_CANDIDATE_ROUTES']
+
     def shoot(key, cam, with_overlay):
         overlay.hide_render = not with_overlay
+        # A painting-faithful map must NOT show invented cyan routes.
+        # The independent routes screenshot documents design candidates.
+        candidate_layer.hide_render = not (with_overlay and key == 'routes')
         hud.hide_render = not (with_overlay and key == 'map')
         scene.camera = cam
         scene.render.filepath = str(out / ('jade-gully-v4-' + key + '.png'))
