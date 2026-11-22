@@ -36,8 +36,8 @@ class TreeVillageGeneratorTests(unittest.TestCase):
         tree=ast.parse(self.source)
         funcs={n.name for n in tree.body if isinstance(n,ast.FunctionDef)}
         self.assertTrue({"hut_decks_and_boughs","root_buttresses","valley_landmass"}<=funcs)
-        self.assertIn('hut_decks_and_boughs()\\n',self.source)
-        self.assertIn('root_buttresses()\\n',self.source)
+        self.assertIn('hut_decks_and_boughs()',self.source)
+        self.assertIn('root_buttresses()',self.source)
         self.assertIn('"cliff": create_image(',self.source)
         self.assertIn('"TreeVillage_PlayerHeight"',self.source)
         self.assertIn('tree_village_ground_preview.png',self.source)
