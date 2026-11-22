@@ -171,20 +171,34 @@ def terrain(sector, data, palette):
                 index.append(2)
             else:
                 index.append(1 if (i+j)%5==0 else 0)
-    # Exterior side walls: a broad near/far chess-pattern bank into the gorge.
+    # Instead of the former 2 huge vertical striped wall bands, tile the
+    # exposed cliff into 4 checker tiers * 3 longitudinal cells per station.
+    # This creates actual mesh-level contrasting squares that remain readable
+    # even when a source texture wraps or appears too dark in the preview.
+    cliff_tiers=4
+    cliff_substeps=3
+    cliff_depth=24.0
     for side in (0,nx):
         for j in range(ny):
-            top0=j*(nx+1)+side
-            top1=(j+1)*(nx+1)+side
-            a=verts[top0]; b=verts[top1]
-            for k in range(2):
-                z0a=a[2]-k*12; z0b=b[2]-k*12
-                z1a=a[2]-(k+1)*12; z1b=b[2]-(k+1)*12
-                base=len(verts)
-                verts.extend(((a[0],a[1],z0a),(b[0],b[1],z0b),
-                              (b[0],b[1],z1b),(a[0],a[1],z1a)))
-                faces.append((base,base+1,base+2,base+3))
-                index.append(2 if (j+k)%2 else 3)
+            a=verts[j*(nx+1)+side]
+            b=verts[(j+1)*(nx+1)+side]
+            for sub in range(cliff_substeps):
+                t0=sub/cliff_substeps
+                t1=(sub+1)/cliff_substeps
+                p0=tuple(a[k]+(b[k]-a[k])*t0 for k in range(3))
+                p1=tuple(a[k]+(b[k]-a[k])*t1 for k in range(3))
+                for tier in range(cliff_tiers):
+                    d0=cliff_depth*tier/cliff_tiers
+                    d1=cliff_depth*(tier+1)/cliff_tiers
+                    n=len(verts)
+                    verts.extend((
+                        (p0[0],p0[1],p0[2]-d0),
+                        (p1[0],p1[1],p1[2]-d0),
+                        (p1[0],p1[1],p1[2]-d1),
+                        (p0[0],p0[1],p0[2]-d1),
+                    ))
+                    faces.append((n,n+1,n+2,n+3))
+                    index.append(2 if (j*cliff_substeps+sub+tier)%2 else 3)
     obj=mesh('sector_'+sector['id']+'_checker_landmass', verts, faces,
              (palette['grass'],palette['foliage'],palette['checker_green'],palette['checker_brown']), index)
     obj['concept_sector']=sector['id']
