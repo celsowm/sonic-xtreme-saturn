@@ -1096,10 +1096,22 @@ def setup_world(data):
     scene.cycles.device = 'CPU'
     scene.cycles.samples = data['render']['samples']
     scene.cycles.transparent_max_bounces = 32   # overlapping soft cloud edges
+    # Ubuntu distro Blender may be built WITHOUT OpenImageDenoiser. Enabling
+    # Cycles denoising then aborts the render after tests have all passed.
+    # In that environment render raw samples; the Mac's Blender build keeps
+    # its normal denoiser. Both legacy scene.cycles and current view-layer
+    # switches must be handled for Blender 3.x/4.x/5.x compatibility.
+    import os
+    disable_denoiser = os.environ.get('JADE_DISABLE_DENOISER') == '1'
     try:
-        scene.cycles.use_denoising = True
+        scene.cycles.use_denoising = not disable_denoiser
     except AttributeError:
         pass
+    for layer in scene.view_layers:
+        try:
+            layer.cycles.use_denoising = not disable_denoiser
+        except AttributeError:
+            pass
     scene.view_settings.view_transform = 'Standard'
     try:
         scene.view_settings.look = 'Medium High Contrast'
