@@ -179,7 +179,7 @@ def box_geometry(center, size):
     w, d, h = (q / 2 for q in size)
     v = [(x+dx*w, y+dy*d, z+dz*h) for dz in (-1, 1)
          for dy in (-1, 1) for dx in (-1, 1)]
-    f = [(0, 1, 3), (0, 3, 2), (4, 7, 5), (4, 6, 7),
+    f = [(0, 3, 1), (0, 2, 3), (4, 5, 7), (4, 7, 6),
          (0, 4, 5), (0, 5, 1), (2, 3, 7), (2, 7, 6),
          (0, 2, 6), (0, 6, 4), (1, 5, 7), (1, 7, 3)]
     return v, f
@@ -189,7 +189,7 @@ def box(name, center, size, material, coll, role, collision_type=None):
     v, f = box_geometry(center, size)
     o = mesh_object(name, v, f, material, coll, role)
     if collision_type == "top":
-        mesh_object(name + "_COLL", v, [(4, 7, 5), (4, 6, 7)],
+        mesh_object(name + "_COLL", v, [(4, 5, 7), (4, 7, 6)],
                     None, "JG_COLLISION", "walkable", collision=True)
     elif collision_type == "block":
         mesh_object(name + "_COLL", v, f, None,
@@ -228,7 +228,7 @@ def bridge(item):
     v=[(x1-nx,y1-ny,z1),(x1+nx,y1+ny,z1),
        (x2+nx,y2+ny,z2),(x2-nx,y2-ny,z2)]
     down=[(x,y,z-item["thickness"]) for x,y,z in v]
-    tris=[(0,1,2),(0,2,3),(4,6,5),(4,7,6),
+    tris=[(0,2,1),(0,3,2),(4,5,6),(4,6,7),
           (0,4,5),(0,5,1),(1,5,6),(1,6,2),
           (2,6,7),(2,7,3),(3,7,4),(3,4,0)]
     mesh_object(item["id"],v+down,tris,item["material"],
