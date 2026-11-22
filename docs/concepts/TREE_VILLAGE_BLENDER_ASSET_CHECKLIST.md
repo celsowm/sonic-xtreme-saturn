@@ -163,3 +163,28 @@ cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/build-tree-vi
 ```
 
 The v2 authoring output is available; do not run the same command solely to reproduce it unless the builder changes.
+
+## V3 artistic revision — implementation and acceptance
+
+Code is now committed on `main`, but **a rendered V3 must still be inspected** before artistic acceptance.
+
+- **Terrain:** changed a 5×5 flat meadow to a 7×7 continuous heightfield (72 terrain triangles) split into three existing-material-style bands, plus 24 art-only triangles making two recessed cliff skirts. Surface collision now follows the new 72 terrain triangles; cliff skirts have no collision. V3 only covers the current 50×70m test cell, not the entire Act 1.
+- **Tree:** flared/eccentric octagonal trunk remains an inexpensive actual 3D collider; three low-poly root fins and two 12-triangle branch beams make it look anchored rather than a vertical column. The canopy is still transparent cross-planes.
+- **Huts:** five decorative 2D façades remain 2 triangles each, but now stand over actual wooden 2-triangle non-collidable balcony decks, with the earlier supports kept. The one gameplay-adjacent hut retains a proper low-poly roof/box blocker.
+- **Palms:** thicker original foliage silhouettes and slightly larger crossed-plane meshes. They are **static X-planes**, not camera-facing live billboards.
+- **Budget:** platforms use six-sided tops instead of eight, saving 30 render triangles across five pads; planned V3 render sum **356 − 30 + (72−32) + 24 + 10 + 24 + 6 = 430 / 448 triangles**. The published Blender report, not this estimate, determines actual counts. The scale proxy is a blue **Blender-only** reference object, *not* an in-game Sonic character.
+- **Two camera reviews:** editor overview and player-height perspective generate `tree_village_preview.png` and `tree_village_ground_preview.png`; both are auto-committed by [V3 art workflow](../../.github/workflows/jade-tree-village-art.yml), and [thumbnail workflow](../../.github/workflows/jade-tree-village-thumbnail.yml) derives lightweight JPEGs from the actual renders. The source .blend and **eleven** original 64×64 PNGs are published with the measured report.
+- **Validation:** static host tests and independent Blender 3D generation run in GitHub Actions. Failures must be investigated; do **not** claim a successful Blender run just from source changes.
+
+**Not implemented**: sector runtime/streaming, VDP1 11-texture/palette integration, ring/spring gameplay, Sonic R model inside the Blender source cell, measured real displayed Saturn 30 FPS. The art-source generated files are not a playable new stage.
+
+On the Mac, once the GitHub Actions art workflow has published the V3, inspect the editable file directly:
+
+```bash
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && \
+git fetch origin main && \
+git show origin/main:assets/jade-gully/tree-village/kit-report.json
+```
+
+The active `work/jade-v3-view-cull` branch is intentionally left unmerged. The Blender source is on `main`, and can be opened from the `main` worktree or an exported copy.
+
