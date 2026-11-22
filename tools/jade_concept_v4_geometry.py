@@ -147,6 +147,65 @@ def floating_island(polygon, top, band, depth):
     return verts, faces, mats
 
 
+def canyon_rim_wall(stations, bottom=-52.0):
+    """A continuous eroded canyon wall rather than stacked cuboid columns.
+
+    Stations are (x, y, top_z) in increasing Y order on the far/right bank.
+    Seven linked strata form overhanging grass lips, inset orange checker
+    cliffs and a low rock shelf. Each row shares vertices with adjacent
+    segments: no visual gap between authored stations. Blender ART only;
+    not automatically walkable and not Saturn collision geometry.
+    Material 0 = grass rim, 1 = checker canyon wall, 2 = bedrock.
+    """
+    if len(stations) < 3 or any(len(p) != 3 for p in stations):
+        raise ValueError('canyon wall requires at least three XYZ stations')
+    if any(not all(math.isfinite(v) for v in p) for p in stations):
+        raise ValueError('canyon wall requires finite station coordinates')
+    if any(b[1] <= a[1] for a, b in zip(stations, stations[1:])):
+        raise ValueError('canyon stations must progress along Y')
+    if bottom >= min(p[2] for p in stations) - 32:
+        raise ValueError('canyon foot too high for shelf strata')
+    # Heights are relative to the local authored top; the last station may
+    # be significantly higher without introducing rigid, flat-topped boxes.
+    bands = ((0.0, 0.0), (-2.0, -1.5), (-6.0, 1.6),
+             (-17.0, 4.5), (-20.0, 0.4), (-27.0, 3.2),
+             (-38.0, 6.0))
+    verts = []
+    for dx, dz in bands:
+        for i, (x, y, top) in enumerate(stations):
+            # Checker faces are no longer precisely vertical or planar.
+            weather = .8 * math.sin(i * 1.47 + dz * .17)
+            verts.append((x + dx + weather, y,
+                          top + dz))
+    # The fixed foot is deep under the cloud plane, blending into jungle.
+    for i, (x, y, top) in enumerate(stations):
+        verts.append((x + 8 + 1.4 * math.sin(i * 1.31), y, bottom))
+    n = len(stations)
+    faces, mats = [], []
+    for band in range(len(bands)):
+        offset0, offset1 = band*n, (band+1)*n
+        for i in range(n-1):
+            # Close the wall across every station pair, including ledges;
+            # one coherent polygon strip per stratum, no separate cubes.
+            faces.append((offset0+i, offset0+i+1,
+                          offset1+i+1, offset1+i))
+            mats.append(0 if band == 0 else (2 if band >= 5 else 1))
+    # A narrow grass cap makes the rim readable against the sky.
+    for i in range(n - 1):
+        a, b = i, i+1
+        faces.append((a, b, len(verts), len(verts)+1))
+        # Additional cap vertices follow the same station boundaries.
+        mats.append(0)
+    # Cap vertices need to be added after main strips: the cap shares the
+    # near edge and extends 2.8m back to meet the far-bank vegetation.
+    for x, y, z in stations:
+        verts.append((x+2.8, y, z-.35))
+    cap_start = (len(bands)+1)*n
+    for i in range(n-1):
+        faces[len(bands)*(n-1)+i] = (i, i+1, cap_start+i+1, cap_start+i)
+    return verts, faces, mats
+
+
 def bridge_deck(stations, width=7.0, thickness=3.0):
     """Solid, visibly connected approach deck following authored route points.
 
