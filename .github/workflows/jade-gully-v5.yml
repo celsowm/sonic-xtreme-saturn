@@ -1,0 +1,36 @@
+name: Jade Gully V5 host geometry validation
+
+on:
+  push:
+    branches: [work/jade-v5-art-direction]
+    paths:
+      - '.github/workflows/jade-gully-v5.yml'
+      - 'tools/jade_concept_v4_geometry.py'
+      - 'tools/create_jade_gully_concept_v4.py'
+      - 'tools/validate_jade_concept_v4.py'
+      - 'assets/levels/jade_gully_concept_v4.json'
+      - 'tests/test_jade_concept_v4.py'
+      - 'tests/test_jade_concept_v5.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-geometry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Python geometry and scene source
+        run: |
+          python3 -m py_compile \
+            tools/jade_concept_v4_geometry.py \
+            tools/create_jade_gully_concept_v4.py \
+            tools/validate_jade_concept_v4.py
+          python3 tools/validate_jade_concept_v4.py
+          python3 -m unittest tests.test_jade_concept_v4 tests.test_jade_concept_v5 -v
+      - name: Declare artwork unqualified until Blender review
+        run: |
+          echo 'Host geometry tests do not establish visual quality or Saturn performance.'
+          echo 'Use scripts/review-jade-v5-mac.sh for Blender PNG and ZIP evidence.'
