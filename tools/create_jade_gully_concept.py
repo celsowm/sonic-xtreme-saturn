@@ -272,12 +272,20 @@ def treehouse(ident, loc, size, materials):
         xx=x+(size*.94)*math.cos(theta)
         yy=y+(size*.94)*math.sin(theta)
         cylinder(ident+'_post_'+str(direction),xx,yy,platform_z+1.8,.2,4,materials['wood'],6)
-    # Tree crowns above the huts signal dense canopy, not floating houses.
-    for direction in range(5):
-        theta=2*PI*direction/5
-        xx=x+size*.85*math.cos(theta)
-        yy=y+size*.85*math.sin(theta)
-        cone(ident+'_leaf_'+str(direction),xx,yy,platform_z+16,size*.5,10,materials['foliage'])
+    # Broad tropical canopy masses frame the elevated huts; the previous
+    # pointed cones made the whole tree village look like a pine forest.
+    for direction in range(6):
+        theta=2*PI*direction/6
+        xx=x+size*.90*math.cos(theta)
+        yy=y+size*.90*math.sin(theta)
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,
+                                               radius=size*.66,
+                                               location=(xx,yy,platform_z+size*1.53))
+        obj=bpy.context.object
+        obj.name=ident+'_broad_canopy_'+str(direction)
+        obj.scale=(1.05,1.18,.61)
+        obj.data.materials.append(materials['foliage'])
+        obj['stage_role']='concept_visual_only'
 
 
 def waterfall(ident, loc, size, materials):
@@ -297,10 +305,32 @@ def waterfall(ident, loc, size, materials):
 
 
 def tree(name, x, y, ground, h, materials):
-    cylinder(name+'_trunk',x,y,ground+h*.36,.75,h*.72,materials['wood'],6)
-    for j in range(2):
-        cone(name+'_foliage_'+str(j),x,y,ground+h*(.64+j*.17),
-             4.4-j*.6,h*.52,materials['foliage'])
+    """Tropical low-poly palm rather than the pointed pine placeholders.
+
+    Broad radial fronds are a *single* indexed mesh per tree, suitable for
+    later Saturn LOD reduction; the decorative tree has no game collision.
+    """
+    tilt=(sum(ord(c) for c in name)%5-2)*.17
+    trunk=cylinder(name+'_trunk',x,y,ground+h*.46,.55+h*.014,h*.92,materials['wood'],7)
+    trunk.rotation_euler[1]=tilt*.07
+    top=(x+tilt,y,ground+h)
+    verts=[]; faces=[]
+    for blade in range(8):
+        angle=2*PI*blade/8+(len(name)%7)*.11
+        ux,uy=math.cos(angle),math.sin(angle)
+        vx,vy=-uy,ux
+        reach=h*(.41+(blade%3)*.035)
+        spread=reach*.26
+        z=top[2]
+        k=len(verts)
+        verts.extend((
+            top,
+            (top[0]+ux*reach*.37+vx*spread,top[1]+uy*reach*.37+vy*spread,z+.62),
+            (top[0]+ux*reach,top[1]+uy*reach,z-reach*.33),
+            (top[0]+ux*reach*.37-vx*spread,top[1]+uy*reach*.37-vy*spread,z+.62),
+        ))
+        faces.extend(((k,k+1,k+2),(k,k+2,k+3)))
+    mesh(name+'_eight_fronds',verts,faces,[materials['foliage']])
 
 
 def ring(name, x, y, z, materials, radius=1.45):
@@ -332,12 +362,25 @@ def label(name, content, location, materials, size=4):
 
 def build_landmarks(data, materials):
     by_id={item['id']:item for item in data['landmarks']}
+    village_decks={}
     for item in data['landmarks']:
         ident=item['id']; kind=item['kind']; x,y,z=item['position']; size=item['size']
         if kind=='hex_loop':
-            hex_loop(ident,(x,y,z),size,materials)
+            # The opening used to be buried below terrain and edge-on.
+            loop_z=z+size*.72
+            hex_loop(ident,(x,y,loop_z),size*1.10,materials)
+            for j in range(9):
+                t=(j+1)*PI/10
+                ring(ident+'_gold_inner_'+str(j),x+9,
+                     y+size*.76*math.sin(t),
+                     loop_z+size*.76*math.cos(t),materials,radius=1.25)
         elif kind=='treehouse':
-            treehouse(ident,(x,y,z),size,materials)
+            # The original deck coordinates sometimes sat inside the terrain.
+            # Lift only the visual concept deck, keeping manifest coordinates
+            # intact for future gameplay sector authoring.
+            deck=max(z,at_z(x,y,data)+size*1.45)
+            village_decks[ident]=(x,y,deck)
+            treehouse(ident,(x,y,deck),size,materials)
         elif kind=='waterfall':
             waterfall(ident,(x,y,z),size,materials)
         elif kind=='dome':
@@ -360,9 +403,9 @@ def build_landmarks(data, materials):
                         (size*1.38/8,.26,size*.5/4),
                         materials['foam' if (col+row)%2==0 else 'rock'])
     # Two genuinely connected suspended walkways between the three houses.
-    huts=[by_id['bamboo_village_'+str(i)] for i in (1,2,3)]
-    walkway('bamboo_suspension_bridge_12',huts[0]['position'],huts[1]['position'],materials['wood'])
-    walkway('bamboo_suspension_bridge_23',huts[1]['position'],huts[2]['position'],materials['wood'])
+    huts=[village_decks['bamboo_village_'+str(i)] for i in (1,2,3)]
+    walkway('bamboo_suspension_bridge_12',huts[0],huts[1],materials['wood'])
+    walkway('bamboo_suspension_bridge_23',huts[1],huts[2],materials['wood'])
 
 
 def setup_camera_and_lighting(data, materials):
