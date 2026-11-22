@@ -30,8 +30,6 @@ def mesa_mesh(x, y, base_z, radius, rise, sides=8):
         a, b = low[i], low[j]
         c, d = high[i], high[j]
         n = len(verts)
-        verts.extend(((a[0]+c[0])/2, (a[1]+c[1])/2, (a[2]+c[2])/2)
-                     for _ in ())  # intentionally no-op, kept deterministic
         verts.extend((
             ((a[0]+c[0])/2, (a[1]+c[1])/2, (a[2]+c[2])/2),
             ((b[0]+d[0])/2, (b[1]+d[1])/2, (b[2]+d[2])/2),
