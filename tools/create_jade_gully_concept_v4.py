@@ -679,6 +679,35 @@ def build_village(data, pal):
             prim('cube', hut['id'] + '_window_' + str(side),
                  (x + side*s*.32, y - s*.59, z + s*.35),
                  pal['warm_window'], size=1).dimensions = (s*.16, .28, s*.16)
+        # Every elevated hut has a recognizable wooden balcony and a band
+        # of vertical timber battens. This makes the village architecture
+        # readable at map scale instead of isolated low straw umbrellas.
+        battens = []
+        for k in range(12):
+            a = math.tau * k / 12
+            bx0, by0 = x + math.cos(a)*s*.615, y + math.sin(a)*s*.615
+            battens.append(((bx0, by0, z + s*.32), (0, 0, 1),
+                            .34, s*.59, .34, 0))
+        boxes(hut['id'] + '_woven_wall_battens', battens, [pal['wood']])
+        # Leave an opening toward the camera (negative Y).
+        balcony = []
+        for k in range(15):
+            a = -.95 + k*(math.tau-1.2)/14
+            balcony.append((x + math.cos(a)*s*1.05,
+                            y + math.sin(a)*s*1.05, z + 2.6))
+        tube(hut['id'] + '_balcony_rail', balcony, pal['rope'], .20)
+        for k, p in enumerate(balcony[::3]):
+            tube(hut['id'] + '_balcony_post_%d' % k,
+                 [(p[0], p[1], z + .45), p], pal['wood'], .26)
+        # The branches are the primary support, while these angled braces
+        # visually transfer the balcony's load back into the trunk.
+        if hut['tiers'] > 1:
+            for k in range(6):
+                a = math.tau*k/6
+                tube(hut['id'] + '_load_brace_%d' % k,
+                     [(x + math.cos(a)*s*.30, y + math.sin(a)*s*.30, z - s*.40),
+                      (x + math.cos(a)*s*.85, y + math.sin(a)*s*.85, z - .7)],
+                     pal['wood'], .43)
 
 
 def build_walkways(data, pal):
