@@ -64,18 +64,19 @@ def palm_pixel(x, y):
     # Hand-authored raster palm silhouette: brown curving trunk, green fronds,
     # transparent surroundings. No proprietary sprite sheets.
     cx = 31.5 + 1.2 * math.sin(y / 10.0)
-    if 4 <= y < 47 and abs(x - cx) < 2.8:
+    if 4 <= y < 45 and abs(x - cx) < 3.3:
         return (.34, .20, .08, 1.)
-    origin = (32., 46.)
-    tips = ((5, 36), (10, 54), (23, 61), (42, 61),
-            (55, 53), (61, 36), (12, 40), (54, 40))
+    origin = (32., 43.)
+    tips = ((2, 32), (6, 55), (20, 63), (44, 63),
+            (58, 55), (62, 32), (4, 43), (60, 43), (16, 55), (48, 55))
     for a, b in tips:
         vx, vy = a - origin[0], b - origin[1]
         t = ((x - origin[0]) * vx + (y - origin[1]) * vy) / (vx * vx + vy * vy)
         if 0 <= t <= 1:
             dist = abs((x - origin[0]) * vy - (y - origin[1]) * vx) / math.hypot(vx, vy)
-            if dist < 4.4 * (1 - .60 * t):
-                return (.04 + .06 * ((x + y) % 3) / 2, .30 + .14 * (y % 4) / 4, .09, 1.)
+            if dist < max(1.2, 8.5 * (1 - .72 * t)):
+                tint = ((x * 7 + y * 11) % 9) / 9.
+                return (.08 + .05 * tint, .39 + .15 * tint, .08 + .04 * tint, 1.)
     return (0., 0., 0., 0.)
 
 
@@ -130,6 +131,10 @@ images = {
     "canopy": create_image("village-canopy-64", canopy_pixel),
     "meadow": create_image("ground-meadow-64", lambda x, y:
         (.19 + .03 * ((x * 3 + y) % 7) / 7., .46 + .06 * ((x + y * 5) % 9) / 9., .15, 1.)),
+    "cliff": create_image("gully-cliff-64", lambda x, y:
+        ((.30, .29, .20, 1.) if ((x//13 + y//9) % 4 == 0) else
+         (.48, .43, .26, 1.) if ((x//9 + y//17) % 3 == 0) else
+         (.24, .31, .18, 1.))),
     "spring": create_image("spring-red-64", lambda x, y:
         ((.95, .18, .12, 1.) if 5 < x < 59 and 5 < y < 59 else
          (.97, .83, .16, 1.) if x % 9 < 3 or y % 9 < 3 else
@@ -230,7 +235,9 @@ def box(name, center, size, material, coll, role, collision_type=None):
 
 def platform(item):
     x, y, z = item["center"]
-    n = 8
+    # Six-sided platforms retain a readable round silhouette in 320x224.
+    # 6 top + 12 skirt triangles instead of 8 + 16: save 30 tris / five pads.
+    n = 6
     r = item["diameter"] / 2.
     depth = item["thickness"]
     outer = [(x + r*math.cos(2*math.pi*i/n),
@@ -274,9 +281,12 @@ def trunk(item):
     h=item["height"]
     n=8
     verts=[]
-    for level,scale in ((0.,1.), (h*.52,.84), (h,.52)):
-        verts.extend([(x+r*scale*math.cos(i*2*math.pi/n),
-                       y+r*scale*math.sin(i*2*math.pi/n),z+level)
+    # Keep an 8-sided, tapered collision trunk but offset the top to make
+    # an organic silhouette. Root buttresses and branch boughs sit outside it.
+    for level,scale,ox,oy in ((0.,1.28,0.,0.), (h*.52,.82,-.7,.4),
+                               (h,.60,1.0,.9)):
+        verts.extend([(x+ox+r*scale*math.cos(i*2*math.pi/n),
+                       y+oy+r*scale*math.sin(i*2*math.pi/n),z+level)
                       for i in range(n)])
     faces=[]
     for row in range(2):
