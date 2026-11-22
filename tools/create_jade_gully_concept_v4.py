@@ -265,7 +265,10 @@ def build_palette():
         'wood': flat('wood deck', (.40, .20, .06), .85),
         'plank': flat('light planks', (.62, .36, .12), .85),
         'rope': flat('rope', (.70, .52, .26), .9),
-        'thatch': flat('straw thatch', (.85, .58, .12), .9, emission=.05),
+        'thatch': flat('sunlit woven thatch', (.66, .43, .12), .9, emission=.025),
+        'thatch_shadow': flat('layered thatch shadow fringe', (.28, .16, .065), 1.0),
+        'thatch_highlight': flat('sunlit woven thatch highlights', (.85, .64, .25), .9),
+        'riverbank': flat('river forest bank', (.085, .23, .045), .95),
         'hut_wall': flat('hut wall', (.55, .32, .10), .9),
         'warm_window': flat('hut warm windows', (1.0, .55, .11), .7, emission=.60),
         'dark': flat('door shadow', (.04, .03, .02), 1.0),
@@ -445,9 +448,19 @@ def build_ground(data, pal):
         v, f, m = geo.arch(*a['center'], a['base_z'], a['radius'], a['thickness'], a['width'], 14)
         mesh(a['id'], v, f, [pal['grass'], pal['grass_dark'], pal['underside']], m)
     for p in data['pools']:
-        poly = geo.rounded_rect(*p['center'], *p['size'], min(p['size']) * .3)
-        v, f, m = geo.prism(poly, p['z'], p['z'] - .6)
-        mesh('pool_' + p['id'], v, f, [pal['water'], pal['water'], pal['water']], m)
+        if p['id'] == 'canyon_basin_water':
+            # The approved painting shows a canyon of raised landings with
+            # winding river channels, not one giant blue rectangular patio.
+            course = data['canyon_river']
+            path, widths = course['stations'], course['widths']
+            v, f, m = geo.river_ribbon(path, [w*1.20 for w in widths], p['z'] - .08)
+            mesh('canyon_meandering_riverbanks', v, f, [pal['riverbank']], m)
+            v, f, m = geo.river_ribbon(path, widths, p['z'] + .03)
+            mesh('pool_' + p['id'], v, f, [pal['water']], m)
+        else:
+            poly = geo.rounded_rect(*p['center'], *p['size'], min(p['size']) * .3)
+            v, f, m = geo.prism(poly, p['z'], p['z'] - .6)
+            mesh('pool_' + p['id'], v, f, [pal['water'], pal['water'], pal['water']], m)
     for w in data['waterfalls']:
         x, y, z = w['top']
         half, h = w['width'] / 2, w['height']
@@ -629,15 +642,25 @@ def build_village(data, pal):
         prim('cylinder', hut['id'] + '_walls', (x, y, z + s * .33), pal['hut_wall'],
              vertices=10, radius=s * .62, depth=s * .62)
         roof_z = z + s * .64
-        prim('cone', hut['id'] + '_thatch_skirt', (x, y, roof_z + s * .12), pal['thatch'],
-             vertices=12, radius1=s * 1.08, radius2=s * .45, depth=s * .32)
-        prim('cone', hut['id'] + '_thatch_roof', (x, y, roof_z + s * .5), pal['thatch'],
-             vertices=12, radius1=s * .62, radius2=.2, depth=s * .62)
+        # Shallow, uneven layered eaves visually integrate with the giant
+        # canopy: the old two stacked cones read as an umbrella from afar.
+        seed = sum((k+1)*ord(ch) for k,ch in enumerate(hut['id']))
+        v, f, m = geo.treehouse_thatch_roof(x, y, roof_z, s, seed=seed)
+        mesh(hut['id'] + '_thatch_roof', v, f,
+             [pal['thatch'], pal['thatch_shadow'], pal['thatch_highlight']], m)
+        for k in range(8):
+            a = math.tau * k / 8
+            tube(hut['id'] + '_eave_brace_%02d' % k,
+                 [(x + math.cos(a)*s*.62, y + math.sin(a)*s*.62, z+s*.36),
+                  (x + math.cos(a)*s*.90, y + math.sin(a)*s*.90, roof_z+s*.045)],
+                 pal['wood'], .19)
         if hut['tiers'] > 1:
             prim('cylinder', hut['id'] + '_upper_walls', (x, y, roof_z + s * .55), pal['hut_wall'],
                  vertices=10, radius=s * .38, depth=s * .4)
-            prim('cone', hut['id'] + '_upper_roof', (x, y, roof_z + s * 1.0), pal['thatch'],
-                 vertices=12, radius1=s * .62, radius2=.2, depth=s * .55)
+            v, f, m = geo.treehouse_thatch_roof(
+                x, y, roof_z + s * .79, s * .65, seed=seed+17)
+            mesh(hut['id'] + '_upper_roof', v, f,
+                 [pal['thatch'], pal['thatch_shadow'], pal['thatch_highlight']], m)
         prim('cube', hut['id'] + '_door', (x, y - s * .6, z + s * .25), pal['dark'],
              size=1).dimensions = (s * .22, .4, s * .38)
         # Warm openings make the huts identifiable as inhabited architecture,
