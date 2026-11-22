@@ -29,6 +29,8 @@ jobs:
     env:
       CI: '1'
       JADE_V4_QUICK: '1'
+      # Ubuntu apt Blender is compiled without OpenImageDenoiser.
+      JADE_DISABLE_DENOISER: '1'
       OMP_NUM_THREADS: '2'
       OPENBLAS_NUM_THREADS: '2'
     steps:
