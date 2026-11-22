@@ -1,0 +1,129 @@
+{
+  "generator": "tools/create_tree_village_kit.py",
+  "status": "Blender authoring source, not yet Saturn runtime",
+  "scene_name": "Jade Gully \u2014 Tree Village Hybrid Kit v1",
+  "render_faces": 308,
+  "render_vertices": 271,
+  "collision_faces": 96,
+  "render_meshes": 29,
+  "collision_meshes": 13,
+  "entity_markers": 7,
+  "model_definitions": 28,
+  "per_object_faces": {
+    "branch_main": 12,
+    "bridge_high_optional": 12,
+    "bridge_main_lower": 12,
+    "bridge_main_upper": 12,
+    "entry_ramp": 12,
+    "exit_ramp": 12,
+    "foliage_x_01": 4,
+    "foliage_x_02": 4,
+    "foliage_x_03": 4,
+    "ground_entry": 12,
+    "house_facade_01": 2,
+    "house_facade_02": 2,
+    "house_facade_03": 2,
+    "house_facade_04": 2,
+    "house_facade_05": 2,
+    "house_playable_roof": 6,
+    "house_playable_walls": 12,
+    "palm_x_01": 4,
+    "palm_x_02": 4,
+    "palm_x_03": 4,
+    "palm_x_04": 4,
+    "palm_x_05": 4,
+    "platform_exit": 24,
+    "platform_high_optional": 24,
+    "platform_lower": 24,
+    "platform_middle": 24,
+    "platform_upper": 24,
+    "spring_red": 12,
+    "trunk_central": 32
+  },
+  "routes": [
+    {
+      "id": "main",
+      "mode": "walkable",
+      "waypoints": [
+        [
+          0,
+          10,
+          0
+        ],
+        [
+          -5,
+          25,
+          4
+        ],
+        [
+          0,
+          37,
+          5
+        ],
+        [
+          1,
+          51,
+          7
+        ],
+        [
+          0,
+          66,
+          4
+        ]
+      ],
+      "parts": [
+        "entry_ramp",
+        "platform_lower",
+        "bridge_main_lower",
+        "platform_middle",
+        "bridge_main_upper",
+        "platform_upper",
+        "exit_ramp",
+        "platform_exit"
+      ]
+    },
+    {
+      "id": "upper",
+      "mode": "spring_launch_required",
+      "waypoints": [
+        [
+          -5,
+          25,
+          4
+        ],
+        [
+          -12,
+          40,
+          9
+        ],
+        [
+          1,
+          51,
+          7
+        ]
+      ],
+      "parts": [
+        "spring_red",
+        "platform_high_optional",
+        "bridge_high_optional",
+        "platform_upper"
+      ],
+      "note": "Collision surfaces authored; bounce physics and reachability NOT implemented"
+    }
+  ],
+  "textures": [
+    "checker-ground-64.png",
+    "foliage-palms-64.png",
+    "spring-red-64.png",
+    "village-bark-64.png",
+    "village-hut-64.png",
+    "village-roof-64.png",
+    "village-wood-64.png"
+  ],
+  "warnings": [
+    "spring marker has no in-game impulse",
+    "static X-planes are not camera-facing billboards",
+    "LOD/sector streaming not yet active",
+    "new textures are Blender-only until Saturn texture pipeline integration"
+  ]
+}
