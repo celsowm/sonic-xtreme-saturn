@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / 'assets/levels/jade_gully_concept_v4.json'
 INVENTORY = ROOT / 'assets/levels/jade_gully_route_audit_v5.json'
+AUDIT = INVENTORY  # stable audit path for tests and report consumers
 REGIONS = ('entry_hills','tree_village','sky_bridges','hex_loop','canyon_basin')
 STATUS = {'main_route','partial_alternate','scenery_only','missing'}
 EVIDENCE = {'gold_main','purple_shortcut','platform_ring_hint'}
