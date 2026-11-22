@@ -64,7 +64,7 @@ def palm_pixel(x, y):
     # Hand-authored raster palm silhouette: brown curving trunk, green fronds,
     # transparent surroundings. No proprietary sprite sheets.
     cx = 31.5 + 1.2 * math.sin(y / 10.0)
-    if 4 <= y < 47 and abs(x - cx) < 2.1:
+    if 4 <= y < 47 and abs(x - cx) < 2.8:
         return (.34, .20, .08, 1.)
     origin = (32., 46.)
     tips = ((5, 36), (10, 54), (23, 61), (42, 61),
@@ -74,9 +74,36 @@ def palm_pixel(x, y):
         t = ((x - origin[0]) * vx + (y - origin[1]) * vy) / (vx * vx + vy * vy)
         if 0 <= t <= 1:
             dist = abs((x - origin[0]) * vy - (y - origin[1]) * vx) / math.hypot(vx, vy)
-            if dist < 1.9 * (1 - .60 * t):
+            if dist < 4.4 * (1 - .60 * t):
                 return (.04 + .06 * ((x + y) % 3) / 2, .30 + .14 * (y % 4) / 4, .09, 1.)
     return (0., 0., 0., 0.)
+
+
+def facade_pixel(x, y):
+    """A recognisable little hut roof, shutters and door in a 64px alpha sprite."""
+    # Texture X is local horizontal; Y is height from bottom.
+    top = 40.0 + (23.0 * (1.0 - abs(x - 32.0) / 31.0))
+    if 8 <= x <= 56 and 36 <= y <= top:
+        return (.25, .36, .17, 1.) if (x + y) % 11 > 2 else (.13, .23, .09, 1.)
+    if 10 <= x <= 54 and 3 <= y < 38:
+        if 27 <= x <= 38 and y <= 24:
+            return (.15, .10, .08, 1.) if x not in (27, 38) else (.60, .39, .19, 1.)
+        if (14 <= x <= 23 or 42 <= x <= 51) and 22 <= y <= 31:
+            return (.10, .31, .38, 1.) if 16 <= x <= 49 and 24 <= y <= 29 else (.24, .13, .07, 1.)
+        if (y % 10 == 0 or x in (10, 54)):
+            return (.25, .14, .08, 1.)
+        return (.67, .45, .20, 1.)
+    return (0., 0., 0., 0.)
+
+
+def canopy_pixel(x, y):
+    """Leafy clump with uneven pixel silhouette, not a photographic impostor."""
+    dx, dy = (x - 32.) / 29., (y - 30.) / 26.
+    edge = .92 + .06 * math.sin(x * .31) * math.cos(y * .57)
+    if dx*dx + dy*dy > edge:
+        return (0., 0., 0., 0.)
+    tint = ((x * 19 + y * 7) % 13) / 13.
+    return (.07 + .05 * tint, .28 + .21 * tint, .08 + .02 * tint, 1.)
 
 
 images = {
@@ -99,6 +126,8 @@ images = {
         ((.23, .31, .16, 1.) if (y % 10 < 2 or (x + y // 10 * 7) % 13 < 2)
          else (.40, .48, .23, 1.))),
     "palm": create_image("foliage-palms-64", palm_pixel),
+    "facade": create_image("village-facade-64", facade_pixel),
+    "canopy": create_image("village-canopy-64", canopy_pixel),
     "spring": create_image("spring-red-64", lambda x, y:
         ((.95, .18, .12, 1.) if 5 < x < 59 and 5 < y < 59 else
          (.97, .83, .16, 1.) if x % 9 < 3 or y % 9 < 3 else
@@ -132,7 +161,7 @@ def textured_material(name, image, transparent=False):
     return m
 
 
-MATERIALS = {name: textured_material(name, img, name == "palm")
+MATERIALS = {name: textured_material(name, img, name in ("palm","facade","canopy"))
              for name, img in images.items()}
 
 
@@ -302,7 +331,7 @@ def facade(item):
     vertices=[(x-w/2,y,z-h/2),(x+w/2,y,z-h/2),
               (x+w/2,y,z+h/2),(x-w/2,y,z+h/2)]
     mesh_object(item["id"],vertices,[(0,1,2),(0,2,3)],
-                item["material"],item["collection"],item["role"],sprite_uv=True)
+                "facade",item["collection"],item["role"],sprite_uv=True)
 
 
 def spring(item):
