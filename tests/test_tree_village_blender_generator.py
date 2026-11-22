@@ -32,8 +32,20 @@ class TreeVillageGeneratorTests(unittest.TestCase):
             self.assertIn(token,self.source)
         self.assertIn('"facade",item["collection"]',self.source)
 
-    def test_mac_publisher_expects_ten_textures(self):
-        self.assertIn('assert len(pngs) == 10',self.shell)
+    def test_v3_valley_hut_boughs_and_player_camera(self):
+        tree=ast.parse(self.source)
+        funcs={n.name for n in tree.body if isinstance(n,ast.FunctionDef)}
+        self.assertTrue({"hut_decks_and_boughs","root_buttresses","valley_landmass"}<=funcs)
+        self.assertIn('hut_decks_and_boughs()\\n',self.source)
+        self.assertIn('root_buttresses()\\n',self.source)
+        self.assertIn('"cliff": create_image(',self.source)
+        self.assertIn('"TreeVillage_PlayerHeight"',self.source)
+        self.assertIn('tree_village_ground_preview.png',self.source)
+        self.assertIn('JG_EDITOR_ONLY_SCALE_PROXY_NOT_SONIC',self.source)
+
+    def test_mac_publisher_expects_eleven_textures_and_two_previews(self):
+        self.assertIn('assert len(pngs) == 11',self.shell)
+        self.assertIn('tree_village_ground_preview.png',self.shell)
         self.assertIn('git -C "$ROOT" pull --ff-only',self.shell)
         self.assertIn('git -C "$ROOT" worktree add --detach "$TMP" origin/main',self.shell)
 
