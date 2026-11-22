@@ -384,29 +384,69 @@ def branch(item):
 
 
 def valley_landmass():
-    """Scenic, collision-enabled ground beneath the bridges so the village isn't
-    floating in blue emptiness. This is the 50x70m authoring cell only."""
-    xs=(-24.,-12.,0.,12.,24.)
-    ys=(18.,32.,46.,58.,70.)
-    vertices=[]
-    for iy,y in enumerate(ys):
-        for ix,x in enumerate(xs):
-            # Under the playable decks. Smooth edge rises frame the middle route.
-            edge = max(0., (abs(x)-8.) / 16.)
-            z = -.8 + 2.8*edge*edge + .20*math.sin(iy*.9 + ix*.6)
-            vertices.append((x,y,z))
-    top=[]
-    for row in range(len(ys)-1):
-        for col in range(len(xs)-1):
-            a=row*len(xs)+col
-            b=a+1
-            c=a+len(xs)
-            d=c+1
-            top.extend(((a,b,d),(a,d,c)))
-    mesh_object("jg_village_connected_terrain",vertices,top,
-                "meadow","JG_TERRAIN","walkable")
-    mesh_object("jg_village_connected_terrain_COLL",vertices,top,
-                None,"JG_COLLISION","walkable",collision=True)
+    """Contoured 50x70m valley with three distinct textured bands.
+
+    A 7x7 vertex grid makes 72 top triangles. Real collision follows the same
+    top, while cliff-edge skirts are art-only, with NO fake collision.
+    The terrain stays below the gameplay bridges around the centre.
+    """
+    xs = (-25., -18., -9., 0., 9., 18., 25.)
+    ys = (0., 12., 24., 36., 48., 60., 70.)
+    vertices = []
+    for y in ys:
+        for x in xs:
+            bank = 7.2 * (abs(x) / 25.) ** 2.0
+            waves = .62 * math.sin(y * .14 + x * .09) + .38 * math.cos(y * .23 - x * .06)
+            z = -1.1 + bank + waves
+            vertices.append((x, y, z))
+
+    faces = []
+    for row in range(len(ys) - 1):
+        for col in range(len(xs) - 1):
+            a = row * len(xs) + col
+            b = a + 1
+            c = a + len(xs)
+            d = c + 1
+            faces.extend(((a, b, d), (a, d, c)))
+
+    # Every top triangle participates in the SAME continuous collision mesh.
+    mesh_object("jg_village_contoured_ground_COLL", vertices, faces,
+                None, "JG_COLLISION", "walkable", collision=True)
+
+    # Three visual bands avoid the monochrome rectangle that looked like
+    # an unfinished sheet; they share exact boundary vertices and heights.
+    for first, last, material, name in (
+        (0, 2, "cliff", "left_bank"),
+        (2, 4, "meadow", "central_valley"),
+        (4, 6, "cliff", "right_bank"),
+    ):
+        ncols = last - first + 1
+        local = [vertices[row * len(xs) + col]
+                 for row in range(len(ys)) for col in range(first, last + 1)]
+        strips = []
+        for row in range(len(ys) - 1):
+            for col in range(ncols - 1):
+                a = row * ncols + col
+                b = a + 1
+                c = a + ncols
+                d = c + 1
+                strips.extend(((a, b, d), (a, d, c)))
+        mesh_object("jg_village_terrain_" + name, local, strips,
+                    material, "JG_TERRAIN", "walkable")
+
+    # Undercuts soften the exposed straight valley sides in isometric view.
+    # Each of the left/right skirts is 6 quads = 12 render triangles.
+    for col, side in ((0, -1.), (len(xs) - 1, 1.)):
+        rim = [vertices[row * len(xs) + col] for row in range(len(ys))]
+        skirt_vertices = rim + [(x + side * 3.2, y, z - 5.0)
+                                for x, y, z in rim]
+        skirt_faces = []
+        for k in range(len(ys) - 1):
+            upper = len(ys) + k
+            skirt_faces.extend(((k, k + 1, upper + 1), (k, upper + 1, upper)))
+        mesh_object("jg_village_bank_skirt_" + ("L" if side < 0 else "R"),
+                    skirt_vertices, skirt_faces, "cliff", "JG_TERRAIN",
+                    "decoration")
 
 
 def hut_supports():
