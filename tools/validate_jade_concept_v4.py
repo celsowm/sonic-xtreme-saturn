@@ -65,6 +65,18 @@ def validate(data):
     if not regions[1]['rect'][1] >= regions[0]['rect'][1]:
         raise ValueError('tree village must sit behind entry hills')
 
+    # The V5 art-only far canyon rim must remain a continuous ordered profile
+    # on the outside edge of Canyon Basin, rather than another detached block.
+    rim = data.get('canyon_rim_stations')
+    if not isinstance(rim, list) or len(rim) < 5:
+        raise ValueError('missing continuous canyon rim profile')
+    rim_points = [point(p) for p in rim]
+    if any(b[1] <= a[1] or math.dist(a, b) > 45
+           for a, b in zip(rim_points, rim_points[1:])):
+        raise ValueError('canyon rim must progress continuously along Y')
+    if any(x < 210 or x > 238 for x, y, z in rim_points):
+        raise ValueError('canyon rim must stay on the far bank')
+
     routes = data['routes']
     if not routes or routes[0]['id'] != 'main' or routes[0]['kind'] != 'main' or \
             len({r['id'] for r in routes}) != len(routes):
