@@ -2,6 +2,8 @@
 
 **Status:** fan-made **concept artwork**, not the recovered original level mesh, a build of the leaked game, or a playable stage. This document captures the approved artistic direction. Keep the original Saturn/718 references clearly separate from proposed expansions.
 
+![Jade Gully Act 1 — map concept](jade-gully-act1-concept.png)
+
 ## Proposed layout
 
 The new concept uses a longer, continuous **3D action-adventure** route, with optional side routes rather than a 20-second racetrack. The image carries five numbered areas:
