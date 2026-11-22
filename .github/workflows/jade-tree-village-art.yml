@@ -63,6 +63,24 @@ jobs:
           print("Blender V3 OK:",report["render_faces"],"render faces,",
                 report["collision_faces"],"collision faces,",len(pngs),"textures")
           PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate thumbnails inside the same Actions job
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          src = Path("build/tree-village")
+          for name in ("tree_village_preview", "tree_village_ground_preview"):
+              with Image.open(src/(name+".png")) as img:
+                  out=src/(name+"_thumb.jpg")
+                  img.convert("RGB").resize((800,450),Image.Resampling.LANCZOS).save(
+                      out,"JPEG",quality=70,optimize=True,progressive=True)
+              assert out.is_file() and out.stat().st_size < 600000, out
+              print("Review thumbnail:", out, out.stat().st_size)
+          PY
       - name: Publish Blender source, PNGs, textures and telemetry to main
         run: |
           set -euo pipefail
@@ -72,11 +90,14 @@ jobs:
           cp build/tree-village/kit-report.json "$TARGET/"
           cp build/tree-village/tree_village_preview.png "$TARGET/"
           cp build/tree-village/tree_village_ground_preview.png "$TARGET/"
+          cp build/tree-village/tree_village_preview_thumb.jpg "$TARGET/"
+          cp build/tree-village/tree_village_ground_preview_thumb.jpg "$TARGET/"
           cp build/tree-village/textures/*.png "$TARGET/source/"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$TARGET/tree_village_source.blend" "$TARGET/kit-report.json" \
             "$TARGET/tree_village_preview.png" "$TARGET/tree_village_ground_preview.png" \
+            "$TARGET/tree_village_preview_thumb.jpg" "$TARGET/tree_village_ground_preview_thumb.jpg" \
             "$TARGET/source"
           if git diff --cached --quiet; then echo 'V3 Blender output unchanged'; exit 0; fi
           git commit -m "art(jade): publish generated Blender V3 dual-view scene"
