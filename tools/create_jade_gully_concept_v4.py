@@ -332,6 +332,16 @@ def blob_field(name, blobs, materials, subdivisions=2, collection=None):
     return link(bpy.data.objects.new(name, data), collection)
 
 
+def leafy_field(name, clusters, materials, collection=None):
+    """Merge asymmetrical layered leaf crowns into one low-poly scenic mesh.
+
+    Cloud banks keep their separate, translucent blob system. The jungle,
+    bushes and Tree Village now have overlapping irregular leaf strata.
+    """
+    vertices, faces, mats = geo.layered_leaf_canopies(clusters)
+    return mesh(name, vertices, faces, materials, mats, collection=collection)
+
+
 def boxes(name, items, materials, collection=None):
     """Oriented boxes in one mesh: (centre, forward, width, length, height, mat)."""
     verts, faces, mats = [], [], []
@@ -577,7 +587,7 @@ def build_village(data, pal):
         a = math.tau * k / 14
         crown.append((bx + math.cos(a) * t['canopy_radius'] * .6, by + 8 + math.sin(a) * t['canopy_radius'] * .45,
                       top + 12 + (k % 3) * 3, t['canopy_radius'] * .24, 1.1, 1.0, .85, (k + 1) % 2))
-    blob_field(t['id'] + '_canopy', crown, [pal['canopy'], pal['canopy_light']])
+    leafy_field(t['id'] + '_canopy', crown, [pal['canopy'], pal['canopy_light']])
 
     # Real woody construction replaces the previous six pencil-thin 40m
     # stilts under every hut. Each terrace is carried by a visible branch
@@ -868,7 +878,7 @@ def build_vegetation(data, pal):
             x, y = x + (cx - x) * .08, y + (cy - y) * .08
             r = 1.6 + 1.4 * rnd(item['id'] + 'br', k)
             bushes.append((x, y, item['top'] + r * .45, r, 1.2, 1.2, .8, 0))
-    blob_field('rim_bushes', bushes, [pal['bush']], 2)
+    leafy_field('rim_bushes', bushes, [pal['bush']])
     # Dense jungle under the cliffs (left, right and foreground band); the
     # centre stays open over the cloud sea like the painting.
     jungle = []
@@ -880,7 +890,7 @@ def build_vegetation(data, pal):
             j = rnd('jungle', gx * 1000 + gy)
             jungle.append((gx + (j - .5) * 6, gy + (rnd('jy', gx + gy * 7) - .5) * 6,
                            JUNGLE_Z + j * 9, 5 + j * 4, 1.0, 1.0, .85, int(j * 10) % 2))
-    blob_field('jungle_canopy', jungle, [pal['jungle'], pal['jungle_light']], 2)
+    leafy_field('jungle_canopy', jungle, [pal['jungle'], pal['jungle_light']])
     for k in range(36):
         x = -250 + rnd('jpx', k) * 540
         y = -80 + rnd('jpy', k) * 420
@@ -901,8 +911,8 @@ def build_vegetation(data, pal):
                                gy + (rnd('underjy', gx + gy * 7) - .5) * 5,
                                JUNGLE_Z - 8 + j * 8, 3.8 + j * 2.0,
                                1.25, 1.2, .7, int(j * 9) % 2))
-    blob_field('underbridge_jungle_canopy', understorey,
-               [pal['jungle'], pal['jungle_light']], 2)
+    leafy_field('underbridge_jungle_canopy', understorey,
+                [pal['jungle'], pal['jungle_light']])
     # Small intermittent blue-grey mist banks on top of the dark valley.
     # Shrinking their footprint makes waterfalls and island undersides
     # readable; they MUST NOT fill the entire painted canyon as white foam.
