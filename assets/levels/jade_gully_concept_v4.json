@@ -128,6 +128,7 @@
       "kind": "alternate",
       "evidence": "connected_hut_walkways",
       "visual_only": true,
+      "render_style": "candidate",
       "points": [[-153, 143, 32.6], [-135, 207, 58.6], [-104, 161, 50.6]]
     },
     {
@@ -135,6 +136,7 @@
       "kind": "alternate",
       "evidence": "connected_hut_walkways",
       "visual_only": true,
+      "render_style": "candidate",
       "points": [[-104, 161, 50.6], [-71, 193, 54.6], [-79, 151, 46.6]]
     },
     {
