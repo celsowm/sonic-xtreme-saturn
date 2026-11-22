@@ -581,8 +581,6 @@ def main():
             ring('ring_'+route['id']+'_'+str(i),x,y,z+4,palette)
     build_landmarks(data,palette)
     jade_concept_dressing.decorate(data,palette,sys.modules[__name__])
-    presentation_report=jade_concept_presentation.apply_presentation(
-        data,palette,sys.modules[__name__])
     # Canyon river current and a clearer water path between the waterfalls.
     water_route=[(39,336,30),(38,354,24),(23,373,22),(33,389,27),(16,402,38)]
     line('gully_current_river',water_route,palette['water'],2.6)
@@ -590,6 +588,8 @@ def main():
         y=(sector['y_range'][0]+sector['y_range'][1])*.5
         label('sector_tag_'+sector['id'],sector['title'],
               (sector['width']*.90,y,at_z(sector['width']*.90,y,data)+72),palette,9.0)
+    presentation_report=jade_concept_presentation.apply_presentation(
+        data,palette,sys.modules[__name__])
     # Fail the art build if a key recognizable object silently disappears.
     required_objects=(
         'ridge_hex_loop_angular_checker_loop',
