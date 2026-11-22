@@ -4,6 +4,37 @@
 
 **Conclusão:** a geometria é mais detalhada, porém o mundo ainda NÃO reproduz as escolhas de navegação da pintura. A rota amarela é só o esqueleto; tracejados roxos são atalhos e anéis/plataformas sugerem outros percursos. **Não confundir uma passarela modelada, um efeito visual ou uma curva pintada com um caminho fisicamente transitável.**
 
+## Correção P2 — revisão visual das travessias (após rejeição do render)
+
+A comparação da pintura original com o render `jade-gully-v4-routes.png`
+revelou que **os nove acessos extras sobre as ilhas da Sky Bridges haviam
+sido falsamente transformados em pontes e escadas**. A pintura representa
+trechos de salto por nuvens, molas e plataformas suspensas, não uma pista
+contínua de madeira no vazio.
+
+**Alteração na branch V5:**
+
+- **19 passarelas reais de conceito** (antes 27). Cada superfície restante
+  é uma malha de deck contínuo com largura, corrimãos, treads e encaixes nos
+  extremos; `scenic_walkway_stations` limita curvas para evitar passarelas
+  serpentinas arbitrárias;
+- **9 transferências aéreas explicitamente tipadas** como `jump`,
+  `drop` ou `spring` em `navigation_transfers`, com destino ancorado
+  nas ilhas nomeadas ou no caminho principal. Nenhuma recebe ponte
+  automática. São *intenções*, NÃO saltos alcançáveis comprovados;
+- **Tree Village**: a escadaria oeste–norte de 26m de elevação foi removida;
+  duas rampas menores contornam o tronco, com escoras para a árvore;
+- **Revisão do mapa**: a pintura mantém o amarelo da rota principal e roxo
+  dos atalhos representados; sugestões cianas aparecem apenas no
+  `jade-gully-v4-routes.png`, não no mapa de apresentação;
+- **Grafo** `jade-gully-v5-navigation.json` distingue `walkway_id` de
+  `transfer_id`, mantém `physics_verified: false` e
+  `collision_verified: false` em todas as arestas.
+
+Essa correção resolve o problema de **representação incorreta** das ligações,
+não cria física do Sonic nem resolve lacunas de patamares, saltos e suporte no
+Canyon Basin. **Não promover para main sem inspecionar o novo PNG.**
+
 ## Implementação P1 — ramificações com apoio geométrico (V5)
 
 **Entregue na branch V5, ainda não validado como fase jogável do Saturn.**
