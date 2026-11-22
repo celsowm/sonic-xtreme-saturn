@@ -245,18 +245,36 @@ def hex_loop(ident, center, radius, materials):
 
 
 def walkway(name, p1, p2, material, plank_width=4):
+    """A segmented rope suspension bridge, not one featureless cube."""
     v=Vector(p2)-Vector(p1)
     length=v.length
+    if length < 1:
+        raise ValueError('bridge endpoints too close')
     mid=(Vector(p1)+Vector(p2))*.5
-    obj=box(name,mid,(plank_width,length,1.0),material)
-    # Local +Y axis is the length of the bridge.
-    obj.rotation_euler=v.to_track_quat('Y','Z').to_euler()
-    for side in (-plank_width*.52,plank_width*.52):
-        # Rail endpoints are offset perpendicular to the travel direction.
-        perp=Vector((v.y,-v.x,0)).normalized()*side
-        a=Vector(p1)+perp+Vector((0,0,1.8))
-        b=Vector(p2)+perp+Vector((0,0,1.8))
-        line(name+'_rail_'+str(round(side,2)),[a,b],material,.13)
+    deck=box(name+'_structural_deck',mid,(plank_width,length,.30),material)
+    deck.rotation_euler=v.to_track_quat('Y','Z').to_euler()
+    plank_count=max(8,int(length/2.0))
+    for i in range(plank_count):
+        t=(i+.5)/plank_count
+        p=Vector(p1)+v*t+Vector((0,0,.22))
+        plank=box(name+'_plank_%02d'%i,p,
+                  (plank_width*.97,length/plank_count*.83,.23),material)
+        plank.rotation_euler=deck.rotation_euler
+    sideways=Vector((v.y,-v.x,0)).normalized()
+    for side in (-1,1):
+        offset=side*plank_width*.56
+        cable=[]
+        for i in range(17):
+            t=i/16
+            p=Vector(p1)+v*t+sideways*offset
+            p.z += 2.7-1.0*math.sin(PI*t)
+            cable.append(tuple(p))
+        line(name+'_sagging_rope_'+str(side),cable,material,.15)
+        for j in range(0,plank_count+1,max(2,plank_count//6)):
+            t=j/plank_count
+            foot=Vector(p1)+v*t+sideways*offset
+            line(name+'_rope_post_%d_%d'%(side,j),
+                 [tuple(foot),tuple(foot+Vector((0,0,2.5)))],material,.12)
 
 
 def treehouse(ident, loc, size, materials):
@@ -289,19 +307,35 @@ def treehouse(ident, loc, size, materials):
 
 
 def waterfall(ident, loc, size, materials):
+    """Visible tiered falls in a YZ plane facing the panoramic camera."""
     x,y,z=loc
-    waterfall_width=size*.42
-    mesh(ident+'_cascade',[(x-waterfall_width,y,z+size*.45),
-                           (x+waterfall_width,y,z+size*.45),
-                           (x+waterfall_width,y+size*.25,z-size),
-                           (x-waterfall_width,y+size*.25,z-size)],
-         [(0,1,2,3)],[materials['water']])
-    cylinder(ident+'_pool',x,y+size*.30,z-size, size*.82,.6,materials['water'],14)
-    for i in range(3):
-        line(ident+'_whitewater_'+str(i),
-             [(x+(i-1)*waterfall_width*.6,y,z+size*.4),
-              (x+(i-1)*waterfall_width*.6,y+size*.21,z-size)],
-             materials['foam'],.22)
+    half_width=size*.30
+    top=z+size*.55
+    bottom=z-size*.75
+    for band in range(3):
+        shift=(band-1)*half_width*.64
+        fall_x=x+(band%2)*.6
+        verts=[
+            (fall_x,y+shift-half_width*.52,top),
+            (fall_x,y+shift+half_width*.52,top),
+            (fall_x+size*.19,y+shift+half_width*.52,bottom),
+            (fall_x+size*.19,y+shift-half_width*.52,bottom),
+        ]
+        mesh(ident+'_water_curtain_'+str(band),verts,[(0,1,2,3)],
+             [materials['water']])
+        for j in (-1,0,1):
+            river_y=y+shift+j*half_width*.19
+            line(ident+'_fall_foam_%d_%d'%(band,j),
+                 [(fall_x+.25,river_y,top-1),
+                  (fall_x+size*.1,river_y+1,bottom+2)],
+                 materials['foam'],.19)
+    cylinder(ident+'_pool',x+size*.22,y,bottom+.5,
+             size*.76,.75,materials['water'],18)
+    for j in range(4):
+        line(ident+'_pool_ripple_'+str(j),
+             [(x+size*.22,y+size*.24*(j-2),bottom+1.1),
+              (x+size*.38,y+size*.24*(j-2),bottom+1.2)],
+             materials['foam'],.28)
 
 
 def tree(name, x, y, ground, h, materials):
