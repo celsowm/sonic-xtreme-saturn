@@ -1,0 +1,44 @@
+name: Tree Village preview thumbnail
+on:
+  push:
+    branches: [main]
+    paths:
+      - assets/jade-gully/tree-village/tree_village_preview.png
+      - .github/workflows/jade-tree-village-thumbnail.yml
+permissions:
+  contents: write
+
+jobs:
+  preview-thumbnail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Convert actual Blender PNG to review-sized JPEG
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          directory=Path("assets/jade-gully/tree-village")
+          source=directory/"tree_village_preview.png"
+          output=directory/"tree_village_preview_thumb.jpg"
+          with Image.open(source) as img:
+              img.convert("RGB").resize((800,450),Image.Resampling.LANCZOS).save(
+                  output,"JPEG",quality=68,optimize=True,progressive=True)
+          assert output.stat().st_size < 600_000, "preview thumbnail unexpectedly large"
+          print("Review preview:", output, "bytes", output.stat().st_size)
+          PY
+      - name: Publish review image
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/jade-gully/tree-village/tree_village_preview_thumb.jpg
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "art(jade): update compact Tree Village render preview"
+          git pull --rebase origin main
+          git push origin HEAD:main
