@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "name": "Jade Gully Act 1 — five-sector concept blockout",
+  "coordinates": "metres, Blender RH Z-up, +Y = level progress",
+  "source_concept": "docs/concepts/jade-gully-act1-concept.png",
+  "status": "offline Blender art blockout only, NOT Saturn gameplay/collision",
+  "world_bounds": {"x": [-100, 100], "y": [-30, 530], "z": [-35, 180]},
+  "sectors": [
+    {"id":"base", "title":"SONIC'S BASE", "y_range":[0, 100], "width":80, "theme":"meadow", "challenge":"arrival, calibration, exploration"},
+    {"id":"ridges", "title":"JADE RIDGES", "y_range":[100, 205], "width":94, "theme":"checker", "challenge":"hexagonal loop, vertical switchbacks, fast route"},
+    {"id":"bamboo", "title":"BAMBOO HEIGHTS", "y_range":[205, 315], "width":88, "theme":"canopy", "challenge":"tree village, suspended bridges, height choices"},
+    {"id":"current", "title":"GULLY CURRENT", "y_range":[315, 415], "width":90, "theme":"river", "challenge":"canyon, waterfalls, low exploration"},
+    {"id":"summit", "title":"JADE SUMMIT / EXIT", "y_range":[415, 515], "width":88, "theme":"summit", "challenge":"final ascent, two loops, finish"}
+  ],
+  "routes": [
+    {"id":"main", "kind":"main", "points":[
+      [0,0,10], [3,22,11], [-12,45,13], [-3,67,17], [12,90,19],
+      [16,110,23], [2,130,38], [-13,151,47], [-4,174,57], [8,197,43],
+      [12,218,52], [-8,237,68], [-14,257,86], [3,279,77], [16,300,91],
+      [12,321,76], [-8,340,52], [-18,361,40], [2,381,39], [12,403,52],
+      [5,423,65], [-10,443,85], [-8,467,105], [6,488,114], [3,515,125]]},
+    {"id":"ridge_secret", "kind":"risk", "points":[[12,90,19],[-30,122,36],[-37,154,65],[-20,179,49],[8,197,43]]},
+    {"id":"bamboo_canopy", "kind":"explore", "points":[[12,218,52],[28,239,72],[32,261,100],[25,285,93],[16,300,91]]},
+    {"id":"bamboo_shortcut", "kind":"risk", "points":[[-8,237,68],[-36,260,92],[-27,286,85],[16,300,91]]},
+    {"id":"river_lower", "kind":"explore", "points":[[12,321,76],[35,338,38],[40,365,21],[24,386,30],[12,403,52]]},
+    {"id":"summit_ridge", "kind":"risk", "points":[[5,423,65],[30,448,93],[34,477,118],[6,488,114]]}
+  ],
+  "landmarks": [
+    {"id":"base_dome", "kind":"dome", "position":[-48,39,16], "size":12, "sector":"base"},
+    {"id":"base_watchtower", "kind":"tower", "position":[44,44,18], "size":13, "sector":"base"},
+    {"id":"ridge_hex_loop", "kind":"hex_loop", "position":[-14,155,58], "size":27, "sector":"ridges"},
+    {"id":"ridge_lower_loop", "kind":"hex_loop", "position":[35,189,37], "size":16, "sector":"ridges"},
+    {"id":"bamboo_village_1", "kind":"treehouse", "position":[-36,243,78], "size":12, "sector":"bamboo"},
+    {"id":"bamboo_village_2", "kind":"treehouse", "position":[19,267,96], "size":13, "sector":"bamboo"},
+    {"id":"bamboo_village_3", "kind":"treehouse", "position":[-31,298,89], "size":10, "sector":"bamboo"},
+    {"id":"current_falls_left", "kind":"waterfall", "position":[-40,354,41], "size":24, "sector":"current"},
+    {"id":"current_falls_right", "kind":"waterfall", "position":[44,383,53], "size":30, "sector":"current"},
+    {"id":"summit_loop_1", "kind":"hex_loop", "position":[-12,468,114], "size":16, "sector":"summit"},
+    {"id":"summit_loop_2", "kind":"hex_loop", "position":[24,493,129], "size":14, "sector":"summit"},
+    {"id":"goal_banner", "kind":"goal", "position":[3,515,127], "size":12, "sector":"summit"}
+  ],
+  "render": {"width":2200,"height":1050,"samples":32,"terrain_x_steps":12,"terrain_y_steps_per_sector":15}
+}
