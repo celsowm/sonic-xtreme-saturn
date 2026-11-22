@@ -35,11 +35,13 @@ jobs:
       OPENBLAS_NUM_THREADS: '2'
     steps:
       - uses: actions/checkout@v4
-      - name: Install background Blender for visual evidence
+      - name: Install background Blender and image-comparison dependency
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq blender
+          sudo apt-get install -y -qq blender python3-numpy
           blender --version | head -1
+          # Import using Blender's own Python, not only the host python3.
+          blender -b --factory-startup --python-exit-code 1 --python-expr "import numpy; print('Blender numpy:', numpy.__version__)"
       - name: Render V5 painting comparison, with source tests
         run: |
           bash scripts/build-jade-concept-v4-mac.sh
