@@ -45,7 +45,7 @@ assert report["entity_markers"] == 7, report
 blend = out/"tree_village_source.blend"
 assert blend.is_file() and blend.stat().st_size > 4000, "Blender file missing/empty"
 pngs = list((out/"textures").glob("*.png"))
-assert len(pngs) == 7, f"expected seven art source PNGs, got {len(pngs)}"
+assert len(pngs) == 10, f"expected ten art source PNGs, got {len(pngs)}"
 for p in pngs:
     assert p.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n", f"bad PNG: {p}"
 print("[tree-village] Source .blend validated; stage faces:",
