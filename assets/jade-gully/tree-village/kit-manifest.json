@@ -1,0 +1,616 @@
+{
+  "schema_version": 1,
+  "name": "Jade Gully — Tree Village Hybrid Kit v1",
+  "source": "New fan-authored geometry, not a recovered Sonic X-treme scene",
+  "units": "m",
+  "axes": "RH_Z_UP",
+  "cell_bounds": {
+    "x": [
+      -25,
+      25
+    ],
+    "y": [
+      0,
+      70
+    ],
+    "z": [
+      -1,
+      21
+    ]
+  },
+  "sector": "tree_village",
+  "runtime_status": "blender_authoring_only",
+  "scene_limits": {
+    "render_faces_max": 448,
+    "vertices_max": 2048,
+    "entity_markers_max": 64,
+    "coordinates_absolute_max_m": 256
+  },
+  "targets": {
+    "visual_fps": 30,
+    "physics_hz": 60
+  },
+  "routes": [
+    {
+      "id": "main",
+      "mode": "walkable",
+      "waypoints": [
+        [
+          0,
+          10,
+          0
+        ],
+        [
+          -5,
+          25,
+          4
+        ],
+        [
+          0,
+          37,
+          5
+        ],
+        [
+          1,
+          51,
+          7
+        ],
+        [
+          0,
+          66,
+          4
+        ]
+      ],
+      "parts": [
+        "entry_ramp",
+        "platform_lower",
+        "bridge_main_lower",
+        "platform_middle",
+        "bridge_main_upper",
+        "platform_upper",
+        "exit_ramp",
+        "platform_exit"
+      ]
+    },
+    {
+      "id": "upper",
+      "mode": "spring_launch_required",
+      "waypoints": [
+        [
+          -5,
+          25,
+          4
+        ],
+        [
+          -12,
+          40,
+          9
+        ],
+        [
+          1,
+          51,
+          7
+        ]
+      ],
+      "parts": [
+        "spring_red",
+        "platform_high_optional",
+        "bridge_high_optional",
+        "platform_upper"
+      ],
+      "note": "Collision surfaces authored; bounce physics and reachability NOT implemented"
+    }
+  ],
+  "objects": [
+    {
+      "id": "ground_entry",
+      "kind": "ground",
+      "center": [
+        0,
+        8,
+        0
+      ],
+      "size": [
+        22,
+        18,
+        0.3
+      ],
+      "material": "checker",
+      "role": "walkable",
+      "collection": "JG_TERRAIN"
+    },
+    {
+      "id": "entry_ramp",
+      "kind": "bridge",
+      "from": [
+        0,
+        12,
+        0.05
+      ],
+      "to": [
+        -5,
+        25,
+        4
+      ],
+      "width": 4,
+      "thickness": 0.35,
+      "material": "wood",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "platform_lower",
+      "kind": "platform",
+      "center": [
+        -5,
+        25,
+        4
+      ],
+      "diameter": 7,
+      "thickness": 0.55,
+      "material": "wood",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "bridge_main_lower",
+      "kind": "bridge",
+      "from": [
+        -5,
+        25,
+        4
+      ],
+      "to": [
+        0,
+        37,
+        5
+      ],
+      "width": 3.5,
+      "thickness": 0.35,
+      "material": "wood",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "platform_middle",
+      "kind": "platform",
+      "center": [
+        0,
+        37,
+        5
+      ],
+      "diameter": 8,
+      "thickness": 0.6,
+      "material": "wood",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "bridge_main_upper",
+      "kind": "bridge",
+      "from": [
+        0,
+        37,
+        5
+      ],
+      "to": [
+        1,
+        51,
+        7
+      ],
+      "width": 3.5,
+      "thickness": 0.35,
+      "material": "wood",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "platform_upper",
+      "kind": "platform",
+      "center": [
+        1,
+        51,
+        7
+      ],
+      "diameter": 11,
+      "thickness": 0.65,
+      "material": "wood",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "exit_ramp",
+      "kind": "bridge",
+      "from": [
+        1,
+        51,
+        7
+      ],
+      "to": [
+        0,
+        65,
+        4
+      ],
+      "width": 4,
+      "thickness": 0.35,
+      "material": "wood",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "platform_exit",
+      "kind": "platform",
+      "center": [
+        0,
+        65,
+        4
+      ],
+      "diameter": 9,
+      "thickness": 0.55,
+      "material": "checker",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "trunk_central",
+      "kind": "trunk",
+      "center": [
+        7.5,
+        37.5,
+        0
+      ],
+      "radius": 2.9,
+      "height": 19,
+      "material": "bark",
+      "role": "blocking",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "branch_main",
+      "kind": "branch",
+      "from": [
+        7.5,
+        37.5,
+        10
+      ],
+      "to": [
+        13,
+        43,
+        11
+      ],
+      "radius": 0.68,
+      "material": "bark",
+      "role": "decoration",
+      "collection": "JG_TREE_VILLAGE_DECOR"
+    },
+    {
+      "id": "house_playable",
+      "kind": "hut",
+      "center": [
+        -2.8,
+        52,
+        7.45
+      ],
+      "size": [
+        4,
+        3,
+        3.5
+      ],
+      "material": "hut",
+      "role": "blocking",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "house_facade_01",
+      "kind": "facade",
+      "center": [
+        12.8,
+        41,
+        12
+      ],
+      "size": [
+        4,
+        0.1,
+        3.4
+      ],
+      "material": "hut",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "house_facade_02",
+      "kind": "facade",
+      "center": [
+        16,
+        47,
+        15
+      ],
+      "size": [
+        3.2,
+        0.1,
+        2.9
+      ],
+      "material": "hut",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "house_facade_03",
+      "kind": "facade",
+      "center": [
+        -15,
+        40,
+        14
+      ],
+      "size": [
+        3.8,
+        0.1,
+        3.2
+      ],
+      "material": "hut",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "house_facade_04",
+      "kind": "facade",
+      "center": [
+        17,
+        28,
+        10
+      ],
+      "size": [
+        4,
+        0.1,
+        3.4
+      ],
+      "material": "hut",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "house_facade_05",
+      "kind": "facade",
+      "center": [
+        -15,
+        54,
+        12
+      ],
+      "size": [
+        3.5,
+        0.1,
+        3.1
+      ],
+      "material": "hut",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "platform_high_optional",
+      "kind": "platform",
+      "center": [
+        -12,
+        40,
+        9
+      ],
+      "diameter": 5.5,
+      "thickness": 0.5,
+      "material": "wood",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "bridge_high_optional",
+      "kind": "bridge",
+      "from": [
+        -12,
+        40,
+        9
+      ],
+      "to": [
+        1,
+        51,
+        7
+      ],
+      "width": 3.5,
+      "thickness": 0.35,
+      "material": "wood",
+      "role": "walkable",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "spring_red",
+      "kind": "spring",
+      "center": [
+        -5,
+        25,
+        4.4
+      ],
+      "size": [
+        1.8,
+        1.8,
+        0.65
+      ],
+      "material": "spring",
+      "role": "trigger_placeholder",
+      "collection": "JG_TREE_VILLAGE_CORE"
+    },
+    {
+      "id": "palm_x_01",
+      "kind": "palm_x",
+      "center": [
+        -20,
+        14,
+        0
+      ],
+      "height": 6.5,
+      "width": 4,
+      "material": "palm",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "palm_x_02",
+      "kind": "palm_x",
+      "center": [
+        21,
+        21,
+        0
+      ],
+      "height": 7,
+      "width": 4.5,
+      "material": "palm",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "palm_x_03",
+      "kind": "palm_x",
+      "center": [
+        -20,
+        43,
+        0
+      ],
+      "height": 6.5,
+      "width": 4,
+      "material": "palm",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "palm_x_04",
+      "kind": "palm_x",
+      "center": [
+        20,
+        59,
+        0
+      ],
+      "height": 7.5,
+      "width": 5,
+      "material": "palm",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "palm_x_05",
+      "kind": "palm_x",
+      "center": [
+        -18,
+        61,
+        0
+      ],
+      "height": 6.5,
+      "width": 4.2,
+      "material": "palm",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "foliage_x_01",
+      "kind": "foliage_x",
+      "center": [
+        -11,
+        16,
+        0
+      ],
+      "height": 2.5,
+      "width": 3,
+      "material": "palm",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "foliage_x_02",
+      "kind": "foliage_x",
+      "center": [
+        14,
+        34,
+        0
+      ],
+      "height": 3.2,
+      "width": 4,
+      "material": "palm",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    },
+    {
+      "id": "foliage_x_03",
+      "kind": "foliage_x",
+      "center": [
+        -16,
+        60,
+        0
+      ],
+      "height": 2.8,
+      "width": 3.5,
+      "material": "palm",
+      "role": "decoration",
+      "collection": "JG_BILLBOARDS"
+    }
+  ],
+  "entities": [
+    {
+      "id": "spawn",
+      "kind": "player_spawn",
+      "position": [
+        0,
+        5,
+        1
+      ]
+    },
+    {
+      "id": "spring_launch",
+      "kind": "spring",
+      "position": [
+        -5,
+        25,
+        4.6
+      ]
+    },
+    {
+      "id": "checkpoint_village",
+      "kind": "checkpoint",
+      "position": [
+        0,
+        37,
+        5.6
+      ]
+    },
+    {
+      "id": "goal_village_cell",
+      "kind": "goal",
+      "position": [
+        0,
+        65,
+        4.6
+      ]
+    },
+    {
+      "id": "ring_route_01",
+      "kind": "ring",
+      "position": [
+        -5,
+        29,
+        5.3
+      ]
+    },
+    {
+      "id": "ring_route_02",
+      "kind": "ring",
+      "position": [
+        0,
+        44,
+        6.6
+      ]
+    },
+    {
+      "id": "ring_high_reward",
+      "kind": "ring",
+      "position": [
+        -12,
+        40,
+        10.2
+      ]
+    }
+  ]
+}
