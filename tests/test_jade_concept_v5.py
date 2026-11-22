@@ -8,7 +8,7 @@ from tools.validate_jade_concept_v4 import DEFAULT, validate
 
 from tools.jade_concept_v4_geometry import (
     bridge_deck, canyon_rim_wall, organic_footprint, polygon_area, river_ribbon,
-    layered_leaf_canopies, stratified_plateau, treehouse_thatch_roof,
+    layered_leaf_canopies, scenic_walkway_stations, stratified_plateau, treehouse_thatch_roof,
     village_branch_paths,
 )
 
@@ -234,6 +234,27 @@ class OrganicTerrainTests(unittest.TestCase):
         bad['canyon_shelves'][1]['center'] = [240, 140]
         with self.assertRaises(ValueError):
             validate(bad)
+
+    def test_curved_walkway_connects_real_decks_at_exact_endpoints(self):
+        a, b = (-121, 153, 40), (-114, 184, 49)
+        points = scenic_walkway_stations(a, b, 'stairs', curvature=3.8)
+        self.assertEqual(points[0], a)
+        self.assertEqual(points[-1], b)
+        self.assertEqual(len(points), 13)
+        self.assertNotAlmostEqual(points[6][0], a[0] + (b[0]-a[0])*.5)
+        self.assertTrue(all(x[2] < y[2] for x, y in zip(points, points[1:])))
+        v, f, m = bridge_deck(points, 5.4, 1.4)
+        self.assertEqual(len(faces := f), len(m))
+        self.assertGreater(len(v), 40)
+        self.assertTrue(all(len(face) == 4 for face in faces))
+
+    def test_bounded_curvature_prevents_spaghetti_ramps(self):
+        with self.assertRaisesRegex(ValueError, 'curvature too large'):
+            scenic_walkway_stations((0,0,0),(10,0,2),'stairs',curvature=5)
+        with self.assertRaisesRegex(ValueError, 'solid surface'):
+            scenic_walkway_stations((0,0,0),(10,0,2),'jump')
+        with self.assertRaisesRegex(ValueError, 'too close'):
+            scenic_walkway_stations((0,0,0),(0,0,20),'stairs')
 
 
 if __name__ == '__main__':
