@@ -712,7 +712,18 @@ def build_props(data, pal):
 
 
 def build_canyon_details(data, pal):
-    """Wooden stilt decks and raised water channels feeding the falls."""
+    """One continuous stepped far-bank cliff plus decks and waterfall sources.
+
+    Visual reconstruction only: the right canyon rim links different height
+    strata behind the existing basin, without sealing the waterfall view.
+    """
+    v, f, m = geo.canyon_rim_wall(data['canyon_rim_stations'], bottom=-52.0)
+    mesh('canyon_continuous_far_rim', v, f,
+         [pal['grass'], pal['cliff'], pal['underside']], m)
+    for i, (x, y, z) in enumerate(data['canyon_rim_stations'][1:-1:2]):
+        # Clumps at the skyline, not a row of identical trees on every block.
+        palm('canyon_rim_palm_%02d' % i, x+1.5, y, z-1.0,
+             8.0 + i*1.8, pal)
     basin = next(p['z'] for p in data['pools'] if p['id'] == 'canyon_basin_water')
     for d in data['platforms']:
         x, y, z = d['deck']
