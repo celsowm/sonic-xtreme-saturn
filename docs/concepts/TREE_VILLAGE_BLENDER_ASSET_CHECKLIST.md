@@ -166,7 +166,7 @@ The v2 authoring output is available; do not run the same command solely to repr
 
 ## V3 artistic revision — implementation and acceptance
 
-Code is now committed on `main`, but **a rendered V3 must still be inspected** before artistic acceptance.
+**V3 was generated and visually inspected from two real Blender camera views.** The render succeeds, but artistic acceptance remains open because the houses still look perched on thin ledges and the tree/village remains visibly blockout-grade.
 
 - **Terrain:** changed a 5×5 flat meadow to a 7×7 continuous heightfield (72 terrain triangles) split into three existing-material-style bands, plus 24 art-only triangles making two recessed cliff skirts. Surface collision now follows the new 72 terrain triangles; cliff skirts have no collision. V3 only covers the current 50×70m test cell, not the entire Act 1.
 - **Tree:** flared/eccentric octagonal trunk remains an inexpensive actual 3D collider; three low-poly root fins and two 12-triangle branch beams make it look anchored rather than a vertical column. The canopy is still transparent cross-planes.
@@ -187,4 +187,17 @@ git show origin/main:assets/jade-gully/tree-village/kit-report.json
 ```
 
 The active `work/jade-v3-view-cull` branch is intentionally left unmerged. The Blender source is on `main`, and can be opened from the `main` worktree or an exported copy.
+
+### Actual V3 qualification from GitHub Actions (2026-11-21)
+
+- [Blender generator execution](../../.github/workflows/jade-tree-village-art.yml) completed successfully on **Ubuntu Blender 4.0.2 with software Mesa/Xvfb**; the previous missing-`libEGL.so.1` runner problem was resolved.
+- `assets/jade-gully/tree-village/kit-report.json` reports **430 render triangles, 422 vertices, 158 collision triangles, 50 visual meshes, 14 collision meshes, 7 markers and 11 texture PNGs**. The exact predicted 430/448 render budget is confirmed; **this is an authoring/mesh capacity check, not an in-game frame-rate test**.
+- [Full overview](../../assets/jade-gully/tree-village/tree_village_preview.png) · [review overview JPEG](../../assets/jade-gully/tree-village/tree_village_preview_thumb.jpg).
+- [Full player-height view](../../assets/jade-gully/tree-village/tree_village_ground_preview.png) · [review player-height JPEG](../../assets/jade-gully/tree-village/tree_village_ground_preview_thumb.jpg).
+- Both images are resized **from real Blender renders**. The player-height view includes a small **blue editor-only proxy**, NOT the actual Sonic R model.
+- **Improvement:** the terrain now slopes upward around the wooden route, the tree has lateral structure, and facades have discernible hut silhouettes.
+- **Remaining blocking visual defects:** large exposed polygonal cliff skirts read like vertical walls; huts on upper levels are still visually disconnected/float over thin dark platforms; trunk is an exaggerated column; distant sky has no proper horizon/background, and the near camera still makes the stage look like a stand-alone demonstration platform rather than a full zone. Do not assert a polished Jade Gully yet.
+- Runtime risks remain unchanged: X-plane sprite transparency, 11 texture atlas/VRAM budget, independent display cadence, collision behavior, and spring bounce have not been integrated or tested on Saturn.
+
+Use [`scripts/open-tree-village-mac.sh`](../../scripts/open-tree-village-mac.sh) to open **the tracked main-branch blend** and both full-size PNGs from the user's `work/jade-v3-view-cull` checkout without merging or switching branches.
 
