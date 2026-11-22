@@ -129,7 +129,7 @@
       "evidence": "connected_hut_walkways",
       "visual_only": true,
       "render_style": "candidate",
-      "points": [[-153, 143, 32.6], [-135, 207, 58.6], [-104, 161, 50.6]]
+      "points": [[-121, 153, 40.6], [-114, 184, 49.6], [-135, 207, 58.6], [-104, 161, 50.6]]
     },
     {
       "id": "village_lookout_decks",
@@ -722,65 +722,176 @@
       "to": [-79, 151, 46]
     },
     {
-      "id": "village_stairs_west_north",
+      "id": "village_trunk_ramp_a",
       "kind": "stairs",
-      "from": [-153, 143, 32],
-      "to": [-135, 207, 58]
+      "from": [-121, 153, 40],
+      "to": [-114, 184, 49],
+      "curvature": 3.8,
+      "structure": "root_supported"
     },
     {
-      "id": "sky_high_rope_a",
-      "kind": "rope",
-      "from": [-24, 148, 40],
-      "to": [-10, 196, 55]
-    },
-    {
-      "id": "sky_high_rope_b",
-      "kind": "rope",
-      "from": [-10, 196, 55],
-      "to": [6, 176, 46]
-    },
-    {
-      "id": "sky_mid_checker_a",
-      "kind": "checker",
-      "from": [-24, 148, 40],
-      "to": [24, 140, 34]
-    },
-    {
-      "id": "sky_mid_checker_b",
-      "kind": "checker",
-      "from": [24, 140, 34],
-      "to": [34, 178, 50.5]
-    },
-    {
-      "id": "sky_lower_entry_stairs",
+      "id": "village_trunk_ramp_b",
       "kind": "stairs",
-      "from": [-57, 149, 43],
-      "to": [-28, 110, 18]
-    },
-    {
-      "id": "sky_lower_checker_ab",
-      "kind": "checker",
-      "from": [-28, 110, 18],
-      "to": [2, 94, 14]
-    },
-    {
-      "id": "sky_lower_checker_bc",
-      "kind": "checker",
-      "from": [2, 94, 14],
-      "to": [28, 108, 20]
-    },
-    {
-      "id": "sky_lower_checker_cd",
-      "kind": "checker",
-      "from": [28, 108, 20],
-      "to": [44, 136, 30]
-    },
-    {
-      "id": "sky_lower_exit_checker",
-      "kind": "checker",
-      "from": [44, 136, 30],
-      "to": [63, 180, 39]
+      "from": [-114, 184, 49],
+      "to": [-135, 207, 58],
+      "curvature": -3.0,
+      "structure": "root_supported"
     }
+  ],
+  "navigation_transfers": [
+      {
+          "id": "sky_high_a_spring",
+          "route": "sky_high_e",
+          "from": [
+              -24,
+              148,
+              40.6
+          ],
+          "to": [
+              -10,
+              196,
+              55.6
+          ],
+          "mode": "spring",
+          "landing": "sky_e",
+          "physics_verified": false
+      },
+      {
+          "id": "sky_high_e_drop",
+          "route": "sky_high_e",
+          "from": [
+              -10,
+              196,
+              55.6
+          ],
+          "to": [
+              6,
+              176,
+              46.6
+          ],
+          "mode": "drop",
+          "landing": "sky_b",
+          "physics_verified": false
+      },
+      {
+          "id": "sky_mid_a_drop",
+          "route": "sky_middle_d",
+          "from": [
+              -24,
+              148,
+              40.6
+          ],
+          "to": [
+              24,
+              140,
+              34.6
+          ],
+          "mode": "jump",
+          "landing": "sky_d",
+          "physics_verified": false
+      },
+      {
+          "id": "sky_mid_d_spring",
+          "route": "sky_middle_d",
+          "from": [
+              24,
+              140,
+              34.6
+          ],
+          "to": [
+              34,
+              178,
+              51.1
+          ],
+          "mode": "spring",
+          "landing": "sky_c",
+          "physics_verified": false
+      },
+      {
+          "id": "low_entry_drop",
+          "route": "lower_islands",
+          "from": [
+              -57,
+              149,
+              43
+          ],
+          "to": [
+              -28,
+              110,
+              18.6
+          ],
+          "mode": "drop",
+          "landing": "low_a",
+          "physics_verified": false
+      },
+      {
+          "id": "low_a_b_jump",
+          "route": "lower_islands",
+          "from": [
+              -28,
+              110,
+              18.6
+          ],
+          "to": [
+              2,
+              94,
+              14.6
+          ],
+          "mode": "jump",
+          "landing": "low_b",
+          "physics_verified": false
+      },
+      {
+          "id": "low_b_c_spring",
+          "route": "lower_islands",
+          "from": [
+              2,
+              94,
+              14.6
+          ],
+          "to": [
+              28,
+              108,
+              20.6
+          ],
+          "mode": "spring",
+          "landing": "low_c",
+          "physics_verified": false
+      },
+      {
+          "id": "low_c_d_jump",
+          "route": "lower_islands",
+          "from": [
+              28,
+              108,
+              20.6
+          ],
+          "to": [
+              44,
+              136,
+              30.6
+          ],
+          "mode": "jump",
+          "landing": "low_d",
+          "physics_verified": false
+      },
+      {
+          "id": "low_d_hex_transfer",
+          "route": "lower_islands",
+          "from": [
+              44,
+              136,
+              30.6
+          ],
+          "to": [
+              63,
+              180,
+              39
+          ],
+          "mode": "jump",
+          "landing": "main",
+          "physics_verified": false
+      }
   ],
   "clouds": [
     {
