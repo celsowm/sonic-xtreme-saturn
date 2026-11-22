@@ -59,3 +59,13 @@ These are real source/baker changes, **not a claim of a prettier Ymir capture**.
 ## Jade Gully Act 1 — approved concept map
 
 The [Act 1 concept-map brief](docs/concepts/JADE_GULLY_ACT1_MAP.md) and [Tree Village Blender kit checklist](docs/concepts/TREE_VILLAGE_BLENDER_ASSET_CHECKLIST.md) record the approved **visual direction** for a longer 3D action/platform stage: Entry Hills, Tree Village, Sky Bridges, Hex Loop and Canyon Basin. The map is **fan concept art**, not a purported recovered level layout or an imported asset. The generated full-resolution PNG will be kept at `docs/concepts/jade-gully-act1-concept.png` once published from the Mac using `bash scripts/publish-jade-gully-map-mac.sh` (expects the image downloaded into `~/Downloads`). This art-only handoff does not merge the [experimental PR #2](https://github.com/celsowm/sonic-xtreme-saturn/pull/2).
+
+### Tree Village: editable Blender source generator
+
+The [hybrid 2D/3D Tree Village modeling checklist](docs/concepts/TREE_VILLAGE_BLENDER_ASSET_CHECKLIST.md) now has a [versioned 28-object source manifest](assets/jade-gully/tree-village/kit-manifest.json) and a [Blender scene generator](tools/create_tree_village_kit.py) for a separate **50×70 m source-art test cell** with walkable decks and bridges, a giant trunk, one compact playable-exterior hut, five flat facade huts, five static X-plane palms and seven original procedurally painted 64×64 textures. **The .blend file has not been generated or checked in yet; a Mac Blender run is needed.** To generate the editable `.blend`, render a preview when possible and publish source files safely to `main` without changing the active branch:
+
+```bash
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/build-tree-village-mac.sh
+```
+
+This new source-art authoring cell does **not** change the existing Saturn game's single-stage scene, enable actual camera-facing scenery billboards or make spring launches interactive; those remain separate export/runtime tasks. The builder checks the 448-face authoring limit and publishes actual face counts only after generation.
