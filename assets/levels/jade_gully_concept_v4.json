@@ -359,6 +359,11 @@
           30.6
         ],
         [
+          46,
+          156,
+          34.6
+        ],
+        [
           63,
           180,
           39
@@ -494,6 +499,11 @@
           24,
           140,
           34.6
+        ],
+        [
+          20,
+          158,
+          43.6
         ],
         [
           34,
@@ -1767,12 +1777,29 @@
       "physics_verified": false
     },
     {
-      "id": "sky_mid_d_spring",
+      "id": "sky_mid_d_east_cloud_spring",
       "route": "sky_middle_d",
       "from": [
         24,
         140,
         34.6
+      ],
+      "to": [
+        20,
+        158,
+        43.6
+      ],
+      "mode": "spring",
+      "landing": "sky_cloud_mid_east",
+      "physics_verified": false
+    },
+    {
+      "id": "sky_mid_east_cloud_c_spring",
+      "route": "sky_middle_d",
+      "from": [
+        20,
+        158,
+        43.6
       ],
       "to": [
         34,
@@ -1886,12 +1913,29 @@
       "physics_verified": false
     },
     {
-      "id": "low_d_hex_transfer",
+      "id": "low_d_cloud_hex_jump",
       "route": "lower_islands",
       "from": [
         44,
         136,
         30.6
+      ],
+      "to": [
+        46,
+        156,
+        34.6
+      ],
+      "mode": "jump",
+      "landing": "sky_cloud_hex_entry",
+      "physics_verified": false
+    },
+    {
+      "id": "low_cloud_hex_rejoin",
+      "route": "lower_islands",
+      "from": [
+        46,
+        156,
+        34.6
       ],
       "to": [
         63,
@@ -2356,6 +2400,30 @@
         15,
         102,
         17
+      ],
+      "radius": 5.6,
+      "tier": "low",
+      "structure": "cloud_landing"
+    },
+    {
+      "id": "sky_cloud_mid_east",
+      "region": "sky_bridges",
+      "center": [
+        20,
+        158,
+        43
+      ],
+      "radius": 5.8,
+      "tier": "middle",
+      "structure": "cloud_landing"
+    },
+    {
+      "id": "sky_cloud_hex_entry",
+      "region": "sky_bridges",
+      "center": [
+        46,
+        156,
+        34
       ],
       "radius": 5.6,
       "tier": "low",
