@@ -114,6 +114,7 @@ def node_id(p):
 def compile_navigation(data):
     routes, walkways = data["routes"], data["walkways"]
     transfers = validate_transfers(data)
+    cloud_stages = {stage["id"]: stage for stage in data.get("sky_cloud_landings", [])}
     names = {route["id"] for route in routes}
     required = set(NEW_BRANCHES) | {LOWER_ISLANDS}
     if not required <= names:
