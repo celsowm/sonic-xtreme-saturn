@@ -206,6 +206,46 @@ def canyon_rim_wall(stations, bottom=-52.0):
     return verts, faces, mats
 
 
+def scenic_walkway_stations(start, end, kind, curvature=0.0, segments=12):
+    """Author a real deck centreline, with exact original junction anchors.
+
+    Previously the editor created detached, pencil-straight plank flights.
+    The route editor now constructs a single curved deck between the authored
+    landing points. Curvature is deliberately bounded; endpoints NEVER move.
+    The steepest routes remain gameplay-unverified even if their geometry
+    exists. For aerial transfers use navigation_transfers instead, NEVER
+    build a faux checker bridge across open sky.
+    """
+    if kind not in ('stairs', 'rope', 'plank', 'checker'):
+        raise ValueError('walkway must have solid surface kind')
+    if len(start) != 3 or len(end) != 3:
+        raise ValueError('walkway needs XYZ endpoints')
+    if not all(math.isfinite(x) for x in tuple(start) + tuple(end)):
+        raise ValueError('nonfinite walkway endpoint')
+    if segments < 4 or segments > 80:
+        raise ValueError('walkway segment count out of range')
+    if not math.isfinite(curvature):
+        raise ValueError('nonfinite walkway bend')
+    dx, dy, dz = (end[i] - start[i] for i in range(3))
+    planar = math.hypot(dx, dy)
+    if planar < 2:
+        raise ValueError('walkway endpoints too close')
+    if abs(curvature) > planar * .22:
+        raise ValueError('walkway curvature too large for safe deck sweep')
+    nx, ny = -dy / planar, dx / planar
+    stations = []
+    for i in range(segments + 1):
+        t = i / segments
+        # Bulge to one side with a gentle S near landings; exact anchors
+        # avoid unsightly steps or gaps against treehouse and island decks.
+        bend = curvature * math.sin(math.pi * t) * (0.7 + 0.3 * math.sin(2*math.pi*t)**2)
+        stations.append((start[0] + dx*t + nx*bend,
+                         start[1] + dy*t + ny*bend,
+                         start[2] + dz*t))
+    stations[0], stations[-1] = tuple(start), tuple(end)
+    return stations
+
+
 def bridge_deck(stations, width=7.0, thickness=3.0):
     """Solid, visibly connected approach deck following authored route points.
 
