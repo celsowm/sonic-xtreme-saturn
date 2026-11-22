@@ -589,7 +589,35 @@ def main():
         if obj.get('stage_role')=='concept_editor_annotation':
             # In the former render, all five labels looked like vertical noise.
             obj.rotation_euler=(camera.location-obj.location).to_track_quat('Z','Y').to_euler()
-    (out/'concept-contract.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+    # Reject a regression to the tiny 2-band cliff topology from the
+    # screenshot: every sector must export its fully subdivided checker wall.
+    nx=data['render']['terrain_x_steps']
+    ny=data['render']['terrain_y_steps_per_sector']
+    expected_faces=nx*ny + 2*ny*3*4
+    terrain_faces={}
+    for sector in data['sectors']:
+        name='sector_'+sector['id']+'_checker_landmass'
+        obj=bpy.data.objects.get(name)
+        if obj is None or obj.type!='MESH':
+            raise RuntimeError('Missing authored terrain: '+name)
+        actual=len(obj.data.polygons)
+        if actual!=expected_faces:
+            raise RuntimeError(
+                f'{name} has {actual} faces; checker terrain needs '
+                f'{expected_faces} (including tiered canyon walls)')
+        terrain_faces[sector['id']]=actual
+    required=('gully_current_broad_river','bamboo_halfpipe_main_gutter',
+              'bamboo_ancient_worldtree_trunk','jade_summit_emerald')
+    missing=[name for name in required if name not in bpy.data.objects]
+    if missing:
+        raise RuntimeError('Missing art landmarks: '+', '.join(missing))
+    report['blender_art_gate']={
+        'checker_faces_per_sector': terrain_faces,
+        'terrain_faces_total': sum(terrain_faces.values()),
+        'required_landmarks': len(required),
+        'visual_only': True,
+    }
+    (out/'concept-contract.json').write_text(json.dumps(report,indent=2)+'\\n',encoding='utf-8')
     bpy.ops.wm.save_as_mainfile(filepath=str(out/'jade_gully_act1_concept.blend'))
     scene=bpy.context.scene
     for key,cam in (('isometric',camera),('top',top)):
