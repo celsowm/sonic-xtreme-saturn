@@ -53,6 +53,7 @@ jobs:
           DIR=build/jade-gully-concept-v4
           test -s "$DIR/jade-gully-v4-map.png"
           test -s "$DIR/jade-gully-v4-routes.png"
+          test -s "$DIR/jade-gully-v4-sky_bridges.png"
           test -s "$DIR/jade-gully-v5-navigation.json"
           test -s "$DIR/jade-gully-v4-clean.png"
           test -s "$DIR/jade-gully-v4-compare.png"
@@ -68,7 +69,8 @@ jobs:
           nav=json.loads(Path('build/jade-gully-concept-v4/jade-gully-v5-navigation.json').read_text())
           assert nav['summary']['alternate_count'] >= 7
           assert nav['summary']['supported_edges'] >= 7
-          assert nav['summary']['aerial_transfer_edges'] == 9
+          assert nav['summary']['aerial_transfer_edges'] == 15
+          assert nav['summary']['cloud_landing_platforms'] == 6
           assert all(not edge['physics_verified'] for edge in nav['edges'])
           assert all(not edge['collision_verified'] for edge in nav['edges'])
           print('Verified actual Blender render:',data.get('blender_version'),
@@ -82,6 +84,7 @@ jobs:
           path: |
             build/jade-gully-concept-v4/jade-gully-v4-map.png
             build/jade-gully-concept-v4/jade-gully-v4-routes.png
+            build/jade-gully-concept-v4/jade-gully-v4-sky_bridges.png
             build/jade-gully-concept-v4/jade-gully-v5-navigation.json
             build/jade-gully-concept-v4/jade-gully-v4-clean.png
             build/jade-gully-concept-v4/jade-gully-v4-compare.png
