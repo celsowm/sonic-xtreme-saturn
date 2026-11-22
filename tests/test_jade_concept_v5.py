@@ -3,7 +3,8 @@ import math
 import unittest
 
 from tools.jade_concept_v4_geometry import (
-    organic_footprint, polygon_area, stratified_plateau,
+    bridge_deck, organic_footprint, polygon_area, stratified_plateau,
+    village_branch_paths,
 )
 
 
@@ -61,6 +62,51 @@ class OrganicTerrainTests(unittest.TestCase):
             stratified_plateau([(0,0),(1,0),(1,1)], 10, -10)
         with self.assertRaises(ValueError):
             stratified_plateau(organic_footprint(0, 0, 10, 10), 1, 0)
+
+
+    def test_hex_entry_and_exit_decks_have_real_connected_surface(self):
+        stations = [(0, 0, 12), (0, 15, 13.5), (7, 26, 16)]
+        vertices, faces, materials = bridge_deck(stations, 8, 3)
+        self.assertEqual(len(vertices), 12)
+        self.assertEqual(len(faces), 10)
+        self.assertEqual(len(faces), len(materials))
+        self.assertEqual(materials.count(0), 2)   # two top quads
+        self.assertEqual(materials.count(2), 2)   # two underside quads
+        for k, station in enumerate(stations):
+            left, right = vertices[2*k], vertices[2*k+1]
+            self.assertAlmostEqual((left[0] + right[0]) / 2, station[0])
+            self.assertAlmostEqual((left[1] + right[1]) / 2, station[1])
+            self.assertAlmostEqual(left[2], station[2])
+            self.assertAlmostEqual(right[2], station[2])
+        self.assertGreater(self._normal_z(vertices, faces[0]), 0)
+
+    @staticmethod
+    def _normal_z(vertices, face):
+        a, b, c = (vertices[i] for i in face[:3])
+        return ((b[0]-a[0])*(c[1]-a[1])
+                - (b[1]-a[1])*(c[0]-a[0]))
+
+    def test_living_branches_reach_each_deck(self):
+        base = (-113, 187, 10)
+        huts = [('main', (-104, 161, 50)), ('west', (-153, 143, 32))]
+        paths = village_branch_paths(base, huts)
+        self.assertEqual(list(paths), ['main', 'west'])
+        for name, deck in huts:
+            path = paths[name]
+            self.assertEqual(len(path), 4)
+            self.assertEqual(path[0][:2], base[:2])
+            self.assertEqual(path[-1][:2], deck[:2])
+            self.assertAlmostEqual(path[-1][2], deck[2] - 1.4)
+            self.assertTrue(all(b[2] > a[2] for a, b in zip(path, path[1:])))
+
+    def test_bad_bridge_and_duplicate_huts_rejected(self):
+        with self.assertRaises(ValueError):
+            bridge_deck([(0, 0, 0)], 5, 2)
+        with self.assertRaises(ValueError):
+            bridge_deck([(0, 0, 0), (0, 0, 7)], 5, 2)
+        with self.assertRaises(ValueError):
+            village_branch_paths((0, 0, 0), [
+                ('hut', (2, 3, 20)), ('hut', (4, 5, 22))])
 
 
 if __name__ == '__main__':
