@@ -414,15 +414,24 @@ def palm(name, x, y, z, height, pal, lean=None, collection=None):
 # ---------------------------------------------------------------- scene parts
 def build_ground(data, pal):
     for t in data['terraces']:
-        poly = geo.rounded_rect(*t['center'], *t['size'], t['corner'])
-        v, f, m = geo.prism(poly, t['top'], CLIFF_FOOT)
-        soften(mesh('terrace_' + t['id'], v, f, [pal['grass'], pal['cliff'], pal['underside']], m))
+        # Stable, individually authored-looking outlines; terrain is art-only.
+        # Tall walls change silhouette below the running surface instead of
+        # remaining one rounded-rectangle vertical extrusion.
+        seed = sum((k + 1) * ord(ch) for k, ch in enumerate(t['id']))
+        poly = geo.organic_footprint(*t['center'], *t['size'], seed=seed,
+                                     roughness=.13 if t['region'] == 'canyon_basin' else .10)
+        v, f, m = geo.stratified_plateau(poly, t['top'], CLIFF_FOOT,
+                                         lip=1.6 if t['region'] == 'canyon_basin' else 1.2)
+        mesh('terrace_' + t['id'], v, f,
+             [pal['grass'], pal['cliff'], pal['underside']], m)
     for i in data['islands']:
-        poly = geo.rounded_rect(*i['center'], *i['size'], min(i['size']) * .22)
+        seed = sum((k + 1) * ord(ch) for k, ch in enumerate(i['id']))
+        poly = geo.organic_footprint(*i['center'], *i['size'], seed=seed,
+                                     segments=20, roughness=.15)
         band = min(6.0, i['depth'] * .3)
         v, f, m = geo.floating_island(poly, i['top'], band, i['depth'])
-        soften(mesh('island_' + i['id'], v, f,
-                    [pal['grass'], pal['cliff'], pal['underside'], pal['underside']], m), .8)
+        mesh('island_' + i['id'], v, f,
+             [pal['grass'], pal['cliff'], pal['underside'], pal['underside']], m)
     # Rolling grass hills and ramps: Entry Hills is painted as soft slopes,
     # not flat boxes.
     for h in data['hills']:
@@ -805,16 +814,18 @@ def build_vegetation(data, pal):
     for gx in range(-44, 130, 8):
         for gy in range(58, 256, 8):
             j = rnd('sea', gx * 997 + gy)
-            if j < .76:
-                continue          # retain open blue channels between the cloud banks
+            if j < .82:
+                continue          # visibly wider blue sky channels: no ball pit
             x, y = gx + (j - .5) * 5, gy + (rnd('sy', gx + gy) - .5) * 5
-            sea.append((x, y, CLOUD_SEA_Z + j * 7, 5 + j * 4, 1.6, 1.3, .6, 0))
-            # Billowing cumulus puffs on top of each bank, as painted.
-            for q in range(3):
-                a = math.tau * rnd('puff', gx * 31 + gy * 17 + q)
-                sea.append((x + math.cos(a) * 4, y + math.sin(a) * 3,
-                            CLOUD_SEA_Z + j * 7 + 2.5 + q, 2.2 + 1.4 * rnd('pr', gx + gy + q),
-                            1.0, 1.0, .8, 0))
+            # Flatten the foam-like pile of tiny spheres into sparse banks.
+            # Lower, stretched cloud layers allow cliffs, falls and islands
+            # to remain visible when viewed from the locked map camera.
+            sea.append((x, y, CLOUD_SEA_Z + j * 4, 7.0 + j * 3.0,
+                        1.8, 1.45, .28, 0))
+            # Occasional small billowing top, not three bright balls on EVERY bank.
+            if rnd('sea_puff', gx * 31 + gy * 17) > .63:
+                sea.append((x + 2.2, y + 1.5, CLOUD_SEA_Z + j * 4 + 1.9,
+                            3.0, 1.7, 1.25, .28, 0))
     blob_field('cloud_sea', sea, [pal['cloud']], 2)
     # Deep painted-blue void below the cloud banks (the painting's centre).
     poly = geo.rounded_rect(42, 150, 220, 260, 30)
