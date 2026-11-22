@@ -124,6 +124,14 @@
       ]
     }
   ],
+  "canyon_shelves": [
+    {"id":"ledge_southwest","center":[143,155],"size":[22,18],"top":23},
+    {"id":"ledge_southeast","center":[206,161],"size":[23,17],"top":28},
+    {"id":"ledge_middlewest","center":[142,206],"size":[25,18],"top":37},
+    {"id":"ledge_middleeast","center":[210,213],"size":[22,19],"top":44},
+    {"id":"ledge_upperwest","center":[157,248],"size":[25,20],"top":54},
+    {"id":"ledge_uppereast","center":[206,252],"size":[18,17],"top":67}
+  ],
   "canyon_river": {
     "id": "canyon_river_meander",
     "region": "canyon_basin",
