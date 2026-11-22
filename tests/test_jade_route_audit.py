@@ -18,8 +18,8 @@ class RouteAuditTests(unittest.TestCase):
         result = audit(self.manifest, self.inventory)
         self.assertEqual(result['visual_corridors'], 18)
         self.assertEqual(result['main_routes'], 1)
-        self.assertEqual(result['alternate_routes'], 3)
-        self.assertEqual(result['decorative_walkways'], 18)
+        self.assertEqual(result['alternate_routes'], 7)
+        self.assertEqual(result['decorative_walkways'], 27)
         self.assertEqual(result['painted_evidence'], {
             'gold_main': 5, 'purple_shortcut': 5, 'platform_ring_hint': 8
         })
@@ -38,10 +38,12 @@ class RouteAuditTests(unittest.TestCase):
     def test_decorative_walkways_do_not_count_as_route_graph(self):
         result = audit(self.manifest, self.inventory)
         far = result['walkway_endpoints_over_6_world_units_from_any_route_centerline']
-        self.assertEqual(len(far), 8)
+        self.assertEqual(len(far), 4)
         missing = {x['id'] for x in far}
-        self.assertIn('village_rope_north', missing)
-        self.assertIn('village_rope_lookout', missing)
+        self.assertNotIn('village_rope_north', missing)
+        self.assertNotIn('village_rope_lookout', missing)
+        self.assertIn('canyon_dock_walk', missing)
+        self.assertIn('canyon_stairs_mid', missing)
         self.assertIn('canyon_dock_a', missing)
         self.assertIn('canyon_dock_b', missing)
         for x in far:
