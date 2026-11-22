@@ -137,3 +137,26 @@ cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/build-tree-vi
 
 The **first-time output on success** will be `assets/jade-gully/tree-village/tree_village_source.blend` in `main`; this local generation is intentionally needed because the authoring runner currently has no Blender binary. Do not describe an unbuilt .blend as already committed.
 
+## Visual audit: first Mac Blender preview (2026-11-21)
+
+The Mac build produced an actual **`tree_village_source.blend`** and a 1280×720 preview and pushed them to `main`. The real [kit report](../../assets/jade-gully/tree-village/kit-report.json) for **v1** showed **308 render triangles, 271 vertices, 96 collision faces, 29 render meshes, 13 collision meshes, 7 entity markers and 7 textures**. Eight host tests passed, and the Blender 5.2.2 authoring run completed successfully.
+
+**Art rejection:** the first [preview](../../assets/jade-gully/tree-village/tree_village_preview.png) looked like a suspended wood track in empty sky. Palm cutouts were thin; facade houses looked like five free-floating wood squares; central tree ended as a bark spike. Passing build limits is not visual approval.
+
+**Generator v2 changes, not yet run in Blender:**
+
+- Expanded original palm frond width and textured **alpha-cutout house facades** with pitched roofs, doors and windows.
+- A new original leafy canopy cutout on three cross-planes at the tree crown, replacing the visually bare trunk top.
+- Connected **32-triangle terrain valley** under the elevated bridges with its own 32-triangle collision mesh, and five **two-triangle timber supports** holding the facade huts near the main tree (render-only).
+- Added original checker-compatible meadow, facade and canopy textures, increasing the v2 palette source set to **10 PNGs**; no Saturn VDP1 migration has been claimed.
+- Changed the overview camera framing to show more of the grounds and vegetation.
+- Expected v2 render budget: **308 + 6 canopy + 32 terrain + 10 supports = 356 / 448 faces**. Actual faces, collision counts, preview quality, transparency and Blender syntax must be verified by the next Mac build before accepting it.
+
+Rebuild from current working branch (the publisher fetches the latest `main` in an isolated worktree):
+
+```bash
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/build-tree-village-mac.sh
+```
+
+The new preview will replace the file at the same path in `main`. Only after **human inspection of v2** should it progress to renderer integration or the sectorized 1.45-km Act 1 map.
+
