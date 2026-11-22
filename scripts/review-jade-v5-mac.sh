@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Review the Jade Gully V5 art-direction candidate without modifying the
 # current checkout's branch. Always pull the Mac checkout before rendering.
-# Run from the existing repo:
-# git fetch origin work/jade-v5-art-direction && \
-# git show origin/work/jade-v5-art-direction:scripts/review-jade-v5-mac.sh | bash
+# One-command launcher from the existing checkout (no manual git fetch/show):
+#   cd ~/dev/sonic-xtreme-saturn && \
+#     bash <(curl -fsSL https://raw.githubusercontent.com/celsowm/sonic-xtreme-saturn/work/jade-v5-art-direction/scripts/review-jade-v5-mac.sh)
+# This script itself performs pull --ff-only and fetches the review branch.
 set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
