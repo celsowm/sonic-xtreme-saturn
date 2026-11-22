@@ -159,7 +159,7 @@ def cloud_material(name):
     middle = cloud_shade.color_ramp.elements.new(0.48)
     middle.color = (0.38, 0.55, 0.80, 1.0)
     cloud_shade.color_ramp.elements[1].position = 0.90
-    cloud_shade.color_ramp.elements[1].color = (0.90, 0.94, 1.0, 1.0)
+    cloud_shade.color_ramp.elements[1].color = (0.70, 0.84, 0.98, 1.0)
     links.new(geometry.outputs['Normal'], facing_up.inputs[0])
     links.new(facing_up.outputs['Value'], cloud_shade.inputs['Fac'])
     links.new(cloud_shade.outputs['Color'], b.inputs['Base Color'])
@@ -865,23 +865,36 @@ def build_vegetation(data, pal):
             continue
         palm('jungle_palm_%02d' % k, x, y, JUNGLE_Z + 4, 18 + 10 * rnd('jph', k), pal)
         palms += 1
-    # Cloud sea in the centre, below the sky bridges and hex loop.
+    # Under-bridge jungle is a V5 art-direction requirement. The painting
+    # shows multiple layers of foliage, shadow and ravines BELOW the floating
+    # route; a huge unbroken white cloud carpet erases all of that depth.
+    understorey = []
+    for gx in range(-44, 130, 11):
+        for gy in range(58, 256, 11):
+            j = rnd('underbridge_jungle', gx * 1009 + gy)
+            if j < .14:
+                continue
+            understorey.append((gx + (j - .5) * 5,
+                               gy + (rnd('underjy', gx + gy * 7) - .5) * 5,
+                               JUNGLE_Z - 8 + j * 8, 3.8 + j * 2.0,
+                               1.25, 1.2, .7, int(j * 9) % 2))
+    blob_field('underbridge_jungle_canopy', understorey,
+               [pal['jungle'], pal['jungle_light']], 2)
+    # Small intermittent blue-grey mist banks on top of the dark valley.
+    # Shrinking their footprint makes waterfalls and island undersides
+    # readable; they MUST NOT fill the entire painted canyon as white foam.
     sea = []
     for gx in range(-44, 130, 8):
         for gy in range(58, 256, 8):
             j = rnd('sea', gx * 997 + gy)
-            if j < .82:
-                continue          # visibly wider blue sky channels: no ball pit
+            if j < .91:
+                continue
             x, y = gx + (j - .5) * 5, gy + (rnd('sy', gx + gy) - .5) * 5
-            # Flatten the foam-like pile of tiny spheres into sparse banks.
-            # Lower, stretched cloud layers allow cliffs, falls and islands
-            # to remain visible when viewed from the locked map camera.
-            sea.append((x, y, CLOUD_SEA_Z + j * 4, 7.0 + j * 3.0,
-                        1.8, 1.45, .28, 0))
-            # Occasional small billowing top, not three bright balls on EVERY bank.
-            if rnd('sea_puff', gx * 31 + gy * 17) > .63:
-                sea.append((x + 2.2, y + 1.5, CLOUD_SEA_Z + j * 4 + 1.9,
-                            3.0, 1.7, 1.25, .28, 0))
+            sea.append((x, y, CLOUD_SEA_Z + j * 4,
+                        4.5 + j * 1.0, 1.7, 1.5, .23, 0))
+            if rnd('sea_puff', gx * 31 + gy * 17) > .91:
+                sea.append((x + 2.2, y + 1.5, CLOUD_SEA_Z + j * 4 + 1.0,
+                            2.2, 1.5, 1.2, .22, 0))
     blob_field('cloud_sea', sea, [pal['cloud']], 2)
     # Deep painted-blue void below the cloud banks (the painting's centre).
     poly = geo.rounded_rect(42, 150, 220, 260, 30)
@@ -1285,9 +1298,11 @@ def main():
     hud.hide_render = False
     scene.camera = cams['map']
     report['review'] = review(out, map_png)
-    report['preview_files'] = (['jade-gully-v4-map.png', 'jade-gully-v4-clean.png', 'jade-gully-v4-top.png',
+    report['preview_files'] = (['jade-gully-v4-map.png', 'jade-gully-v4-clean.png',
                                 'jade-gully-v4-compare.png'] +
-                               ['jade-gully-v4-%s.png' % r['id'] for r in data['regions']])
+                               ([] if quick else
+                                ['jade-gully-v4-top.png'] +
+                                ['jade-gully-v4-%s.png' % r['id'] for r in data['regions']]))
     (out / 'concept-v4-contract.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     bpy.ops.wm.save_as_mainfile(filepath=str(out / 'jade_gully_act1_concept_v4.blend'))
     print('[jade v4] painting-faithful concept written to', out)
