@@ -6,7 +6,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
-python3 -m unittest tests.test_jade_concept_v4 -v
+python3 -m unittest tests.test_jade_concept_v4 tests.test_jade_concept_v5 -v
 python3 -m py_compile tools/create_jade_gully_concept_v4.py tools/jade_concept_v4_geometry.py tools/validate_jade_concept_v4.py
 python3 tools/validate_jade_concept_v4.py
 BLENDER="${BLENDER:-blender}"
