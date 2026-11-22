@@ -319,6 +319,63 @@ def river_ribbon(stations, widths, z):
     return vertices, faces, [TOP]*len(faces)
 
 
+def layered_leaf_canopies(blobs, segments=9):
+    """Faceted leafy crowns with irregular radial silhouette, NOT icospheres.
+
+    Each input is (x, y, z, radius, sx, sy, sz, material_index), matching
+    Blender's old blob_field data contract. Three height-offset polygonal
+    outlines plus an apex produce broad organic leaf fans with dark pockets,
+    instead of a uniform field of billiard-ball foliage. No bpy dependency;
+    deterministic on all Python implementations.
+    """
+    if segments < 7 or segments > 24:
+        raise ValueError('canopy segments outside low-poly range')
+    vertices, faces, mats = [], [], []
+    for idx, blob in enumerate(blobs):
+        if len(blob) != 8:
+            raise ValueError('canopy blob requires eight parameters')
+        x, y, z, radius, sx, sy, sz, material = blob
+        if not all(isinstance(v, (int, float)) and math.isfinite(v)
+                   for v in blob) or min(radius, sx, sy, sz) <= 0:
+            raise ValueError('canopy needs finite positive dimensions')
+        if int(material) != material or material < 0:
+            raise ValueError('canopy material index must be a nonnegative integer')
+        n = len(vertices)
+        phase = idx * 2.3999632297
+        for level, (radial, rise) in enumerate((
+                (.66, -.48), (1.05, -.12), (.88, .37))):
+            for j in range(segments):
+                angle = math.tau * j / segments + phase
+                wobble = (1 + .13 * math.sin(3*angle + idx*.77)
+                            + .09 * math.sin(5*angle - idx*1.31))
+                rr = radius * radial * wobble
+                vertices.append((x + math.cos(angle) * rr * sx,
+                                 y + math.sin(angle) * rr * sy,
+                                 z + radius * sz * (rise
+                                        + .045*math.sin(4*angle + idx))))
+        tip = n + 3*segments
+        vertices.append((x + radius*sx*.09*math.sin(phase),
+                         y + radius*sy*.09*math.cos(phase),
+                         z + radius*sz*.81))
+        bottom = len(vertices)
+        vertices.append((x, y, z - radius*sz*.50))
+        for ring in range(2):
+            for j in range(segments):
+                k = (j+1) % segments
+                faces.append((n+ring*segments+j,
+                              n+ring*segments+k,
+                              n+(ring+1)*segments+k,
+                              n+(ring+1)*segments+j))
+                mats.append(int(material))
+        for j in range(segments):
+            k = (j+1) % segments
+            faces.append((n+2*segments+j, n+2*segments+k, tip))
+            mats.append(int(material))
+            faces.append((bottom, n+k, n+j))
+            mats.append(int(material))
+    return vertices, faces, mats
+
+
 def village_branch_paths(tree_base, hut_decks):
     """Deterministic woody supports connecting each treehouse to the trunk.
 
