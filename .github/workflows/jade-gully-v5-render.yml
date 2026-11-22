@@ -17,6 +17,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: jade-v5-render-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   visual-review:
     name: Render actual V5 compare in Blender
@@ -42,6 +46,7 @@ jobs:
           set -euo pipefail
           DIR=build/jade-gully-concept-v4
           test -s "$DIR/jade-gully-v4-map.png"
+          test -s "$DIR/jade-gully-v4-clean.png"
           test -s "$DIR/jade-gully-v4-compare.png"
           test -s "$DIR/jade_gully_act1_concept_v4.blend"
           test -s "$DIR/concept-v4-contract.json"
@@ -62,6 +67,7 @@ jobs:
           name: jade-v5-real-blender-review
           path: |
             build/jade-gully-concept-v4/jade-gully-v4-map.png
+            build/jade-gully-concept-v4/jade-gully-v4-clean.png
             build/jade-gully-concept-v4/jade-gully-v4-compare.png
             build/jade-gully-concept-v4/concept-v4-contract.json
             build/jade-gully-concept-v4/jade_gully_act1_concept_v4.blend
