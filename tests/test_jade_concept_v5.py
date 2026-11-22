@@ -1,10 +1,14 @@
 """Deterministic checks for the V5 visual landmass shape (no Blender)."""
+import copy
+import json
 import math
 import unittest
 
+from tools.validate_jade_concept_v4 import DEFAULT, validate
+
 from tools.jade_concept_v4_geometry import (
-    bridge_deck, canyon_rim_wall, organic_footprint, polygon_area, stratified_plateau,
-    village_branch_paths,
+    bridge_deck, canyon_rim_wall, organic_footprint, polygon_area, river_ribbon,
+    stratified_plateau, treehouse_thatch_roof, village_branch_paths,
 )
 
 
@@ -133,6 +137,58 @@ class OrganicTerrainTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'foot'):
             canyon_rim_wall([(220, 130, 31), (221, 150, 40),
                              (222, 170, 51)], bottom=18)
+
+
+    def test_layered_treehouse_roof_is_broad_low_and_irregular(self):
+        a = treehouse_thatch_roof(-100, 150, 46, 16, seed=42)
+        b = treehouse_thatch_roof(-100, 150, 46, 16, seed=42)
+        c = treehouse_thatch_roof(-100, 150, 46, 16, seed=53)
+        self.assertEqual(a, b)
+        self.assertNotEqual(a[0], c[0])
+        vertices, faces, mats = a
+        self.assertEqual(len(vertices), 5 * 16 + 1)
+        self.assertEqual(len(faces), 5 * 16)
+        self.assertEqual(set(mats), {0, 1, 2})
+        self.assertTrue(all(len(face) in (3, 4) for face in faces))
+        self.assertGreater(max(v[0] for v in vertices) - min(v[0] for v in vertices), 30)
+        self.assertLess(max(v[2] for v in vertices) - min(v[2] for v in vertices), 9)
+        self.assertGreater(self._normal_z(vertices, faces[18]), 0)
+
+    def test_meandering_canyon_river_shared_edges_and_widths(self):
+        stations = [(166, 130), (164, 147), (178, 165), (174, 188),
+                    (181, 211), (191, 234)]
+        widths = [13, 15, 20, 17, 19, 22]
+        vertices, faces, mats = river_ribbon(stations, widths, 10)
+        self.assertEqual(len(vertices), len(stations) * 2)
+        self.assertEqual(len(faces), len(stations) - 1)
+        self.assertTrue(all(mat == 0 for mat in mats))
+        self.assertTrue(all(abs(v[2] - 10) < 1e-9 for v in vertices))
+        for i, face in enumerate(faces):
+            self.assertGreater(self._normal_z(vertices, face), 0)
+            if i < len(faces) - 1:
+                self.assertEqual(face[2], faces[i+1][1])
+                self.assertEqual(face[3], faces[i+1][0])
+
+    def test_new_organic_shapes_reject_invalid_inputs(self):
+        with self.assertRaises(ValueError):
+            treehouse_thatch_roof(0, 0, 3, 0)
+        with self.assertRaises(ValueError):
+            river_ribbon([(0, 0), (0, 10), (0, 20)], [2, 2], 1)
+        with self.assertRaises(ValueError):
+            river_ribbon([(0, 0), (0, 10), (0, 5)], [2, 2, 2], 1)
+
+    def test_manifest_keeps_river_narrow_and_away_from_ridge(self):
+        data = json.loads(DEFAULT.read_text(encoding='utf-8'))
+        validate(data)
+        self.assertGreaterEqual(len(data['canyon_river']['stations']), 5)
+        bad = copy.deepcopy(data)
+        bad['canyon_river']['widths'][1] = 80
+        with self.assertRaisesRegex(ValueError, 'too wide'):
+            validate(bad)
+        bad = copy.deepcopy(data)
+        bad['canyon_river']['stations'][2][1] = 140
+        with self.assertRaisesRegex(ValueError, 'continuous'):
+            validate(bad)
 
 
 if __name__ == '__main__':
