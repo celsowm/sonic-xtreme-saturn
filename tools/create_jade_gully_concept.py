@@ -377,7 +377,7 @@ def setup_camera_and_lighting(data, materials):
     sun.data.energy=2.5
     sun.rotation_euler=(math.radians(30),math.radians(-28),math.radians(20))
     # View from the side of progression, so +Y spans the panoramic frame.
-    bpy.ops.object.camera_add(location=(260,-110,280))
+    bpy.ops.object.camera_add(location=(315,255,280))
     camera=bpy.context.object
     camera.name='Concept_Perspective'
     target=Vector((0,258,60))
