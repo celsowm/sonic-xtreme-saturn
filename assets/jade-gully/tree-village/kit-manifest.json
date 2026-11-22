@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "Jade Gully — Tree Village Hybrid Kit v1",
+  "name": "Jade Gully — Tree Village Hybrid Kit V3",
   "source": "New fan-authored geometry, not a recovered Sonic X-treme scene",
   "units": "m",
   "axes": "RH_Z_UP",
@@ -443,8 +443,8 @@
         14,
         0
       ],
-      "height": 6.5,
-      "width": 4,
+      "height": 7.539999999999999,
+      "width": 5.52,
       "material": "palm",
       "role": "decoration",
       "collection": "JG_BILLBOARDS"
@@ -457,8 +457,8 @@
         21,
         0
       ],
-      "height": 7,
-      "width": 4.5,
+      "height": 8.12,
+      "width": 6.2,
       "material": "palm",
       "role": "decoration",
       "collection": "JG_BILLBOARDS"
@@ -471,8 +471,8 @@
         43,
         0
       ],
-      "height": 6.5,
-      "width": 4,
+      "height": 7.539999999999999,
+      "width": 5.52,
       "material": "palm",
       "role": "decoration",
       "collection": "JG_BILLBOARDS"
@@ -485,8 +485,8 @@
         59,
         0
       ],
-      "height": 7.5,
-      "width": 5,
+      "height": 8.7,
+      "width": 6.2,
       "material": "palm",
       "role": "decoration",
       "collection": "JG_BILLBOARDS"
@@ -499,8 +499,8 @@
         61,
         0
       ],
-      "height": 6.5,
-      "width": 4.2,
+      "height": 7.539999999999999,
+      "width": 5.795999999999999,
       "material": "palm",
       "role": "decoration",
       "collection": "JG_BILLBOARDS"
@@ -513,8 +513,8 @@
         16,
         0
       ],
-      "height": 2.5,
-      "width": 3,
+      "height": 3,
+      "width": 3.75,
       "material": "palm",
       "role": "decoration",
       "collection": "JG_BILLBOARDS"
@@ -527,8 +527,8 @@
         34,
         0
       ],
-      "height": 3.2,
-      "width": 4,
+      "height": 3.8,
+      "width": 5,
       "material": "palm",
       "role": "decoration",
       "collection": "JG_BILLBOARDS"
@@ -541,8 +541,8 @@
         60,
         0
       ],
-      "height": 2.8,
-      "width": 3.5,
+      "height": 3.36,
+      "width": 4.375,
       "material": "palm",
       "role": "decoration",
       "collection": "JG_BILLBOARDS"
@@ -612,5 +612,6 @@
         10.2
       ]
     }
-  ]
+  ],
+  "authoring_revision": 3
 }
