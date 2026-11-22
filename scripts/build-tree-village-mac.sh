@@ -45,9 +45,13 @@ assert report["entity_markers"] == 7, report
 blend = out/"tree_village_source.blend"
 assert blend.is_file() and blend.stat().st_size > 4000, "Blender file missing/empty"
 pngs = list((out/"textures").glob("*.png"))
-assert len(pngs) == 10, f"expected ten art source PNGs, got {len(pngs)}"
+assert len(pngs) == 11, f"expected eleven art source PNGs, got {len(pngs)}"
 for p in pngs:
     assert p.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n", f"bad PNG: {p}"
+for preview_name in ("tree_village_preview.png", "tree_village_ground_preview.png"):
+    preview = out/preview_name
+    assert preview.is_file() and preview.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n", (
+        f"Missing required overview or player-height preview: {preview}")
 print("[tree-village] Source .blend validated; stage faces:",
       report["render_faces"], "collision faces:", report["collision_faces"])
 PY
@@ -57,13 +61,10 @@ mkdir -p "$TARGET/source"
 cp build/tree-village/tree_village_source.blend "$TARGET/tree_village_source.blend"
 cp build/tree-village/kit-report.json "$TARGET/kit-report.json"
 cp build/tree-village/textures/*.png "$TARGET/source/"
-if [[ -f build/tree-village/tree_village_preview.png ]]; then
-    cp build/tree-village/tree_village_preview.png "$TARGET/tree_village_preview.png"
-else
-    echo '[tree-village] WARNING: Blender preview unavailable; edit the .blend in GUI.'
-fi
+cp build/tree-village/tree_village_preview.png "$TARGET/tree_village_preview.png"
+cp build/tree-village/tree_village_ground_preview.png "$TARGET/tree_village_ground_preview.png"
 git add "$TARGET/tree_village_source.blend" "$TARGET/kit-report.json" "$TARGET/source"
-if [[ -f "$TARGET/tree_village_preview.png" ]]; then git add "$TARGET/tree_village_preview.png"; fi
+git add "$TARGET/tree_village_preview.png" "$TARGET/tree_village_ground_preview.png"
 if git diff --cached --quiet; then
     echo '[tree-village] Same authored files already published to origin/main.'
     exit 0
