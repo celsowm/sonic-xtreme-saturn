@@ -15,7 +15,7 @@ on:
       - 'tests/test_jade_concept_geometry.py'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   blender-concept:
@@ -50,3 +50,30 @@ jobs:
             build/jade-gully-concept/jade-gully-concept-top.png
             build/jade-gully-concept/concept-contract.json
           retention-days: 14
+      - name: Publish editable Blender source and verified preview files to main
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="assets/jade-gully/concept-v2"
+          mkdir -p "$DEST"
+          cp build/jade-gully-concept/jade_gully_act1_concept.blend "$DEST/jade_gully_act1_concept.blend"
+          cp build/jade-gully-concept/jade-gully-concept-isometric.png "$DEST/jade-gully-concept-isometric.png"
+          cp build/jade-gully-concept/jade-gully-concept-top.png "$DEST/jade-gully-concept-top.png"
+          cp build/jade-gully-concept/concept-contract.json "$DEST/concept-contract.json"
+          git add "$DEST"
+          if git diff --cached --quiet; then
+            echo '[jade] No changes to generated Blender artifacts'
+            exit 0
+          fi
+          # Never publish an old render over a newer main revision.
+          git fetch origin main
+          if [[ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]]; then
+            echo '[jade] Main advanced since build; skipping stale artifact publish'
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'art(jade): publish five-sector Blender scene and real renders [skip ci]'
+          git push origin HEAD:refs/heads/main
+
