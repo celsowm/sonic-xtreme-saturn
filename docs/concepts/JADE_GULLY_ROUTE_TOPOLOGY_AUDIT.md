@@ -4,6 +4,55 @@
 
 **Conclusão:** a geometria é mais detalhada, porém o mundo ainda NÃO reproduz as escolhas de navegação da pintura. A rota amarela é só o esqueleto; tracejados roxos são atalhos e anéis/plataformas sugerem outros percursos. **Não confundir uma passarela modelada, um efeito visual ou uma curva pintada com um caminho fisicamente transitável.**
 
+## Implementação P1 — ramificações com apoio geométrico (V5)
+
+**Entregue na branch V5, ainda não validado como fase jogável do Saturn.**
+A rede de rotas do Blender agora contém **1 percurso principal e 7 alternativas
+de apresentação** (antes: 1+3). As passarelas subiram de **18 para 27**:
+
+- `village_north_decks`: oeste → cabana norte → cabana central, apoiada nas
+  passarelas/escadas já presentes;
+- `village_lookout_decks`: cabana central → mirante → cabana leste, apoiada em
+  duas passarelas já existentes;
+- `sky_high_e`: ilha alta A → ilha E → ilha B, com duas novas pontes;
+- `sky_middle_d`: ilha alta A → ilha intermediária D → ilha C, com duas novas
+  passarelas xadrez;
+- `lower_islands`: a alternativa baixa já declarada ganhou cinco segmentos
+  físicos de acesso, travessia e reconexão entre ilhas.
+
+Os quatro ramos novos são **candidatos cianos no render do mapa**, não atalhos
+roxos que a pintura confirme explicitamente. A pintura continua sendo evidência
+de uma rede muito mais rica, mas não tem detalhamento de física/aterrissagem.
+As outras quatro linhas, `main`, `village_drop`, `lower_islands` e
+`hex_bypass`, conservam seu sentido original.
+
+`tools/compile_jade_navigation_v5.py` agora compila nós 3D e arestas
+tipadas com IDs de passarelas quando **as duas extremidades coincidem**.
+Gera `jade-gully-v5-navigation.json`; as arestas marcadas
+`mode: unverified` não têm suporte geométrico provado. Todos os nós/arestas
+declaram `collision_verified: false`: não houve teste de gameplay, colisão,
+salto, mola, loop nem desempenho real do Saturn.
+
+**O débito original de 13 elementos do desenho não está quitado por essas
+novas curvas.** A validação de caminhos exige aterrissagens, retorno,
+diferentes alturas e testes jogáveis. O relatório pode ser reproduzido com
+`python3 tools/audit_jade_routes_v5.py`, e o grafo com
+`python3 tools/compile_jade_navigation_v5.py`.
+
+### Comparação da malha de apresentação
+
+| Medida | Antes do P1 | Com P1 |
+|---|---:|---:|
+| Rotas alternativas declaradas | 3 | 7 |
+| Passarelas modeladas | 18 | 27 |
+| Passarelas com ponta a mais de 6 unidades das rotas declaradas | 8 | 4 |
+| Navegação/colisão do Saturn verificada | Não | Não |
+
+As **quatro passarelas ainda sem ancoragem** ficam no Canyon Basin:
+`canyon_dock_walk`, `canyon_stairs_mid`, `canyon_dock_a`,
+`canyon_dock_b`. A expansão funcional seguinte deve tratar do Hex Loop
+inferior e dos três níveis do Canyon Basin.
+
 ## O que dá para contar com segurança
 
 - **1** percurso principal amarelo contínuo START → GOAL, passando por cinco regiões.
@@ -21,7 +70,7 @@
 
 ### Diferença objetiva entre a pintura e o JSON
 
-O JSON atual tem **1** `main` com **33** pontos e só **3** rotas `alternate`: `village_drop`, `lower_islands`, `hex_bypass`. Contém **18** `walkways`, mas elas não são automaticamente ramificações completas. Um teste geométrico 3D de distância a segmentos dos quatro caminhos declarados encontrou **8 de 18 passarelas** com pelo menos uma ponta a mais de 6 unidades da linha de rota mais próxima: `village_rope_north`, `village_rope_lookout`, `canyon_dock_walk`, `canyon_stairs_mid`, `canyon_dock_a`, `canyon_dock_b`, `village_rope_lookout_east`, `village_stairs_west_north`. **É indício de falta de ancoragem no grafo — não prova, isoladamente, que a geometria seja inalcançável**, pois pulos e plataformas intermediárias podem existir.
+Na **linha de base anterior ao P1**, o JSON tinha **1** `main` com **33** pontos e só **3** rotas `alternate`: `village_drop`, `lower_islands`, `hex_bypass`. Naquele momento continha **18** `walkways`, mas elas não eram automaticamente ramificações completas. Um teste geométrico 3D de distância a segmentos dos quatro caminhos declarados encontrou **8 de 18 passarelas na linha de base** com pelo menos uma ponta a mais de 6 unidades da linha de rota mais próxima: `village_rope_north`, `village_rope_lookout`, `canyon_dock_walk`, `canyon_stairs_mid`, `canyon_dock_a`, `canyon_dock_b`, `village_rope_lookout_east`, `village_stairs_west_north`. **É indício de falta de ancoragem no grafo — não prova, isoladamente, que a geometria seja inalcançável**, pois pulos e plataformas intermediárias podem existir.
 
 Os demais 10 de 18 elementos também NÃO estão necessariamente completos: há rotas com pontos que não seguem precisamente o bordo de uma passarela, aterrissagens não modeladas e trecho principal sugerido em cima de terreno que não foi validado como jogável.
 
