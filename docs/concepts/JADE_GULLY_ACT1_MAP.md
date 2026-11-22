@@ -6,6 +6,9 @@
 
 ## Proposed layout
 
+For a **piece-by-piece Blender specification**, see [Tree Village: hybrid 2D/3D asset checklist](TREE_VILLAGE_BLENDER_ASSET_CHECKLIST.md). The budgets below are **sector-level targets**; the present single-stage baker cannot carry the entire proposed world.
+
+
 The new concept uses a longer, continuous **3D action-adventure** route, with optional side routes rather than a 20-second racetrack. The image carries five numbered areas:
 
 1. **Entry Hills** — rolling terrain, water pools, rings, springs, an open starting clearing.
