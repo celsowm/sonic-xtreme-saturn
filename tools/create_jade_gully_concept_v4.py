@@ -713,46 +713,77 @@ def build_village(data, pal):
 
 
 def build_walkways(data, pal):
+    """Physical, continuous curved stage decks, never scenery drawn as lines.
+
+    The former implementation scattered thin straight cubes/steps between
+    XYZ coordinates, creating impossible-looking aerial staircases. Aerial
+    segments now belong to navigation_transfers, not this builder.
+    """
     for w in data['walkways']:
-        a, b = (Vector(p) for p in tilt_hex_points(data, (w['from'], w['to'])))
-        d = b - a
-        length = d.length
-        items = []
-        if w['kind'] in ('rope', 'plank'):
-            count = max(6, int(length / 1.7))
-            for k in range(count):
-                t = (k + .5) / count
-                sag = -1.6 * math.sin(math.pi * t) if w['kind'] == 'rope' else 0
-                c = a + d * t + Vector((0, 0, sag))
-                items.append((tuple(c), tuple(d), 3.4, length / count * .78, .35, 0))
-            boxes(w['id'], items, [pal['plank']])
-            if w['kind'] == 'rope':
-                side = d.cross(Vector((0, 0, 1))).normalized() * 1.9
-                for sgn in (-1, 1):
-                    rail = [tuple(a + d * (k / 12) + side * sgn +
-                                  Vector((0, 0, 1.8 - 1.6 * math.sin(math.pi * k / 12))))
-                            for k in range(13)]
-                    tube(w['id'] + '_rope_%d' % sgn, rail, pal['rope'], .12)
-        elif w['kind'] == 'stairs':
-            flat_d = Vector((d.x, d.y, 0))
-            count = max(5, int(abs(d.z) / .9))
-            for k in range(count):
-                t = (k + .5) / count
-                c = a + d * t
-                items.append((tuple(c), tuple(flat_d), 4.2, flat_d.length / count * 1.05, .6, 0))
-            boxes(w['id'], items, [pal['plank']])
-            side = flat_d.cross(Vector((0, 0, 1))).normalized() * 2.2
-            for sgn in (-1, 1):
-                tube(w['id'] + '_rail_%d' % sgn,
-                     [tuple(a + side * sgn + Vector((0, 0, 1.6))), tuple(b + side * sgn + Vector((0, 0, 1.6)))],
+        a, b = tilt_hex_points(data, (w['from'], w['to']))
+        kind = w['kind']
+        chord = math.dist(a[:2], b[:2])
+        # Very gentle authored lateral movement breaks the ruler-straight
+        # silhouette without shifting the branch start/end landing anchors.
+        seed = sum((i+1)*ord(ch) for i, ch in enumerate(w['id']))
+        sign = 1 if seed % 2 else -1
+        default_bend = min(3.0, chord * .048) * sign
+        bend = w.get('curvature', default_bend)
+        path = geo.scenic_walkway_stations(a, b, kind, curvature=bend,
+                                          segments=max(9, min(28, int(chord/2.6))))
+        width = {'rope':4.5, 'plank':4.5, 'checker':5.2, 'stairs':5.4}[kind]
+        height = 1.4 if kind in ('rope', 'plank', 'stairs') else 2.6
+        verts, faces, mats = geo.bridge_deck(path, width=width, thickness=height)
+        if kind == 'checker':
+            materials = [pal['grass'], pal['underside'], pal['cliff']]
+        else:
+            materials = [pal['wood'], pal['bark'], pal['plank']]
+        mesh(w['id'] + '_continuous_deck', verts, faces, materials, mats)
+
+        if kind in ('rope', 'stairs', 'plank'):
+            # Discrete wood grain / non-slip risers on the solid deck, not a
+            # disconnected cloud of narrow bars masquerading as stairs.
+            cross = []
+            for k in range(1, len(path)-1, 2):
+                p = Vector(path[k])
+                forward = Vector(path[k+1]) - Vector(path[k-1])
+                tangent = Vector((forward.x, forward.y, 0))
+                cross.append((tuple(p + Vector((0, 0, .13))),
+                              tuple(tangent),
+                              width * .84, .42 if kind == 'stairs' else .19,
+                              .25 if kind == 'stairs' else .13, 0))
+            if cross:
+                boxes(w['id'] + '_wood_treads', cross, [pal['plank']])
+            rail = []
+            for side in (-1, 1):
+                stations = []
+                for k, p in enumerate(path):
+                    prev = path[max(0, k-1)]
+                    nxt = path[min(len(path)-1, k+1)]
+                    tangent = Vector((nxt[0]-prev[0], nxt[1]-prev[1], 0))
+                    tangent.normalize()
+                    n = Vector((-tangent.y, tangent.x, 0))
+                    stations.append(tuple(Vector(p) + n * side * (width/2+.3)
+                                          + Vector((0, 0, 1.45))))
+                tube(w['id'] + '_rail_%d' % side, stations,
                      pal['rope'], .14)
-        elif w['kind'] == 'checker':
-            count = max(4, int(length / 3.0))
-            for k in range(count):
-                t = (k + .5) / count
-                c = a + d * t - Vector((0, 0, .8))
-                items.append((tuple(c), tuple(d), 3.6, length / count, 1.8, k % 2))
-            boxes(w['id'], items, [pal['grass'], pal['cliff']])
+                for k in range(0, len(stations), 4):
+                    p = Vector(stations[k])
+                    tube(w['id'] + '_baluster_%d_%02d' % (side, k),
+                         [tuple(p-Vector((0,0,1.35))), tuple(p)],
+                         pal['wood'], .22)
+        if w.get('structure') == 'root_supported':
+            # Tie the village's elevated switchback back into the giant
+            # trunk rather than dropping pencil-thin stilts into the void.
+            bx, by, bz = data['giant_tree']['base']
+            for k in range(2, len(path)-2, 4):
+                p = Vector(path[k])
+                trunk = (bx, by, max(bz+10.0, p.z - 12.0))
+                tube(w['id'] + '_root_support_%02d' % k,
+                     [trunk, tuple(p - Vector((0,0,.8)))],
+                     pal['bark'], 1.1)
+
+
 
 
 def build_props(data, pal):
