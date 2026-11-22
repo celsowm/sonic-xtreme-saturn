@@ -3,7 +3,7 @@ import math
 import unittest
 
 from tools.jade_concept_v4_geometry import (
-    bridge_deck, organic_footprint, polygon_area, stratified_plateau,
+    bridge_deck, canyon_rim_wall, organic_footprint, polygon_area, stratified_plateau,
     village_branch_paths,
 )
 
@@ -107,6 +107,32 @@ class OrganicTerrainTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             village_branch_paths((0, 0, 0), [
                 ('hut', (2, 3, 20)), ('hut', (4, 5, 22))])
+
+
+    def test_canyon_wall_is_continuous_across_stations(self):
+        stations = [(222, 132, 31), (224, 153, 38), (228, 176, 51),
+                    (231, 196, 62), (230, 216, 68)]
+        verts, faces, mats = canyon_rim_wall(stations)
+        self.assertEqual(len(verts), 9 * len(stations))
+        self.assertEqual(len(faces), 8 * (len(stations) - 1))
+        self.assertEqual(len(mats), len(faces))
+        self.assertEqual(set(mats), {0, 1, 2})
+        for face in faces:
+            self.assertEqual(len(face), 4)
+            self.assertTrue(all(0 <= i < len(verts) for i in face))
+        # The same vertex from each station is shared across adjacent faces.
+        self.assertEqual(faces[0][1], faces[1][0])
+        self.assertAlmostEqual(min(p[2] for p in verts), -52)
+
+    def test_canyon_wall_rejects_disconnected_or_invalid_profiles(self):
+        with self.assertRaisesRegex(ValueError, 'three'):
+            canyon_rim_wall([(220, 130, 31), (220, 150, 32)])
+        with self.assertRaisesRegex(ValueError, 'progress'):
+            canyon_rim_wall([(220, 150, 40), (221, 140, 45),
+                             (222, 160, 42)])
+        with self.assertRaisesRegex(ValueError, 'foot'):
+            canyon_rim_wall([(220, 130, 31), (221, 150, 40),
+                             (222, 170, 51)], bottom=18)
 
 
 if __name__ == '__main__':
