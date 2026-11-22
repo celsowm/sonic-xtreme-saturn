@@ -8,7 +8,8 @@ from tools.validate_jade_concept_v4 import DEFAULT, validate
 
 from tools.jade_concept_v4_geometry import (
     bridge_deck, canyon_rim_wall, organic_footprint, polygon_area, river_ribbon,
-    stratified_plateau, treehouse_thatch_roof, village_branch_paths,
+    layered_leaf_canopies, stratified_plateau, treehouse_thatch_roof,
+    village_branch_paths,
 )
 
 
@@ -188,6 +189,50 @@ class OrganicTerrainTests(unittest.TestCase):
         bad = copy.deepcopy(data)
         bad['canyon_river']['stations'][2][1] = 140
         with self.assertRaisesRegex(ValueError, 'continuous'):
+            validate(bad)
+
+
+    def test_layered_canopy_has_jagged_lowpoly_silhouette(self):
+        clusters = [(0, 0, 30, 8, 1.2, 1.0, .85, 0),
+                    (25, 4, 35, 7, 1.0, 1.1, .70, 1)]
+        verts, faces, mats = layered_leaf_canopies(clusters, segments=9)
+        self.assertEqual(len(verts), 2 * (3*9+2))
+        self.assertEqual(len(faces), 2 * 4*9)
+        self.assertEqual(len(faces), len(mats))
+        self.assertEqual(set(mats), {0, 1})
+        self.assertEqual((verts, faces, mats),
+                         layered_leaf_canopies(clusters, segments=9))
+        for face in faces:
+            self.assertTrue(all(0 <= i < len(verts) for i in face))
+            self.assertEqual(len(face), len(set(face)))
+        # Crown rims vary by angle and height rather than having sphere rings.
+        r = [math.hypot(v[0], v[1]) for v in verts[:9]]
+        self.assertGreater(max(r) - min(r), 1.1)
+        top = verts[3*9]
+        self.assertGreater(top[2], max(v[2] for v in verts[:9]))
+        # Front upper walls have upward/outward facing normals.
+        self.assertGreater(self._normal_z(verts, faces[9]), 0)
+
+    def test_foliage_rejects_invalid_meshes(self):
+        with self.assertRaisesRegex(ValueError, 'range'):
+            layered_leaf_canopies([], segments=4)
+        with self.assertRaisesRegex(ValueError, 'positive'):
+            layered_leaf_canopies([(0,0,0,-2,1,1,1,0)])
+        with self.assertRaisesRegex(ValueError, 'parameters'):
+            layered_leaf_canopies([(0,0,0,2,1,1,1)])
+
+    def test_canyon_shelves_stay_bounded_and_staggered(self):
+        data = json.loads(DEFAULT.read_text(encoding='utf-8'))
+        self.assertEqual(len(data['canyon_shelves']), 6)
+        self.assertEqual(len({r['top'] for r in data['canyon_shelves']}), 6)
+        validate(data)
+        bad = copy.deepcopy(data)
+        bad['canyon_shelves'][0]['size'] = [100, 15]
+        with self.assertRaisesRegex(ValueError, 'narrow'):
+            validate(bad)
+        bad = copy.deepcopy(data)
+        bad['canyon_shelves'][1]['center'] = [240, 140]
+        with self.assertRaises(ValueError):
             validate(bad)
 
 
