@@ -11,6 +11,26 @@ fitting. Keep its manifest, validation, editable `.blend` and reproducible
 preview workflow. The problem is **silhouette, terrain language and density**,
 not missing region names or the number of mesh polygons.
 
+## Priority gate N0: restore navigation topology BEFORE further scenic polish
+
+The 22 Nov painting-first audit is authoritative for the next implementation
+pass: [JADE_GULLY_ROUTE_TOPOLOGY_AUDIT.md](JADE_GULLY_ROUTE_TOPOLOGY_AUDIT.md).
+The visual reference has **18 corridor features** (five sector slices of
+the same gold route, five violet shortcut sections and eight circulation
+hints from islands, bridges, rings and springs). These are NOT 18 separate
+complete start-to-goal routes. The V5 manifest only has one main and three
+alternate polylines; **13 features remain partial, scenery-only or absent**.
+Eight of its 18 decorative walkways have at least one endpoint farther
+than 6 world units from all declared route centreline segments.
+
+**Do not spend the next pass on palm shaders, backgrounds or hut roofs.**
+First create the actual multi-height graph: Entry Hills arch/pools, Tree
+Village trunk loop and east/west jumps, Sky Bridges high/middle/low,
+Hex inside/around/under, and Canyon upper/middle/lower with real
+split/rejoin points. Terrain, walkable landings, typed jump/spring/gravity
+edges and collisions must be verified before gameplay or Saturn 30fps
+claims. Use `python3 tools/audit_jade_routes_v5.py` to reproduce debt.
+
 ## Image-by-image critique
 
 | Reference painting (left) | V4 preview (right) | V5 target |
