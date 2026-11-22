@@ -28,12 +28,12 @@ Authored files:
 ```bash
 cd ~/dev/sonic-xtreme-saturn
 git fetch origin main
-DEST="build/jade-concept-$(date +%s)"
+DEST="$HOME/dev/sonic-xtreme-concept-$(date +%s)"
 git worktree add --detach "$DEST" origin/main
 bash "$DEST/scripts/build-jade-concept-mac.sh"
 ```
 
-This uses an isolated detached worktree. It does **not** switch, merge, reset, or alter the developer's current experimental branch. Open `$DEST/build/jade-gully-concept/jade_gully_act1_concept.blend` in Blender. The same command also renders isometric and top-down PNGs. The [GitHub Actions workflow](../../.github/workflows/jade-gully-concept.yml) runs the Blender generator in CI and saves the scene and previews as an artifact when successful. Each large landmass is named `sector_<id>_checker_landmass`; route meshes and line guides have `path_*` / `guide_*` prefixes; landmarks keep their map names. The source PNG is a reference alongside the editable scene, not a texture mapped over the entire ground.
+This uses an isolated detached worktree. It does **not** switch, merge, reset, or alter the developer's current experimental branch. Open `$DEST/build/jade-gully-concept/jade_gully_act1_concept.blend` in Blender. The same command also renders isometric and top-down PNGs. The [GitHub Actions workflow](../../.github/workflows/jade-gully-concept.yml) runs the Blender generator in CI and saves the scene and previews as an artifact when successful. Each large landmass is named `sector_<id>_checker_landmass`; route meshes and line guides have `path_*` / `guide_*` prefixes; landmarks keep their map names. The source PNG is a reference alongside the editable scene, not a texture mapped over the entire ground. Terrain, rock, forest, roof, bamboo, bridge, river and path materials use the already committed **Kenney CC0 PNGs** in `assets/textures/jade-gully/`; source images are packed into the generated `.blend`. The color of rings and visual route guides remains authored.
 
 ## Intentional limits
 
