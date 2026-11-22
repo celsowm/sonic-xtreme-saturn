@@ -20,7 +20,7 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.validate_jade_concept import DEFAULT, validate
-from tools import jade_concept_dressing
+from tools import jade_concept_dressing, jade_concept_presentation
 
 PI = math.pi
 
@@ -200,7 +200,7 @@ def terrain(sector, data, palette):
                     faces.append((n,n+1,n+2,n+3))
                     index.append(2 if (j*cliff_substeps+sub+tier)%2 else 3)
     obj=mesh('sector_'+sector['id']+'_checker_landmass', verts, faces,
-             (palette['grass'],palette['foliage'],palette['checker_green'],palette['checker_brown']), index)
+             (palette['grass'],palette['foliage'],palette['cliff_fern'],palette['cliff_ochre']), index)
     obj['concept_sector']=sector['id']
     return obj
 
@@ -253,7 +253,7 @@ def hex_loop(ident, center, radius, materials):
                       (a,c,d,b),(a+1,b+1,d+1,c+1)))
         indices.extend((i%2,1-i%2,2,2))
     mesh(ident+'_angular_checker_loop',verts,faces,
-         [materials['checker_brown'],materials['checker_green'],materials['rock']],indices)
+         [materials['cliff_ochre'],materials['cliff_fern'],materials['rock']],indices)
     for dx in (-radius*.75,radius*.75):
         box(ident+'_base_'+str(round(dx,1)),(x,y+dx,z-radius-3),
             (10,3,5),materials['rock'])
@@ -312,11 +312,11 @@ def treehouse(ident, loc, size, materials):
         xx=x+size*.90*math.cos(theta)
         yy=y+size*.90*math.sin(theta)
         bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,
-                                               radius=size*.66,
-                                               location=(xx,yy,platform_z+size*1.53))
+                                               radius=size*.44,
+                                               location=(xx,yy,platform_z+size*2.02))
         obj=bpy.context.object
         obj.name=ident+'_broad_canopy_'+str(direction)
-        obj.scale=(1.05,1.18,.61)
+        obj.scale=(1.03,1.16,.60)
         obj.data.materials.append(materials['foliage'])
         obj['stage_role']='concept_visual_only'
 
@@ -511,6 +511,10 @@ def main():
         'foliage':mat('canopy emerald',(.045,.29,.09)),
         'checker_green':mat('Xtreme checker moss',(.21,.44,.16)),
         'checker_brown':mat('Xtreme checker sandstone',(.47,.24,.12)),
+        'cliff_fern':mat('checker cliff vivid moss',(.16,.48,.16)),
+        'cliff_ochre':mat('checker cliff warm sandstone',(.70,.38,.15)),
+        'loop_border':mat('golden rim of the six-sided loops',(.94,.47,.07),.06),
+        'warm_window':mat('warm glowing village windows',(1.0,.63,.19)),
         'rock':mat('canyon stone',(.24,.23,.20)),
         'wood':mat('bamboo wood',(.38,.22,.10)),
         'bamboo':mat('palm bamboo hut',(.69,.53,.24)),
@@ -558,6 +562,8 @@ def main():
             ring('ring_'+route['id']+'_'+str(i),x,y,z+4,palette)
     build_landmarks(data,palette)
     jade_concept_dressing.decorate(data,palette,sys.modules[__name__])
+    presentation_report=jade_concept_presentation.apply_presentation(
+        data,palette,sys.modules[__name__])
     # Canyon river current and a clearer water path between the waterfalls.
     water_route=[(39,336,30),(38,354,24),(23,373,22),(33,389,27),(16,402,38)]
     line('gully_current_river',water_route,palette['water'],2.6)
@@ -578,7 +584,8 @@ def main():
     missing=[name for name in required_objects if name not in bpy.data.objects]
     if missing:
         raise RuntimeError('Incomplete five-region visual build: '+', '.join(missing))
-    report['visual_pass']='tropical-setpieces-v2'
+    report['visual_pass']='tropical-landmark-visibility-v3'
+    report['presentation']=presentation_report
     report['key_art_objects']=list(required_objects)
     report['mesh_object_count']=sum(obj.type=='MESH' for obj in bpy.data.objects)
     report['mesh_polygon_count']=sum(len(obj.data.polygons)
