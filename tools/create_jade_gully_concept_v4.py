@@ -267,6 +267,7 @@ def build_palette():
         'rope': flat('rope', (.70, .52, .26), .9),
         'thatch': flat('straw thatch', (.85, .58, .12), .9, emission=.05),
         'hut_wall': flat('hut wall', (.55, .32, .10), .9),
+        'warm_window': flat('hut warm windows', (1.0, .55, .11), .7, emission=.60),
         'dark': flat('door shadow', (.04, .03, .02), 1.0),
         'gold': flat('rings', (1.0, .72, .05), .3, emission=.55, metallic=.6),
         'route': flat('main route arrow', (1.0, .80, .12), .5, emission=.9),
@@ -513,6 +514,18 @@ def build_hex(data, pal):
     v, f, m = geo.hex_tube(cx, cy, cz, h['radius'], h['inner_ratio'], h['depth'])
     mesh(h['id'], [tuple(matrix @ Vector(p)) for p in v], f,
          [pal['hex_outer'], pal['hex_inner'], pal['hex_rim']], m)
+    # The painted main route must MEET the loop, not end at two floating
+    # guide-line nodes. Use the same transformed main-route stations already
+    # used for the loop itself: rigid textured entry/exit causeways reach
+    # the blue floor without leaving a camera-visible gap.
+    main_stations = data['routes'][0]['points']
+    for name, indices, width in (
+            ('entry', (17, 18, 19), 8.2),
+            ('exit', (26, 27, 28), 8.2)):
+        points = tilt_hex_points(data, [main_stations[i] for i in indices])
+        verts, faces, materials = geo.bridge_deck(points, width, 3.8)
+        mesh('hex_' + name + '_landform', verts, faces,
+             [pal['grass'], pal['cliff'], pal['underside']], materials)
     # Keep the ring trail inside the hexagon's flats (apothem), not its
     # corner radius, so no ring cuts into the blue running surface.
     inner = h['radius'] * h['inner_ratio'] * math.cos(math.pi / 6) - 3.2
@@ -553,6 +566,31 @@ def build_village(data, pal):
                       top + 12 + (k % 3) * 3, t['canopy_radius'] * .24, 1.1, 1.0, .85, (k + 1) % 2))
     blob_field(t['id'] + '_canopy', crown, [pal['canopy'], pal['canopy_light']])
 
+    # Real woody construction replaces the previous six pencil-thin 40m
+    # stilts under every hut. Each terrace is carried by a visible branch
+    # starting INSIDE the central trunk, with a second tree under the most
+    # remote platforms. It remains decorative, never collision geometry.
+    support_paths = geo.village_branch_paths(
+        t['base'], [(hut['id'], hut['deck']) for hut in data['huts']])
+    for hut in data['huts']:
+        x, y, z = hut['deck']
+        size = hut['size']
+        tube(hut['id'] + '_living_branch', support_paths[hut['id']],
+             pal['bark'], max(1.8, size*.17))
+        separation = math.hypot(x - bx, y - by)
+        if separation > t['canopy_radius'] * .70:
+            height = z - bz - 1.4
+            prim('cone', hut['id'] + '_secondary_tree_trunk',
+                 (x, y, bz + height/2), pal['bark'],
+                 vertices=11, radius1=max(2.5, size*.35),
+                 radius2=max(1.4, size*.17), depth=height)
+            for k in range(3):
+                a = math.tau * k / 3 + .3
+                tube(hut['id'] + '_secondary_branch_' + str(k),
+                     [(x, y, z-10),
+                      (x + math.cos(a)*size*.45, y + math.sin(a)*size*.45, z-5),
+                      (x + math.cos(a)*size*.72, y + math.sin(a)*size*.72, z-1.4)],
+                     pal['bark'], .8)
     # Spiral walkway wrapped around the trunk up to a ring deck, as painted.
     sp = data['spiral']
     sx, sy = sp['center']
@@ -584,8 +622,9 @@ def build_village(data, pal):
         for k in range(6):
             a = math.tau * k / 6
             px, py = x + math.cos(a) * s * 1.0, y + math.sin(a) * s * 1.0
-            posts.append(((px, py, (z + 10) / 2), (0, 0, 1), 1.0, z - 10, 1.0, 0))
-            posts.append(((px, py, z + 1.5), (0, 0, 1), .4, 3, .4, 0))
+            # A short deck parapet; long straight supports belonged to the
+            # greybox and are replaced by the branching limbs above.
+            posts.append(((px, py, z + 1.5), (0, 0, 1), .48, 3, .48, 0))
         boxes(hut['id'] + '_posts', posts, [pal['wood']])
         prim('cylinder', hut['id'] + '_walls', (x, y, z + s * .33), pal['hut_wall'],
              vertices=10, radius=s * .62, depth=s * .62)
@@ -601,6 +640,12 @@ def build_village(data, pal):
                  vertices=12, radius1=s * .62, radius2=.2, depth=s * .55)
         prim('cube', hut['id'] + '_door', (x, y - s * .6, z + s * .25), pal['dark'],
              size=1).dimensions = (s * .22, .4, s * .38)
+        # Warm openings make the huts identifiable as inhabited architecture,
+        # not straw-coloured cones atop sticks.
+        for side in (-1, 1):
+            prim('cube', hut['id'] + '_window_' + str(side),
+                 (x + side*s*.32, y - s*.59, z + s*.35),
+                 pal['warm_window'], size=1).dimensions = (s*.16, .28, s*.16)
 
 
 def build_walkways(data, pal):
