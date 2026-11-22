@@ -37,6 +37,38 @@ The previous render confirmed that the v1 scene was only a uniform checkerboard 
 
 The pure-Python geometry library and regression tests are in `tools/jade_concept_geometry.py` and `tests/test_jade_concept_geometry.py`, while `tools/jade_concept_dressing.py` holds visual-only setpieces. The Blender workflow in `.github/workflows/jade-gully-concept.yml` checks these modules and renders actual images. **Visual acceptance remains open until we inspect the newly generated screenshots.**
 
+## Visual pass v3 — review of the 10:17 Mac capture
+
+The 22 November 2026, 10:17 Mac PNG is a **successful Blender-generated
+blockout**, not approval of the visual design. In that screenshot, the village
+houses disappear behind one huge tree, loops are difficult to identify, the
+waterfall is too thin, cliff textures are dark, and sector titles are painted
+directly over the terrain. The new version explicitly targets those problems:
+
+- Move the massive ancient tree behind the village and reduce the obstructing
+  canopy clusters, leaving the three platform huts, lit windows and wooden
+  bridges visible.
+- Bring the four hexagonal ring structures to the nearer camera-facing side,
+  add warm outline rims and supports, without changing the source manifest
+  coordinates or claiming loop physics.
+- Retain Kenney CC0 grass/rock source materials but separate the cliff checker
+  palette into recognizable saturated ochre and green surfaces.
+- Add bright foreground waterfall curtains and a prominent main route.
+- Hide sector-name text **only from renders**; leave the annotations editable
+  inside the .blend.
+- Use a warmer sky gradient and generate **seven real Blender PNGs**: a panoramic
+  perspective, the overhead map, plus close-ups for `base`, `ridges`,
+  `bamboo`, `current` and `summit`.
+- The pure Python hex-rim tests are in
+  [test_jade_concept_presentation.py](../../tests/test_jade_concept_presentation.py).
+  The CI pipeline publishes generated v3 material to
+  [assets/jade-gully/concept-v3](../../assets/jade-gully/concept-v3/)
+  **only if** its Blender build, output validation and freshness guards pass.
+
+There is still no credible claim that the generated concept is playable in the
+Saturn build, or that its art matches the original painting. A screenshot
+comparison remains mandatory.
+
 ## Mac — one command (pull + rebuild + open)
 
 From the existing checkout, irrespective of its current branch:
@@ -45,9 +77,9 @@ From the existing checkout, irrespective of its current branch:
 cd ~/dev/sonic-xtreme-saturn && git fetch origin main && git show origin/main:scripts/review-jade-concept-mac.sh | bash
 ```
 
-The remote-reviewed script performs `git pull --ff-only` on the Mac's current branch, fetches `origin/main`, creates an isolated detached worktree, builds the new Blender scene, and opens its isometric PNG. It does not move the current experimental branch.
+The remote-reviewed script performs `git pull --ff-only` on the Mac's current branch, fetches `origin/main`, creates an isolated detached worktree, builds the new Blender scene, and opens the panorama plus the Bamboo Heights and Gully Current detail renders. It also writes a `jade-gully-v3-visual-review.zip` containing the `.blend`, source report and all seven PNGs. It does not move the current experimental branch.
 
-When the GitHub Actions [Blender concept workflow](../../.github/workflows/jade-gully-concept.yml) renders successfully against the current `main`, it also publishes the editable scene and previews to [`assets/jade-gully/concept-v2/`](../../assets/jade-gully/concept-v2/). **The existence of this publication step is not proof that the job has completed or that the art passed visual review.**
+When the GitHub Actions [Blender concept workflow](../../.github/workflows/jade-gully-concept.yml) renders successfully against the current `main`, it also publishes the editable scene and seven previews to [`assets/jade-gully/concept-v3/`](../../assets/jade-gully/concept-v3/). **The existence of this publication step is not proof that the job has completed or that the art passed visual review.**
 
 ## Mac — explicit detached worktree
 
@@ -61,7 +93,7 @@ bash "$DEST/scripts/build-jade-concept-mac.sh"
 open "$DEST/build/jade-gully-concept/jade-gully-concept-isometric.png"
 ```
 
-This uses an isolated detached worktree. It does **not** switch, merge, reset, or alter the developer's current experimental branch. Open `$DEST/build/jade-gully-concept/jade_gully_act1_concept.blend` in Blender. The same command also renders isometric and top-down PNGs. The [GitHub Actions workflow](../../.github/workflows/jade-gully-concept.yml) runs the Blender generator in CI and saves the scene and previews as an artifact when successful. Each large landmass is named `sector_<id>_checker_landmass`; route meshes and line guides have `path_*` / `guide_*` prefixes; landmarks keep their map names. The source PNG is a reference alongside the editable scene, not a texture mapped over the entire ground. Terrain, rock, forest, roof, bamboo, bridge, river and path materials use the already committed **Kenney CC0 PNGs** in `assets/textures/jade-gully/`; source images are packed into the generated `.blend`. The color of rings and visual route guides remains authored.
+This uses an isolated detached worktree. It does **not** switch, merge, reset, or alter the developer's current experimental branch. Open `$DEST/build/jade-gully-concept/jade_gully_act1_concept.blend` in Blender. The same command renders isometric and top-down PNGs and five sector close-ups. The [GitHub Actions workflow](../../.github/workflows/jade-gully-concept.yml) runs the Blender generator in CI and saves the scene and previews as an artifact when successful. Each large landmass is named `sector_<id>_checker_landmass`; route meshes and line guides have `path_*` / `guide_*` prefixes; landmarks keep their map names. The source PNG is a reference alongside the editable scene, not a texture mapped over the entire ground. Terrain, rock, forest, roof, bamboo, bridge, river and path materials use the already committed **Kenney CC0 PNGs** in `assets/textures/jade-gully/`; source images are packed into the generated `.blend`. The color of rings and visual route guides remains authored.
 
 ## Intentional limits
 
