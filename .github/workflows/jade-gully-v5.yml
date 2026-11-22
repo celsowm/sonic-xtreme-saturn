@@ -14,6 +14,8 @@ on:
       - 'assets/levels/jade_gully_route_audit_v5.json'
       - 'tools/audit_jade_routes_v5.py'
       - 'tests/test_jade_route_audit.py'
+      - 'tools/compile_jade_navigation_v5.py'
+      - 'tests/test_jade_navigation_v5.py'
       - 'docs/concepts/JADE_GULLY_ROUTE_TOPOLOGY_AUDIT.md'
   workflow_dispatch:
 
@@ -32,10 +34,12 @@ jobs:
             tools/jade_concept_v4_geometry.py \
             tools/create_jade_gully_concept_v4.py \
             tools/validate_jade_concept_v4.py \
-            tools/audit_jade_routes_v5.py
+            tools/audit_jade_routes_v5.py \
+            tools/compile_jade_navigation_v5.py
           python3 tools/validate_jade_concept_v4.py
           python3 tools/audit_jade_routes_v5.py
-          python3 -m unittest tests.test_jade_concept_v4 tests.test_jade_concept_v5 tests.test_jade_route_audit -v
+          python3 tools/compile_jade_navigation_v5.py
+          python3 -m unittest tests.test_jade_concept_v4 tests.test_jade_concept_v5 tests.test_jade_route_audit tests.test_jade_navigation_v5 -v
       - name: Declare artwork unqualified until Blender review
         run: |
           echo 'Host geometry tests do not establish visual quality or Saturn performance.'
