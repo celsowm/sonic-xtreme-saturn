@@ -1,0 +1,92 @@
+name: Tree Village Blender V3 art build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - tools/create_tree_village_kit.py
+      - tools/validate_tree_village_kit.py
+      - assets/jade-gully/tree-village/kit-manifest.json
+      - tests/test_tree_village_blender_generator.py
+      - .github/workflows/jade-tree-village-art.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tree-village-art-main
+  cancel-in-progress: true
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Check manifest and host unit tests
+        run: |
+          python3 tools/validate_tree_village_kit.py
+          python3 -m unittest discover -s tests -p 'test_tree_village*.py' -v
+      - name: Install Blender
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender
+          blender --version | head -3
+      - name: Generate actual editable Blender art and two review views
+        run: |
+          blender --background --factory-startup --python-exit-code 1 \
+            --python tools/create_tree_village_kit.py -- \
+            assets/jade-gully/tree-village/kit-manifest.json \
+            build/tree-village --preview
+      - name: Validate authoring output and source textures
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=Path("build/tree-village")
+          report=json.loads((d/"kit-report.json").read_text())
+          assert report["model_definitions"]==28
+          assert report["entity_markers"]==7
+          assert report["authoring_revision"]>=3
+          assert 0 < report["render_faces"] <= 448
+          assert report["render_vertices"] <= 2048
+          assert report["collision_faces"] >= 100
+          assert (d/"tree_village_source.blend").stat().st_size>4000
+          pngs=list((d/"textures").glob("*.png"))
+          assert len(pngs)==11,(len(pngs),pngs)
+          for p in pngs+[d/"tree_village_preview.png",
+                         d/"tree_village_ground_preview.png"]:
+              assert p.is_file() and p.read_bytes()[:8]==b"\x89PNG\r\n\x1a\n",p
+          print("Blender V3 OK:",report["render_faces"],"render faces,",
+                report["collision_faces"],"collision faces,",len(pngs),"textures")
+          PY
+      - name: Publish Blender source, PNGs, textures and telemetry to main
+        run: |
+          set -euo pipefail
+          TARGET=assets/jade-gully/tree-village
+          mkdir -p "$TARGET/source"
+          cp build/tree-village/tree_village_source.blend "$TARGET/"
+          cp build/tree-village/kit-report.json "$TARGET/"
+          cp build/tree-village/tree_village_preview.png "$TARGET/"
+          cp build/tree-village/tree_village_ground_preview.png "$TARGET/"
+          cp build/tree-village/textures/*.png "$TARGET/source/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$TARGET/tree_village_source.blend" "$TARGET/kit-report.json" \
+            "$TARGET/tree_village_preview.png" "$TARGET/tree_village_ground_preview.png" \
+            "$TARGET/source"
+          if git diff --cached --quiet; then echo 'V3 Blender output unchanged'; exit 0; fi
+          git commit -m "art(jade): publish generated Blender V3 dual-view scene"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tree-village-art-review
+          path: |
+            build/tree-village/tree_village_preview.png
+            build/tree-village/tree_village_ground_preview.png
+            build/tree-village/kit-report.json
+          if-no-files-found: ignore
