@@ -10,9 +10,11 @@ on:
       - 'tools/validate_jade_concept.py'
       - 'tools/create_jade_gully_concept.py'
       - 'tools/jade_concept_dressing.py'
+      - 'tools/jade_concept_presentation.py'
       - 'tools/jade_concept_geometry.py'
       - 'tests/test_jade_concept.py'
       - 'tests/test_jade_concept_geometry.py'
+      - 'tests/test_jade_concept_presentation.py'
 
 permissions:
   contents: write
@@ -27,7 +29,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p 'test_jade_concept*.py' -v
           python3 tools/validate_jade_concept.py
-          python3 -m py_compile tools/create_jade_gully_concept.py tools/jade_concept_dressing.py tools/jade_concept_geometry.py
+          python3 -m py_compile tools/create_jade_gully_concept.py tools/jade_concept_dressing.py tools/jade_concept_geometry.py tools/jade_concept_presentation.py
       - name: Install Blender
         run: |
           sudo apt-get update -qq
@@ -39,6 +41,9 @@ jobs:
           test -s build/jade-gully-concept/jade_gully_act1_concept.blend
           test -s build/jade-gully-concept/jade-gully-concept-isometric.png
           test -s build/jade-gully-concept/jade-gully-concept-top.png
+          for zone in base ridges bamboo current summit; do
+            test -s "build/jade-gully-concept/jade-gully-concept-${zone}.png"
+          done
       - name: Preserve .blend and actual render previews
         if: success()
         uses: actions/upload-artifact@v4
@@ -48,6 +53,11 @@ jobs:
             build/jade-gully-concept/jade_gully_act1_concept.blend
             build/jade-gully-concept/jade-gully-concept-isometric.png
             build/jade-gully-concept/jade-gully-concept-top.png
+            build/jade-gully-concept/jade-gully-concept-base.png
+            build/jade-gully-concept/jade-gully-concept-ridges.png
+            build/jade-gully-concept/jade-gully-concept-bamboo.png
+            build/jade-gully-concept/jade-gully-concept-current.png
+            build/jade-gully-concept/jade-gully-concept-summit.png
             build/jade-gully-concept/concept-contract.json
           retention-days: 14
       - name: Publish editable Blender source and verified preview files to main
@@ -55,11 +65,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          DEST="assets/jade-gully/concept-v2"
+          DEST="assets/jade-gully/concept-v3"
           mkdir -p "$DEST"
           cp build/jade-gully-concept/jade_gully_act1_concept.blend "$DEST/jade_gully_act1_concept.blend"
           cp build/jade-gully-concept/jade-gully-concept-isometric.png "$DEST/jade-gully-concept-isometric.png"
           cp build/jade-gully-concept/jade-gully-concept-top.png "$DEST/jade-gully-concept-top.png"
+          for zone in base ridges bamboo current summit; do
+            cp "build/jade-gully-concept/jade-gully-concept-${zone}.png" \
+               "$DEST/jade-gully-concept-${zone}.png"
+          done
           cp build/jade-gully-concept/concept-contract.json "$DEST/concept-contract.json"
           git add "$DEST"
           if git diff --cached --quiet; then
@@ -74,6 +88,6 @@ jobs:
           fi
           git -c user.name='github-actions[bot]' \
               -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-              commit -m 'art(jade): publish five-sector Blender scene and real renders [skip ci]'
+              commit -m 'art(jade): publish seven v3 Blender renders and editable scene [skip ci]'
           git push origin HEAD:refs/heads/main
 
