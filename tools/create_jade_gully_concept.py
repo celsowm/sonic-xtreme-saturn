@@ -35,6 +35,34 @@ def mat(name, rgb, metallic=0.0):
     return m
 
 
+
+def textured(material, name, repeat=8):
+    """Map already tracked, unmodified Kenney CC0 texture to concept material.
+
+    Generated UV-space coordinates keep preview meshes texture-mapped without
+    baking image data from the fan concept painting. Texture images get packed
+    into the saved .blend, so the editable scene remains portable.
+    """
+    source = ROOT / 'assets/textures/jade-gully' / name
+    if not source.is_file():
+        raise FileNotFoundError('Missing vendored Kenney CC0 material: '+str(source))
+    image = bpy.data.images.load(str(source), check_existing=True)
+    image.pack()
+    nodes = material.node_tree.nodes
+    links = material.node_tree.links
+    mapping = nodes.new('ShaderNodeMapping')
+    mapping.inputs['Scale'].default_value = (repeat, repeat, repeat)
+    coords = nodes.new('ShaderNodeTexCoord')
+    bitmap = nodes.new('ShaderNodeTexImage')
+    bitmap.image = image
+    bitmap.interpolation = 'Closest'
+    bitmap.extension = 'REPEAT'
+    links.new(coords.outputs['Generated'], mapping.inputs['Vector'])
+    links.new(mapping.outputs['Vector'], bitmap.inputs['Vector'])
+    links.new(bitmap.outputs['Color'], nodes.get('Principled BSDF').inputs['Base Color'])
+    return material
+
+
 def mesh(name, verts, faces, materials, assignments=None):
     data = bpy.data.meshes.new(name)
     data.from_pydata(verts, [], faces)
@@ -402,6 +430,22 @@ def main():
         'route_grass':mat('main path terrain',(.33,.53,.15)),
         'bridge':mat('alternative path deck',(.43,.36,.17)),
     }
+    # Reuse the real CC0 source images already checked into the repo.
+    # These are not Sega rips and not generated from the concept art.
+    for key, filename, repeats in (
+        ('grass','meadow-grass.png',12),
+        ('foliage','forest-leaves.png',6),
+        ('checker_green','moss-bank.png',8),
+        ('checker_brown','sandstone.png',8),
+        ('rock','rock-grey.png',7),
+        ('wood','sand-path.png',5),
+        ('bamboo','sandstone.png',5),
+        ('roof','moss-bank.png',4),
+        ('water','waterfall.png',3),
+        ('route_grass','grass-path.png',12),
+        ('bridge','sandstone.png',5),
+    ):
+        textured(palette[key],filename,repeats)
     for sector in data['sectors']:
         terrain(sector,data,palette)
         y0,y1=sector['y_range']
