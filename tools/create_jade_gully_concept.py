@@ -551,6 +551,25 @@ def main():
         y=(sector['y_range'][0]+sector['y_range'][1])*.5
         label('sector_tag_'+sector['id'],sector['title'],
               (sector['width']*.90,y,at_z(sector['width']*.90,y,data)+72),palette,9.0)
+    # Fail the art build if a key recognizable object silently disappears.
+    required_objects=(
+        'ridge_hex_loop_angular_checker_loop',
+        'bamboo_village_1_canopy_platform',
+        'bamboo_suspension_bridge_12_structural_deck',
+        'bamboo_halfpipe_main_gutter',
+        'gully_current_broad_river',
+        'current_falls_right_water_curtain_0',
+        'jade_summit_emerald',
+    )
+    missing=[name for name in required_objects if name not in bpy.data.objects]
+    if missing:
+        raise RuntimeError('Incomplete five-region visual build: '+', '.join(missing))
+    report['visual_pass']='tropical-setpieces-v2'
+    report['key_art_objects']=list(required_objects)
+    report['mesh_object_count']=sum(obj.type=='MESH' for obj in bpy.data.objects)
+    report['mesh_polygon_count']=sum(len(obj.data.polygons)
+        for obj in bpy.data.objects if obj.type=='MESH')
+    report['note']='Offline render scene; NOT Saturn-exported triangles or gameplay'
     camera, top=setup_camera_and_lighting(data,palette)
     for obj in bpy.data.objects:
         if obj.get('stage_role')=='concept_editor_annotation':
