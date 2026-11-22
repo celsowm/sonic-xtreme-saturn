@@ -469,6 +469,54 @@ def hut_supports():
         mesh_object(item["id"]+"_support",v,[(0,1,2),(0,2,3)],
                     "bark","JG_TREE_VILLAGE_DECOR","decoration")
 
+
+def hut_decks_and_boughs():
+    """Five collision-free hut landings, plus two real branch-shaped beams.
+
+    Each facade stays 2D and uses just 2 textured triangles; the small deck
+    below it gives a physical-looking building foundation from the overview.
+    """
+    for item in data["objects"]:
+        if item["kind"] != "facade":
+            continue
+        x, y, z = item["center"]
+        width, _, height = item["size"]
+        floor = z - height / 2. - .35
+        w = width / 2. + .55
+        v = [(x-w,y-1.8,floor),(x+w,y-1.8,floor),
+             (x+w,y+1.8,floor),(x-w,y+1.8,floor)]
+        mesh_object(item["id"]+"_balcony",v,[(0,1,2),(0,2,3)],
+                    "wood","JG_TREE_VILLAGE_DECOR","decoration")
+
+    for number, target in enumerate(((15.0, 47.0, 11.7),
+                                     (-14.0, 40.0, 11.9)), 1):
+        branch({
+            "id": "jg_tree_lateral_bough_%02d" % number,
+            "from": (7.5, 37.5, 10.2),
+            "to": target,
+            "radius": .72,
+            "material": "bark",
+            "collection": "JG_TREE_VILLAGE_DECOR",
+            "role": "decoration",
+        })
+
+
+def root_buttresses():
+    """Three cheap broad root fins help the tree read as an anchored trunk."""
+    x, y = 7.5, 37.5
+    for idx, angle in enumerate((.36, 2.56, 4.55), 1):
+        ux, uy = math.cos(angle), math.sin(angle)
+        nx, ny = -uy, ux
+        near = 2.6
+        far = 6.4
+        v = [(x+near*ux+1.05*nx,y+near*uy+1.05*ny,2.5),
+             (x+near*ux-1.05*nx,y+near*uy-1.05*ny,2.5),
+             (x+far*ux-.32*nx,y+far*uy-.32*ny,-.1),
+             (x+far*ux+.32*nx,y+far*uy+.32*ny,-.1)]
+        mesh_object("jg_tree_root_%02d" % idx,v,[(0,1,2),(0,2,3)],
+                    "bark","JG_TREE_VILLAGE_DECOR","decoration")
+
+
 BUILDERS={"ground":lambda x: box(x["id"],(x["center"][0],x["center"][1],
                                           x["center"][2]-x["size"][2]/2),
                                   x["size"],x["material"],x["collection"],
@@ -480,6 +528,8 @@ for item in data["objects"]:
     BUILDERS[item["kind"]](item)
 valley_landmass()
 hut_supports()
+hut_decks_and_boughs()
+root_buttresses()
 
 for marker in data["entities"]:
     obj=bpy.data.objects.new("JG_ENTITY_"+marker["id"],None)
