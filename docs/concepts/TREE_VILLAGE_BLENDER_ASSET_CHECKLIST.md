@@ -118,45 +118,48 @@ open -a Blender build/jade-gully-adventure/jade_gully.blend
 
 This opens the *existing* small adventure test scene **without** producing Tree Village. Once Sprint 1 assets and the sector-aware builder are implemented, the new Tree Village Blender scene can be generated on the Mac. Neither this plan nor the concept image is proof that new 3D source models already exist.
 
-## Implemented source generator (2026-11-21)
+## Implemented Blender authoring (2026-11-21, verified V2)
 
-The **first authored 50×70 m Blender test cell** is now defined as code, not merely specified in this checklist:
+The first **50×70m Tree Village test cell** is now generated and source-controlled:
 
-- [`kit-manifest.json`](../../assets/jade-gully/tree-village/kit-manifest.json): **28 authored pieces**, five static X-plane palms, five decorative 2D house facades, main and spring-required upper paths, and seven editor/entity markers.
-- [`tools/create_tree_village_kit.py`](../../tools/create_tree_village_kit.py): creates geometry with independent collision meshes, UVs, seven **original procedural pixel-art source textures** (checker, timber, bark, hut, roof, palm silhouette, spring) packed into a source .blend, camera, lighting and optional overview PNG. **No Blender add-on, network asset, third-party ripped textures or Sega material is used in the generator.**
-- [`tools/validate_tree_village_kit.py`](../../tools/validate_tree_village_kit.py) plus host unit tests: verify the manuscript's typed objects, coordinates, IDs, route joins and runtime honesty.
-- [`scripts/build-tree-village-mac.sh`](../../scripts/build-tree-village-mac.sh): after `git pull --ff-only`, runs validation and Blender in a clean **origin/main worktree**, checks the actual generated face/vertex totals and **commits the .blend, seven PNGs, report and optional preview to main**. It preserves the currently checked-out experimental branch.
+- [`kit-manifest.json`](../../assets/jade-gully/tree-village/kit-manifest.json): 28 source definitions; five static palm X-planes, five distant house facades, walkable principal route, higher spring-required path, seven editor markers.
+- [`tools/create_tree_village_kit.py`](../../tools/create_tree_village_kit.py): native Blender generator with separate collision meshes and **ten original procedural 64×64 textures** packed in the source .blend. No import of copyrighted Sega texture art.
+- [`tools/validate_tree_village_kit.py`](../../tools/validate_tree_village_kit.py), [host tests](../../tests/test_tree_village_kit.py), and [`build-tree-village-mac.sh`](../../scripts/build-tree-village-mac.sh): deterministic manifest checks, isolated main worktree authoring, Blender render, report and source publication. A main-push [preview thumbnail workflow](../../.github/workflows/jade-tree-village-thumbnail.yml) creates a small JPEG for visual review from the real Blender PNG without modifying the original PNG.
 
-**Current code-only estimate:** 308 render triangles across 28 authored definitions, plus separate collision geometry (verified against build limits by the Mac generator before publishing). This is **a standalone test cell**, not 308 faces inserted into the existing 442/448-face adventure build. **Neither the new .blend nor its preview has been run on the user's Blender until the Mac generator finishes.** No in-game Tree Village, camera-following billboards, collision qualification, spring impulses or sector streaming is implied.
+### Verified measurements
 
-Single Mac command after pulling the current branch:
+| Metric | V1 | V2 |
+| --- | ---: | ---: |
+| Render triangles | 308 | **356** |
+| Render vertices | 271 | **328** |
+| Collision triangles | 96 | **128** |
+| Render meshes | 29 | **36** |
+| Collision meshes | 13 | **14** |
+| Original texture PNGs | 7 | **10** |
+| Authoring entities | 7 | **7** |
+
+V2's `.blend`, full [PNG preview](../../assets/jade-gully/tree-village/tree_village_preview.png), [compact JPEG preview](../../assets/jade-gully/tree-village/tree_village_preview_thumb.jpg) and [report](../../assets/jade-gully/tree-village/kit-report.json) are committed to `main`. The thumbnail workflow succeeded; the thumbnail is a resized image of the real Blender output, **not a new artistic rendering**.
+
+### Visual review: technically successful, NOT an approved Jade Gully art pass
+
+- V1 was mostly a small floating pathway with five wood-square facades and no believable undergrowth.
+- V2 adds a connected green landmass, an alpha-cutout crown, tiny hut silhouettes and wood supports. These changes are visible in the real image.
+- **Still poor:** landmass is an obvious flat polygonal sheet with an abrupt rectangular end; trunk is a straight column rather than a convincing branching ancient tree; decorative huts look very small and precariously attached; palm fronds read as thin dark spikes; the scene remains open and empty relative to the approved panorama.
+- The checkerboard is confined to a flat entry patch and tiny far platform: its proportions and transitions do not yet match the stage's terrain style. A large, soft-lit, physically coherent canyon/valley is needed; avoid just scattering extra planes.
+- The preview contains **no in-game Sonic character**. Neither scale nor gameplay traversal is yet qualified. VDP1 texture alpha behavior, sector culling and **30 displayed FPS** remain untested.
+
+### V3 acceptance requirements (do not confuse plans with implementation)
+
+1. **Terrain framing:** replace flat exposed rectangular green sheet with a 3–5-band sloped valley, cliff edges that disappear naturally into the view, and a continuous route to the neighboring sector. Budget the terrain within the standalone 448-face export limit and profile the new collision polygons.
+2. **Tree and houses:** keep the real low-poly trunk as structural collision; introduce lateral branch volume at believable heights and **huts visibly anchored to actual platform tops**, not free-standing alpha rectangles. A readable roof silhouette is necessary from both side and overview camera angles. Use non-colliding textured facade layers for decorative huts.
+3. **Palms and foliage:** make frontal, side and rear appearance tests. Increase silhouette fullness/width, add cheap nearby low-poly varieties (within sector budget), and ensure transparency is preserved after VDP1 conversion. Do not imply static X-planes are true camera-facing billboards.
+4. **Camera/scale:** produce at least two review screenshots (overview + player-height angle), with Sonic scale proxy in editor only, not exported until properly integrated.
+5. **Assets and runtime:** make transparent textures and material UVs compatible with the LibSaturn texture pipeline; keep render/physics contracts separate and add sector export before fitting this into the 1.45-km layout. **The Saturn game is unchanged by this Blender source art.**
+
+Build/publish from Mac without changing the checked-out experimental branch:
 
 ```bash
 cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/build-tree-village-mac.sh
 ```
 
-The **first-time output on success** will be `assets/jade-gully/tree-village/tree_village_source.blend` in `main`; this local generation is intentionally needed because the authoring runner currently has no Blender binary. Do not describe an unbuilt .blend as already committed.
-
-## Visual audit: first Mac Blender preview (2026-11-21)
-
-The Mac build produced an actual **`tree_village_source.blend`** and a 1280×720 preview and pushed them to `main`. The real [kit report](../../assets/jade-gully/tree-village/kit-report.json) for **v1** showed **308 render triangles, 271 vertices, 96 collision faces, 29 render meshes, 13 collision meshes, 7 entity markers and 7 textures**. Eight host tests passed, and the Blender 5.2.2 authoring run completed successfully.
-
-**Art rejection:** the first [preview](../../assets/jade-gully/tree-village/tree_village_preview.png) looked like a suspended wood track in empty sky. Palm cutouts were thin; facade houses looked like five free-floating wood squares; central tree ended as a bark spike. Passing build limits is not visual approval.
-
-**Generator v2 changes, not yet run in Blender:**
-
-- Expanded original palm frond width and textured **alpha-cutout house facades** with pitched roofs, doors and windows.
-- A new original leafy canopy cutout on three cross-planes at the tree crown, replacing the visually bare trunk top.
-- Connected **32-triangle terrain valley** under the elevated bridges with its own 32-triangle collision mesh, and five **two-triangle timber supports** holding the facade huts near the main tree (render-only).
-- Added original checker-compatible meadow, facade and canopy textures, increasing the v2 palette source set to **10 PNGs**; no Saturn VDP1 migration has been claimed.
-- Changed the overview camera framing to show more of the grounds and vegetation.
-- Expected v2 render budget: **308 + 6 canopy + 32 terrain + 10 supports = 356 / 448 faces**. Actual faces, collision counts, preview quality, transparency and Blender syntax must be verified by the next Mac build before accepting it.
-
-Rebuild from current working branch (the publisher fetches the latest `main` in an isolated worktree):
-
-```bash
-cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/build-tree-village-mac.sh
-```
-
-The new preview will replace the file at the same path in `main`. Only after **human inspection of v2** should it progress to renderer integration or the sectorized 1.45-km Act 1 map.
-
+The v2 authoring output is available; do not run the same command solely to reproduce it unless the builder changes.
