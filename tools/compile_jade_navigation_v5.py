@@ -36,12 +36,59 @@ def matching_walkway(a, b, walkways, tolerance=SUPPORT_TOLERANCE):
     return min(matches, key=lambda pair: pair[0])[1] if matches else None
 
 
+def matching_transfer(a, b, route_id, transfers, tolerance=1e-4):
+    """Aerial transfers have landing pads, not invented planks in the void."""
+    matches = [t for t in transfers if
+               t["route"] == route_id
+               and distance(a, t["from"]) <= tolerance
+               and distance(b, t["to"]) <= tolerance]
+    if len(matches) > 1:
+        raise ValueError("duplicate aerial transfer")
+    return matches[0] if matches else None
+
+
+def validate_transfers(data):
+    """Require explicit aerial mode, landing object, and unverified physics."""
+    transfers = data.get("navigation_transfers", [])
+    names = {t["id"] for t in transfers}
+    if len(names) != len(transfers):
+        raise ValueError("duplicate aerial transfer id")
+    routes = {r["id"]: r for r in data["routes"]}
+    islands = {i["id"]: i for i in data["islands"]}
+    for transfer in transfers:
+        if transfer["mode"] not in ("spring", "jump", "drop"):
+            raise ValueError("invalid transfer motion")
+        if transfer.get("physics_verified") is not False:
+            raise ValueError("transfer may not claim tested physics")
+        route = routes.get(transfer["route"])
+        if not route:
+            raise ValueError("aerial transfer refers to absent route")
+        if not any(distance(a, transfer["from"]) < 1e-4
+                   and distance(b, transfer["to"]) < 1e-4
+                   for a, b in zip(route["points"], route["points"][1:])):
+            raise ValueError("aerial transfer must match consecutive route points")
+        if transfer["landing"] == "main":
+            if transfer["to"] not in data["routes"][0]["points"]:
+                raise ValueError("aerial transfer must rejoin main at a real route node")
+        else:
+            island = islands.get(transfer["landing"])
+            if island is None:
+                raise ValueError("aerial transfer has no landing island")
+            x, y, z = transfer["to"]
+            cx, cy = island["center"]
+            sx, sy = island["size"]
+            if abs(x-cx) > sx*.35 or abs(y-cy) > sy*.35 or abs(z-island["top"]-.6) > 1e-3:
+                raise ValueError("aerial transfer misses its landing island")
+    return transfers
+
+
 def node_id(p):
     return "p_" + "_".join(str(round(v * 10)).replace("-", "m") for v in p)
 
 
 def compile_navigation(data):
     routes, walkways = data["routes"], data["walkways"]
+    transfers = validate_transfers(data)
     names = {route["id"] for route in routes}
     required = set(NEW_BRANCHES) | {LOWER_ISLANDS}
     if not required <= names:
@@ -87,12 +134,19 @@ def compile_navigation(data):
         for start, finish in zip(points, points[1:]):
             first, second = add_vertex(start), add_vertex(finish)
             support = matching_walkway(start, finish, walkways)
-            if route["id"] in required and support is None:
+            transfer = matching_transfer(start, finish, route["id"], transfers)
+            if support and transfer:
+                raise ValueError("route edge may not be both bridge and aerial jump")
+            if route["id"] in required and support is None and transfer is None:
                 raise ValueError("new alternate has an unsupported segment: " + route["id"])
             edge = {"from": first, "to": second, "route": route["id"],
                     "walkway_id": support["id"] if support else None,
-                    "mode": support["kind"] if support else "unverified",
-                    "visual_only": True, "collision_verified": False}
+                    "transfer_id": transfer["id"] if transfer else None,
+                    "mode": support["kind"] if support else
+                            (transfer["mode"] if transfer else "unverified"),
+                    "landing": transfer["landing"] if transfer else None,
+                    "visual_only": True, "collision_verified": False,
+                    "physics_verified": False}
             edges.append(edge)
             graph[first].add(second)
 
@@ -112,7 +166,7 @@ def compile_navigation(data):
 
     return {
         "schema_version": 1,
-        "intent": "art-only walkability candidate; NOT exported Saturn collision or verified gameplay",
+        "intent": "art-only route intent: walkway surfaces, untested aerial transitions; NOT Saturn collision/gameplay",
         "start": start, "goal": goal,
         "nodes": [{"id": name, **node} for name, node in sorted(vertices.items())],
         "edges": edges,
@@ -120,8 +174,11 @@ def compile_navigation(data):
             "route_count": len(routes),
             "alternate_count": sum(r["kind"] == "alternate" for r in routes),
             "walkway_count": len(walkways),
+            "aerial_transfer_definitions": len(transfers),
             "supported_edges": sum(e["walkway_id"] is not None for e in edges),
-            "unsupported_edges": sum(e["walkway_id"] is None for e in edges),
+            "aerial_transfer_edges": sum(e["transfer_id"] is not None for e in edges),
+            "unsupported_edges": sum(e["walkway_id"] is None
+                                     and e["transfer_id"] is None for e in edges),
             "new_supported_branches": list(NEW_BRANCHES) + [LOWER_ISLANDS],
             "reachable_nodes_in_presentation_graph": len(visited),
         },
