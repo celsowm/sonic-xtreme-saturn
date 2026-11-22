@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "source_image": "docs/concepts/jade-gully-act1-concept.png",
+  "baseline_manifest": "assets/levels/jade_gully_concept_v4.json",
+  "meaning": "18 corridor features, NOT 18 independent playable START-to-GOAL routes. A line is explicit only for gold_main and purple_shortcut; platform_ring_hint is a design hypothesis needing terrain and jump verification.",
+  "fields": {
+    "evidence": {
+      "gold_main": "Linha principal amarela visivel",
+      "purple_shortcut": "Segmento/seta roxa pontilhada visivel, com extremidades possivelmente ocultas",
+      "platform_ring_hint": "Trilha inferida por aneis, patamares, pontes, molas ou escadas; nao e linha continua explicitamente desenhada"
+    },
+    "status": {
+      "main_route": "Trecho da linha unica main (nao novo percurso completo)",
+      "partial_alternate": "Apenas parte desta familia ja aparece nas tres alternativas declaradas",
+      "scenery_only": "Tem geometria/props relacionados, mas falta caminho coerente no grafo routes",
+      "missing": "Nao ha representacao adequada deste corredor no contrato existente"
+    }
+  },
+  "corridors": [
+    {
+      "id": "E01",
+      "region": "entry_hills",
+      "name": "START e ladeira principal",
+      "evidence": "gold_main",
+      "status": "main_route",
+      "manifest_link": "main",
+      "observation": "Linha amarela sinuosa do START ate a subida da vila",
+      "priority": "P0"
+    },
+    {
+      "id": "E02",
+      "region": "entry_hills",
+      "name": "Arco verde com aneis sobre o lago",
+      "evidence": "platform_ring_hint",
+      "status": "scenery_only",
+      "manifest_link": "arches / pools / rings",
+      "observation": "O arco de aneis fica FORA do traco amarelo; corredor opcional",
+      "priority": "P0"
+    },
+    {
+      "id": "E03",
+      "region": "entry_hills",
+      "name": "Lajes inferiores e piscinas com quedas",
+      "evidence": "platform_ring_hint",
+      "status": "scenery_only",
+      "manifest_link": "pools / terraces / waterfalls",
+      "observation": "Patamares inferiores sugerem travessia vertical, sem linha continua",
+      "priority": "P0"
+    },
+    {
+      "id": "T01",
+      "region": "tree_village",
+      "name": "Escada de entrada e plataforma superior",
+      "evidence": "gold_main",
+      "status": "main_route",
+      "manifest_link": "main / village_stairs",
+      "observation": "Subida amarela ate a arvore central",
+      "priority": "P0"
+    },
+    {
+      "id": "T02",
+      "region": "tree_village",
+      "name": "Anel de passarela ao redor do tronco",
+      "evidence": "platform_ring_hint",
+      "status": "scenery_only",
+      "manifest_link": "spiral / walkways",
+      "observation": "Deck de madeira circular em mais de uma altura",
+      "priority": "P0"
+    },
+    {
+      "id": "T03",
+      "region": "tree_village",
+      "name": "Queda roxa da cabana oeste",
+      "evidence": "purple_shortcut",
+      "status": "partial_alternate",
+      "manifest_link": "village_drop",
+      "observation": "Seta pontilhada sai da cabana oeste e chega perto da escada",
+      "priority": "P0"
+    },
+    {
+      "id": "T04",
+      "region": "tree_village",
+      "name": "Salto roxo do deck alto para o leste",
+      "evidence": "purple_shortcut",
+      "status": "scenery_only",
+      "manifest_link": "village_rope_lookout*",
+      "observation": "Arco roxo sai da estrutura alta da arvore em direcao ao deck inferior a leste",
+      "priority": "P0"
+    },
+    {
+      "id": "T05",
+      "region": "tree_village",
+      "name": "Ponte de madeira inferior ate a cachoeira leste",
+      "evidence": "platform_ring_hint",
+      "status": "scenery_only",
+      "manifest_link": "spiral / village_long_bridge",
+      "observation": "Ponte sob o tronco tem aneis proprios e saida para ilha externa",
+      "priority": "P0"
+    },
+    {
+      "id": "S01",
+      "region": "sky_bridges",
+      "name": "Pontes xadrez superiores",
+      "evidence": "gold_main",
+      "status": "main_route",
+      "manifest_link": "main / sky_checker_*",
+      "observation": "Linha amarela cruza pontes altas e ilhas estreitas",
+      "priority": "P0"
+    },
+    {
+      "id": "S02",
+      "region": "sky_bridges",
+      "name": "Corrente roxa de ilhas inferiores",
+      "evidence": "purple_shortcut",
+      "status": "partial_alternate",
+      "manifest_link": "lower_islands",
+      "observation": "Tracejado roxo atravessa ilhas abaixo do caminho alto",
+      "priority": "P0"
+    },
+    {
+      "id": "S03",
+      "region": "sky_bridges",
+      "name": "Plataformas e nuvens intermediarias",
+      "evidence": "platform_ring_hint",
+      "status": "scenery_only",
+      "manifest_link": "clouds / islands / rings / springs",
+      "observation": "Patamares e nuvens em nivel distinto dos trajetos alto e inferior",
+      "priority": "P0"
+    },
+    {
+      "id": "H01",
+      "region": "hex_loop",
+      "name": "Pista azul e aneis no interior do hexagono",
+      "evidence": "gold_main",
+      "status": "main_route",
+      "manifest_link": "main / hex_loop",
+      "observation": "Trecho amarelo gira pela face interna do hexagono",
+      "priority": "P0"
+    },
+    {
+      "id": "H02",
+      "region": "hex_loop",
+      "name": "Contorno externo e passagem ao redor do loop",
+      "evidence": "purple_shortcut",
+      "status": "partial_alternate",
+      "manifest_link": "hex_bypass",
+      "observation": "Legenda da pintura registra varias rotas dentro ou ao redor do loop",
+      "priority": "P0"
+    },
+    {
+      "id": "H03",
+      "region": "hex_loop",
+      "name": "Saida roxa por baixo do hexagono",
+      "evidence": "purple_shortcut",
+      "status": "missing",
+      "manifest_link": null,
+      "observation": "Tracejado roxo alcanca ilhas baixas junto ao Canyon Basin; nao e a rampa amarela superior",
+      "priority": "P0"
+    },
+    {
+      "id": "C01",
+      "region": "canyon_basin",
+      "name": "Subida superior ate GOAL",
+      "evidence": "gold_main",
+      "status": "main_route",
+      "manifest_link": "main / canyon_stairs_goal",
+      "observation": "Rampa amarela vai pela borda alta com cachoeiras ao portal final",
+      "priority": "P0"
+    },
+    {
+      "id": "C02",
+      "region": "canyon_basin",
+      "name": "Ponte e tablados sobre a agua",
+      "evidence": "platform_ring_hint",
+      "status": "scenery_only",
+      "manifest_link": "platforms / channels / canyon_dock*",
+      "observation": "Tablados de madeira separados na area alagada sugerem sequencia de saltos",
+      "priority": "P0"
+    },
+    {
+      "id": "C03",
+      "region": "canyon_basin",
+      "name": "Cascata inferior por ilhas e molas",
+      "evidence": "platform_ring_hint",
+      "status": "scenery_only",
+      "manifest_link": "waterfalls / springs / canyon_shelves",
+      "observation": "Ilhas baixas, aneis, molas e cachoeiras formam camada distinta da subida superior",
+      "priority": "P0"
+    },
+    {
+      "id": "C04",
+      "region": "canyon_basin",
+      "name": "Subida lateral em degraus alternados",
+      "evidence": "platform_ring_hint",
+      "status": "scenery_only",
+      "manifest_link": "canyon_shelves / terraces",
+      "observation": "Aglomerado de patamares xadrez nas paredes sugere subida lateral; ligacao exata nao desenhada",
+      "priority": "P0"
+    }
+  ]
+}
