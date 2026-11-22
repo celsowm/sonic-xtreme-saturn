@@ -540,7 +540,21 @@ for marker in data["entities"]:
     obj["saturn_id"]=marker["id"]
     obj["saturn_kind"]=marker["kind"]
 
-# Reference axis and camera are Blender-only; no export geometry.
+# Blue editor-only scale proxy near spawn (not Sonic R model and never exported).
+# Render it in both views to reveal real platform/stair proportions.
+bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=.64, location=(0., 5., 1.24))
+proxy = bpy.context.object
+proxy.name = "JG_EDITOR_ONLY_SCALE_PROXY_NOT_SONIC"
+for collection in list(proxy.users_collection):
+    collection.objects.unlink(proxy)
+COLLECTIONS["JG_REFERENCE"].objects.link(proxy)
+proxy_mat = bpy.data.materials.new("JG_EDITOR_ONLY_BLUE_REFERENCE")
+proxy_mat.use_nodes = True
+proxy_mat.node_tree.nodes.get("Principled BSDF").inputs["Base Color"].default_value = (.04,.18,.85,1.)
+proxy.data.materials.append(proxy_mat)
+proxy["jg_role"] = "reference_only_not_exported"
+
+# Cameras and scale proxy are Blender-only; no Saturn scene export geometry.
 cam_data=bpy.data.cameras.new("TreeVillage_Overview")
 camera=bpy.data.objects.new("TreeVillage_Overview",cam_data)
 COLLECTIONS["JG_REFERENCE"].objects.link(camera)
@@ -548,8 +562,17 @@ camera.location=(64,-67,56)
 look=Vector((0,35,7))-camera.location
 camera.rotation_euler=look.to_track_quat("-Z","Y").to_euler()
 cam_data.type="ORTHO"
-cam_data.ortho_scale=85
+cam_data.ortho_scale=90
 scene.camera=camera
+
+ground_cam_data=bpy.data.cameras.new("TreeVillage_PlayerHeight")
+ground_camera=bpy.data.objects.new("TreeVillage_PlayerHeight",ground_cam_data)
+COLLECTIONS["JG_REFERENCE"].objects.link(ground_camera)
+ground_camera.location=(-2.,-10.,4.2)
+look_ground=Vector((5.5,32.,8.8))-ground_camera.location
+ground_camera.rotation_euler=look_ground.to_track_quat("-Z","Y").to_euler()
+ground_cam_data.type="PERSP"
+ground_cam_data.lens=32
 light_data=bpy.data.lights.new("VillageSun","SUN")
 sun=bpy.data.objects.new("VillageSun",light_data)
 COLLECTIONS["JG_REFERENCE"].objects.link(sun)
@@ -584,10 +607,12 @@ report={
   "collision_meshes":len(colliders),
   "entity_markers":len(data["entities"]),
   "model_definitions":len(data["objects"]),
+  "authoring_revision":data.get("authoring_revision",1),
   "per_object_faces":{o.name:len(o.data.polygons) for o in render_items},
   "routes":data["routes"],
   "textures":sorted((p.name for p in TEX.glob("*.png"))),
   "warnings":["spring marker has no in-game impulse",
+              "editor blue scale proxy is NOT the Sonic character and is never exported",
               "static X-planes are not camera-facing billboards",
               "LOD/sector streaming not yet active",
               "new textures are Blender-only until Saturn texture pipeline integration"]
@@ -604,8 +629,13 @@ if PREVIEW:
             except (TypeError,ValueError):
                 continue
         scene.render.image_settings.file_format="PNG"
-        scene.render.filepath=str(OUT/"tree_village_preview.png")
-        bpy.ops.render.render(write_still=True)
+        for cam, filename in ((camera, "tree_village_preview.png"),
+                              (ground_camera, "tree_village_ground_preview.png")):
+            scene.camera=cam
+            scene.render.filepath=str(OUT/filename)
+            bpy.ops.render.render(write_still=True)
+            print("[Tree Village] preview:",filename)
+        scene.camera=camera
     except Exception as exc:
         print("[Tree Village] preview not rendered: "+str(exc))
 print("[Tree Village] Blender source:",blend_path)
