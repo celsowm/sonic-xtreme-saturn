@@ -11,11 +11,12 @@ def hex_outline_points(x, y, z, radius, front_x=0.0):
     """Six-sided YZ loop facing a camera on the positive-X side."""
     if radius <= 0:
         raise ValueError("loop radius must be positive")
-    return [
+    vertices = [
         (x + front_x, y + radius * math.sin(2 * math.pi * i / 6 + math.pi / 6),
          z + radius * math.cos(2 * math.pi * i / 6 + math.pi / 6))
-        for i in range(7)
+        for i in range(6)
     ]
+    return vertices + [vertices[0]]
 
 
 def apply_presentation(data, materials, artist):
