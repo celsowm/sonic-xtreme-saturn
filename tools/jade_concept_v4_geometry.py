@@ -245,6 +245,80 @@ def bridge_deck(stations, width=7.0, thickness=3.0):
     return verts, faces, mats
 
 
+def treehouse_thatch_roof(cx, cy, base_z, radius, seed=0, segments=16):
+    """Broad uneven tiered-thatched pavilion roof, not a tall cone.
+
+    The eaves turn slightly upward at four organic corner lobes. The top
+    rises only 0.46*radius, giving the Tree Village the low, layered roofs
+    of the approved painting. 0=gold thatch, 1=shadowed fringe, 2=highlight.
+    Deterministic Blender concept ART, not Saturn geometry.
+    """
+    if radius <= 0 or segments < 12:
+        raise ValueError('invalid hut roof shape')
+    phase = ((int(seed) % 1021) / 1021.0) * math.tau
+    profile = [(1.12, .03), (1.01, .115), (.82, .20),
+               (.57, .30), (.28, .405)]
+    vertices = []
+    for ring, (rr, zz) in enumerate(profile):
+        for k in range(segments):
+            a = math.tau * k / segments
+            lobe = math.sin(4*a + phase)
+            wobble = .035 * math.sin(7*a - phase)
+            r = radius * rr * (1 + wobble)
+            lift = (max(0.0, lobe) * .065 if ring == 0 else
+                    .018 * math.sin(3*a + phase))
+            vertices.append((cx + r*math.cos(a),
+                             cy + r*math.sin(a),
+                             base_z + radius*(zz + lift)))
+    tip = len(vertices)
+    vertices.append((cx, cy, base_z + .46*radius))
+    faces, mats = [], []
+    for ring in range(len(profile) - 1):
+        for k in range(segments):
+            n = (k+1) % segments
+            faces.append((ring*segments+k, ring*segments+n,
+                          (ring+1)*segments+n, (ring+1)*segments+k))
+            mats.append(1 if ring == 0 else
+                        (2 if ring == 2 and k % 4 == 0 else 0))
+    for k in range(segments):
+        n = (k+1) % segments
+        faces.append(((len(profile)-1)*segments+k,
+                      (len(profile)-1)*segments+n, tip))
+        mats.append(0)
+    return vertices, faces, mats
+
+
+def river_ribbon(stations, widths, z):
+    """Water surface flowing between canyon ledges; not a rectangular slab.
+
+    Centreline stations must progress in Y. Width may vary at each bend.
+    Water occupies one continuous strip with exact shared vertices.
+    """
+    if len(stations) < 3 or len(stations) != len(widths):
+        raise ValueError('river requires matching centreline and widths')
+    if not math.isfinite(z) or any(not math.isfinite(q) or q <= 0 for q in widths):
+        raise ValueError('river requires positive finite widths and elevation')
+    if any(len(p) != 2 or not all(math.isfinite(c) for c in p) for p in stations):
+        raise ValueError('river stations must be finite XY points')
+    if any(b[1] <= a[1] for a, b in zip(stations, stations[1:])):
+        raise ValueError('river must progress along Y')
+    vertices = []
+    for i, (x,y) in enumerate(stations):
+        x0,y0 = stations[max(0,i-1)]
+        x1,y1 = stations[min(len(stations)-1,i+1)]
+        dx,dy = x1-x0,y1-y0
+        length = math.hypot(dx,dy)
+        if length <= 1e-8:
+            raise ValueError('degenerate river centreline')
+        nx,ny = -dy/length*widths[i]/2, dx/length*widths[i]/2
+        vertices.extend(((x+nx,y+ny,z),(x-nx,y-ny,z)))
+    faces = []
+    for i in range(len(stations)-1):
+        a = i*2
+        faces.append((a,a+1,a+3,a+2))
+    return vertices, faces, [TOP]*len(faces)
+
+
 def village_branch_paths(tree_base, hut_decks):
     """Deterministic woody supports connecting each treehouse to the trunk.
 
