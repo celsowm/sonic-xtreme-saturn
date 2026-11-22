@@ -438,7 +438,7 @@ def valley_landmass():
     # Each of the left/right skirts is 6 quads = 12 render triangles.
     for col, side in ((0, -1.), (len(xs) - 1, 1.)):
         rim = [vertices[row * len(xs) + col] for row in range(len(ys))]
-        skirt_vertices = rim + [(x + side * 3.2, y, z - 5.0)
+        skirt_vertices = rim + [(x - side * .65, y, z - 5.0)
                                 for x, y, z in rim]
         skirt_faces = []
         for k in range(len(ys) - 1):
