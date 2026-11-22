@@ -37,7 +37,20 @@ The previous render confirmed that the v1 scene was only a uniform checkerboard 
 
 The pure-Python geometry library and regression tests are in `tools/jade_concept_geometry.py` and `tests/test_jade_concept_geometry.py`, while `tools/jade_concept_dressing.py` holds visual-only setpieces. The Blender workflow in `.github/workflows/jade-gully-concept.yml` checks these modules and renders actual images. **Visual acceptance remains open until we inspect the newly generated screenshots.**
 
-## Mac
+## Mac — one command (pull + rebuild + open)
+
+From the existing checkout, irrespective of its current branch:
+
+```bash
+cd ~/dev/sonic-xtreme-saturn && git fetch origin main && git show origin/main:scripts/review-jade-concept-mac.sh | bash
+```
+
+The remote-reviewed script performs `git pull --ff-only` on the Mac's current branch, fetches `origin/main`, creates an isolated detached worktree, builds the new Blender scene, and opens its isometric PNG. It does not move the current experimental branch.
+
+When the GitHub Actions [Blender concept workflow](../../.github/workflows/jade-gully-concept.yml) renders successfully against the current `main`, it also publishes the editable scene and previews to [`assets/jade-gully/concept-v2/`](../../assets/jade-gully/concept-v2/). **The existence of this publication step is not proof that the job has completed or that the art passed visual review.**
+
+## Mac — explicit detached worktree
+
 
 ```bash
 cd ~/dev/sonic-xtreme-saturn
