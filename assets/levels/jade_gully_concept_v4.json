@@ -122,6 +122,36 @@
         [103, 208, 36],
         [159, 178, 40.6]
       ]
+    },
+    {
+      "id": "village_north_decks",
+      "kind": "alternate",
+      "evidence": "connected_hut_walkways",
+      "visual_only": true,
+      "points": [[-153, 143, 32.6], [-135, 207, 58.6], [-104, 161, 50.6]]
+    },
+    {
+      "id": "village_lookout_decks",
+      "kind": "alternate",
+      "evidence": "connected_hut_walkways",
+      "visual_only": true,
+      "points": [[-104, 161, 50.6], [-71, 193, 54.6], [-79, 151, 46.6]]
+    },
+    {
+      "id": "sky_high_e",
+      "kind": "alternate",
+      "evidence": "platform_ring_hint",
+      "visual_only": true,
+      "render_style": "candidate",
+      "points": [[-24, 148, 40.6], [-10, 196, 55.6], [6, 176, 46.6]]
+    },
+    {
+      "id": "sky_middle_d",
+      "kind": "alternate",
+      "evidence": "platform_ring_hint",
+      "visual_only": true,
+      "render_style": "candidate",
+      "points": [[-24, 148, 40.6], [24, 140, 34.6], [34, 178, 51.1]]
     }
   ],
   "canyon_shelves": [
@@ -694,6 +724,60 @@
       "kind": "stairs",
       "from": [-153, 143, 32],
       "to": [-135, 207, 58]
+    },
+    {
+      "id": "sky_high_rope_a",
+      "kind": "rope",
+      "from": [-24, 148, 40],
+      "to": [-10, 196, 55]
+    },
+    {
+      "id": "sky_high_rope_b",
+      "kind": "rope",
+      "from": [-10, 196, 55],
+      "to": [6, 176, 46]
+    },
+    {
+      "id": "sky_mid_checker_a",
+      "kind": "checker",
+      "from": [-24, 148, 40],
+      "to": [24, 140, 34]
+    },
+    {
+      "id": "sky_mid_checker_b",
+      "kind": "checker",
+      "from": [24, 140, 34],
+      "to": [34, 178, 50.5]
+    },
+    {
+      "id": "sky_lower_entry_stairs",
+      "kind": "stairs",
+      "from": [-57, 149, 43],
+      "to": [-28, 110, 18]
+    },
+    {
+      "id": "sky_lower_checker_ab",
+      "kind": "checker",
+      "from": [-28, 110, 18],
+      "to": [2, 94, 14]
+    },
+    {
+      "id": "sky_lower_checker_bc",
+      "kind": "checker",
+      "from": [2, 94, 14],
+      "to": [28, 108, 20]
+    },
+    {
+      "id": "sky_lower_checker_cd",
+      "kind": "checker",
+      "from": [28, 108, 20],
+      "to": [44, 136, 30]
+    },
+    {
+      "id": "sky_lower_exit_checker",
+      "kind": "checker",
+      "from": [44, 136, 30],
+      "to": [63, 180, 39]
     }
   ],
   "clouds": [
