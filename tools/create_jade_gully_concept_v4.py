@@ -1256,10 +1256,12 @@ def main():
         return scene.render.filepath
 
     import os
-    quick = os.environ.get('JADE_V4_QUICK') == '1'   # map + comparison only
+    quick = os.environ.get('JADE_V4_QUICK') == '1'   # map, clean + comparison
     map_png = shoot('map', cams['map'], True)
+    # Annotations and the gold route must NOT conceal the actual geography.
+    # Always produce clean visual proof, including in CI quick mode.
+    shoot('clean', cams['map'], False)
     if not quick:
-        shoot('clean', cams['map'], False)
         shoot('top', cams['top'], True)
     scene.render.resolution_x, scene.render.resolution_y = 1280, 720
     scene.cycles.samples = min(32, data['render']['samples'])
