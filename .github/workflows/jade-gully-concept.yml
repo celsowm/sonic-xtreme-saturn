@@ -1,0 +1,49 @@
+name: Jade Gully five-sector Blender concept
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/jade-gully-concept.yml'
+      - 'assets/levels/jade_gully_concept_v1.json'
+      - 'tools/validate_jade_concept.py'
+      - 'tools/create_jade_gully_concept.py'
+      - 'tests/test_jade_concept.py'
+
+permissions:
+  contents: read
+
+jobs:
+  blender-concept:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate five-region concept topology
+        run: |
+          python3 -m unittest discover -s tests -p 'test_jade_concept.py' -v
+          python3 tools/validate_jade_concept.py
+          python3 -m py_compile tools/create_jade_gully_concept.py
+      - name: Install Blender
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender
+      - name: Build editable concept and render isometric and top views
+        run: |
+          blender -b --factory-startup --python-exit-code 1 \
+            --python tools/create_jade_gully_concept.py -- build/jade-gully-concept
+          test -s build/jade-gully-concept/jade_gully_act1_concept.blend
+          test -s build/jade-gully-concept/jade-gully-concept-isometric.png
+          test -s build/jade-gully-concept/jade-gully-concept-top.png
+      - name: Preserve .blend and actual render previews
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jade-gully-five-sector-concept
+          path: |
+            build/jade-gully-concept/jade_gully_act1_concept.blend
+            build/jade-gully-concept/jade-gully-concept-isometric.png
+            build/jade-gully-concept/jade-gully-concept-top.png
+            build/jade-gully-concept/concept-contract.json
+          retention-days: 14
