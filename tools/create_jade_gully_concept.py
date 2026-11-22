@@ -229,7 +229,7 @@ def hex_loop(ident, center, radius, materials):
         for i in range(6):
             angle=2*PI*i/6+PI/6
             for r in (radius,radius*.70):
-                verts.append((x+r*math.sin(angle),y+layer,z+r*math.cos(angle)))
+                verts.append((x+layer,y+r*math.sin(angle),z+r*math.cos(angle)))
     for i in range(6):
         nxt=(i+1)%6
         a=2*i; b=2*nxt
@@ -240,8 +240,8 @@ def hex_loop(ident, center, radius, materials):
     mesh(ident+'_angular_checker_loop',verts,faces,
          [materials['checker_brown'],materials['checker_green'],materials['rock']],indices)
     for dx in (-radius*.75,radius*.75):
-        box(ident+'_base_'+str(round(dx,1)),(x+dx,y,z-radius-3),
-            (3,10,5),materials['rock'])
+        box(ident+'_base_'+str(round(dx,1)),(x,y+dx,z-radius-3),
+            (10,3,5),materials['rock'])
 
 
 def walkway(name, p1, p2, material, plank_width=4):
@@ -309,7 +309,7 @@ def ring(name, x, y, z, materials, radius=1.45):
     for i in range(10):
         theta=2*PI*i/10
         for r in (radius,radius*.67):
-            verts.append((x+r*math.sin(theta),y,z+r*math.cos(theta)))
+            verts.append((x,y+r*math.sin(theta),z+r*math.cos(theta)))
     for i in range(10):
         j=(i+1)%10
         faces.append((2*i,2*j,2*j+1,2*i+1))
@@ -325,7 +325,8 @@ def label(name, content, location, materials, size=4):
     obj.data.extrude=.04
     obj.data.materials.append(materials['foam'])
     obj['stage_role']='concept_editor_annotation'
-    # Slightly above flat ground, for bird's-eye camera annotations.
+    # Face the panorama camera later; annotation quads must never be edge-on.
+    obj.data.align_x='CENTER'
     return obj
 
 
@@ -470,6 +471,10 @@ def main():
         label('sector_tag_'+sector['id'],sector['title'],
               (-sector['width']*.93,y,at_z(-sector['width']*.93,y,data)+25),palette,4.7)
     camera, top=setup_camera_and_lighting(data,palette)
+    for obj in bpy.data.objects:
+        if obj.get('stage_role')=='concept_editor_annotation':
+            # In the former render, all five labels looked like vertical noise.
+            obj.rotation_euler=(camera.location-obj.location).to_track_quat('Z','Y').to_euler()
     (out/'concept-contract.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
     bpy.ops.wm.save_as_mainfile(filepath=str(out/'jade_gully_act1_concept.blend'))
     scene=bpy.context.scene
