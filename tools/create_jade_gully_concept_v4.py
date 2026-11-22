@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.validate_jade_concept_v4 import DEFAULT, validate  # noqa: E402
 from tools import jade_concept_v4_geometry as geo  # noqa: E402
+from tools.compile_jade_navigation_v5 import compile_navigation  # noqa: E402
 
 CONCEPT_PNG = ROOT / 'docs/concepts/jade-gully-act1-concept.png'
 OVERLAY = 'MAP_OVERLAY'
@@ -275,6 +276,7 @@ def build_palette():
         'gold': flat('rings', (1.0, .72, .05), .3, emission=.55, metallic=.6),
         'route': flat('main route arrow', (1.0, .80, .12), .5, emission=.9),
         'alt_route': flat('alternate route dots', (.55, .10, .95), .5, emission=.8),
+        'nav_candidate': flat('candidate bridge route dots', (.12, .88, .72), .5, emission=.7),
         'spring_base': flat('spring base', (.55, .55, .60), .5),
         'spring_top': flat('spring pad', (.95, .20, .60), .4, emission=.35),
         'pad_glow': flat('start/goal glow', (1.0, .70, .95), .4, emission=1.6),
@@ -860,10 +862,14 @@ def build_rings_and_routes(data, pal):
                 bpy.context.scene.collection.objects.unlink(arrow)
                 overlay.objects.link(arrow)
         else:
+            # Purple is reserved for the reference painting's existing
+            # shortcuts. Cyan marks new bridge-supported concept candidates
+            # whose physics and Saturn collision remain UNVERIFIED.
+            route_mat = pal['nav_candidate'] if route.get('render_style') == 'candidate' else pal['alt_route']
             dots = [(p[0], p[1], p[2], .8, 1, 1, 1, 0) for p, _ in geo.sample_along(curve, 3.2)]
-            blob_field('route_' + route['id'] + '_dots', dots, [pal['alt_route']], 1, overlay)
+            blob_field('route_' + route['id'] + '_dots', dots, [route_mat], 1, overlay)
             end, direction = geo.sample_along(curve, geo.polyline_length(curve) - .1)[-1]
-            arrow = prim('cone', 'route_' + route['id'] + '_arrow', end, pal['alt_route'],
+            arrow = prim('cone', 'route_' + route['id'] + '_arrow', end, route_mat,
                          vertices=8, radius1=1.6, radius2=0, depth=3.0)
             arrow.rotation_euler = Vector(direction).to_track_quat('Z', 'Y').to_euler()
             bpy.context.scene.collection.objects.unlink(arrow)
@@ -1330,6 +1336,13 @@ def main():
     build_items(data, pal)
     report['rings'] = build_rings_and_routes(data, pal)
     report['palms'] = build_vegetation(data, pal)
+    # A route only counts as presentation-supported if its stations touch
+    # authored walkway endpoints. This does not establish collision or
+    # gameplay reachability on Sega Saturn.
+    nav_graph = compile_navigation(data)
+    report['navigation'] = nav_graph['summary']
+    (out / 'jade-gully-v5-navigation.json').write_text(
+        json.dumps(nav_graph, indent=2) + '\n', encoding='utf-8')
     build_backdrop(data, pal)
     setup_world(data)
     cams = create_cameras(data)
@@ -1361,6 +1374,9 @@ def main():
     import os
     quick = os.environ.get('JADE_V4_QUICK') == '1'   # map, clean + comparison
     map_png = shoot('map', cams['map'], True)
+    # Route-only proof: show gold main, historical purple alternatives and
+    # cyan new candidates without titles obscuring branch junctions.
+    shoot('routes', cams['map'], True)
     # Annotations and the gold route must NOT conceal the actual geography.
     # Always produce clean visual proof, including in CI quick mode.
     shoot('clean', cams['map'], False)
@@ -1376,8 +1392,9 @@ def main():
     hud.hide_render = False
     scene.camera = cams['map']
     report['review'] = review(out, map_png)
-    report['preview_files'] = (['jade-gully-v4-map.png', 'jade-gully-v4-clean.png',
-                                'jade-gully-v4-compare.png'] +
+    report['preview_files'] = (['jade-gully-v4-map.png', 'jade-gully-v4-routes.png',
+                                'jade-gully-v4-clean.png', 'jade-gully-v4-compare.png',
+                                'jade-gully-v5-navigation.json'] +
                                ([] if quick else
                                 ['jade-gully-v4-top.png'] +
                                 ['jade-gully-v4-%s.png' % r['id'] for r in data['regions']]))
