@@ -55,6 +55,19 @@ def validate_transfers(data):
         raise ValueError("duplicate aerial transfer id")
     routes = {r["id"]: r for r in data["routes"]}
     islands = {i["id"]: i for i in data["islands"]}
+    cloud_stages = {i["id"]: i for i in data.get("sky_cloud_landings", [])}
+    if len(cloud_stages) != len(data.get("sky_cloud_landings", [])):
+        raise ValueError("duplicate cloud landing IDs")
+    for stage in cloud_stages.values():
+        if stage.get("structure") != "cloud_landing" or stage.get("tier") not in ("high", "middle", "low"):
+            raise ValueError("invalid cloud landing structure/tier")
+        if stage.get("region") != "sky_bridges":
+            raise ValueError("cloud stages belong to Sky Bridges")
+        x, y, z = stage["center"]
+        if not all(math.isfinite(p) for p in (x, y, z)):
+            raise ValueError("nonfinite cloud landing center")
+        if not 4.5 <= stage["radius"] <= 9:
+            raise ValueError("cloud landing requires a visible platform radius")
     for transfer in transfers:
         if transfer["mode"] not in ("spring", "jump", "drop"):
             raise ValueError("invalid transfer motion")
@@ -72,13 +85,25 @@ def validate_transfers(data):
                 raise ValueError("aerial transfer must rejoin main at a real route node")
         else:
             island = islands.get(transfer["landing"])
-            if island is None:
-                raise ValueError("aerial transfer has no landing island")
+            cloud = cloud_stages.get(transfer["landing"])
+            if island is None and cloud is None:
+                raise ValueError("aerial transfer has no landing island/cloud stage")
             x, y, z = transfer["to"]
-            cx, cy = island["center"]
-            sx, sy = island["size"]
-            if abs(x-cx) > sx*.35 or abs(y-cy) > sy*.35 or abs(z-island["top"]-.6) > 1e-3:
-                raise ValueError("aerial transfer misses its landing island")
+            if island:
+                cx, cy = island["center"]
+                sx, sy = island["size"]
+                if abs(x-cx) > sx*.35 or abs(y-cy) > sy*.35 or abs(z-island["top"]-.6) > 1e-3:
+                    raise ValueError("aerial transfer misses its landing island")
+            else:
+                cx, cy, top = cloud["center"]
+                if math.hypot(x-cx, y-cy) > cloud["radius"]*.35 or abs(z-top-.6) > 1e-3:
+                    raise ValueError("aerial transfer misses its landing cloud platform")
+        # These are design envelopes, deliberately NOT a verified ballistic
+        # solution. The source painting shows short hop/spring sequences.
+        dx = math.hypot(transfer["to"][0]-transfer["from"][0],
+                        transfer["to"][1]-transfer["from"][1])
+        if transfer["mode"] != "drop" and dx > 34:
+            raise ValueError("aerial jump too long without an intermediate landing")
     return transfers
 
 
@@ -175,6 +200,12 @@ def compile_navigation(data):
             "alternate_count": sum(r["kind"] == "alternate" for r in routes),
             "walkway_count": len(walkways),
             "aerial_transfer_definitions": len(transfers),
+            "cloud_landing_platforms": len(cloud_stages),
+            "long_unverified_drop_edges": sum(
+                e["mode"] == "drop"
+                and distance(vertices[e["from"]]["position"], vertices[e["to"]]["position"]) > 36
+                for e in edges
+            ),
             "supported_edges": sum(e["walkway_id"] is not None for e in edges),
             "aerial_transfer_edges": sum(e["transfer_id"] is not None for e in edges),
             "unsupported_edges": sum(e["walkway_id"] is None
