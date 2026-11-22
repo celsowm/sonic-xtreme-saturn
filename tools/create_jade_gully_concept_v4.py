@@ -786,6 +786,22 @@ def build_canyon_details(data, pal):
         # Clumps at the skyline, not a row of identical trees on every block.
         palm('canyon_rim_palm_%02d' % i, x+1.5, y, z-1.0,
              8.0 + i*1.8, pal)
+    # Broad staggered rock shelves interrupt the otherwise sheer canyon
+    # wall and establish middle-ground depth behind the foreground decks.
+    # Their bottoms taper into the canyon, not down to the global floor.
+    for ledge in data['canyon_shelves']:
+        x, y = ledge['center']
+        width, depth = ledge['size']
+        top = ledge['top']
+        seed = sum((k+1)*ord(ch) for k,ch in enumerate(ledge['id']))
+        outline = geo.organic_footprint(x, y, width, depth,
+                                        seed=seed, segments=20, roughness=.18)
+        verts, faces, mats = geo.stratified_plateau(
+            outline, top, top-19, lip=1.0)
+        mesh('canyon_shelf_' + ledge['id'], verts, faces,
+             [pal['grass'], pal['cliff'], pal['underside']], mats)
+        palm('canyon_shelf_palm_' + ledge['id'], x+width*.13,
+             y+depth*.12, top, 8.5+3*rnd(ledge['id']), pal)
     basin = next(p['z'] for p in data['pools'] if p['id'] == 'canyon_basin_water')
     for d in data['platforms']:
         x, y, z = d['deck']
