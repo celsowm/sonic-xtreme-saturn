@@ -60,19 +60,19 @@ def decorate(data, materials, artist):
                     materials['foam'],.18)
 
     # One gigantic central canopy silhouette unifies the three huts.
-    gx,gy=49,268
+    gx,gy=-61,269
     ground=terrain_z(gx,gy)-5
     artist.cylinder('bamboo_ancient_worldtree_trunk',gx,gy,ground+32,
                     6.8,69,materials['wood'],12)
     for i in range(8):
         theta=math.tau*i/8
-        x=gx+math.cos(theta)*16
-        y=gy+math.sin(theta)*17
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=17,
-                    location=(x,y,ground+74+(i%3)*4))
+        x=gx+math.cos(theta)*11
+        y=gy+math.sin(theta)*11
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=10.5,
+                    location=(x,y,ground+65+(i%3)*3))
         obj=bpy.context.object
         obj.name='bamboo_ancient_worldtree_crown_%02d'%i
-        obj.scale=(1.3,1.1,.59)
+        obj.scale=(1.35,1.1,.72)
         obj.data.materials.append(materials['foliage'])
         obj['stage_role']='concept_visual_only'
 
