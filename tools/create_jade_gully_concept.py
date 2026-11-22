@@ -617,7 +617,7 @@ def main():
         'required_landmarks': len(required),
         'visual_only': True,
     }
-    (out/'concept-contract.json').write_text(json.dumps(report,indent=2)+'\\n',encoding='utf-8')
+    (out/'concept-contract.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
     bpy.ops.wm.save_as_mainfile(filepath=str(out/'jade_gully_act1_concept.blend'))
     scene=bpy.context.scene
     for key,cam in (('isometric',camera),('top',top)):
