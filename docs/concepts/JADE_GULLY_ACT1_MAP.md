@@ -6,16 +6,17 @@
 
 ## Proposed layout
 
-For a **piece-by-piece Blender specification**, see [Tree Village: hybrid 2D/3D asset checklist](TREE_VILLAGE_BLENDER_ASSET_CHECKLIST.md). The budgets below are **sector-level targets**; the present single-stage baker cannot carry the entire proposed world.
+For the **editable five-region Blender generator**, see [Jade Gully 3D implementation](JADE_GULLY_3D_IMPLEMENTATION.md). The existing [Tree Village V3 kit](TREE_VILLAGE_BLENDER_ASSET_CHECKLIST.md) is a separately qualified small art-source cell. The present single-stage Saturn baker cannot carry the full map.
 
+The actual image labels five regions, translated into +Y progression in the new concept manifest:
 
-The new concept uses a longer, continuous **3D action-adventure** route, with optional side routes rather than a 20-second racetrack. The image carries five numbered areas:
+1. **Sonic's Base** — clearing, tutorial, access to optional routes and starter dome.
+2. **Jade Ridges** — checkerboard cliffs, switchbacks, a large hexagonal corkscrew and a lower loop.
+3. **Bamboo Heights** — multilevel tree village, bamboo platforms, hanging bridges and high shortcuts.
+4. **Gully Current** — river gorge, waterfalls, gravity-wall references and lower exploration passages.
+5. **Jade Summit / Exit** — final forest climb, paired loops, suspended spans and goal.
 
-1. **Entry Hills** — rolling terrain, water pools, rings, springs, an open starting clearing.
-2. **Tree Village** — tall tree platforms, huts and elevated bridges; alternate vertical paths and hidden rings. *Interpretive/new design*, not verified as part of the Saturn Jade Gully level.
-3. **Sky Bridges** — narrow suspended platforms and routes through clouds. *Concept expansion*, not a claim about documented original geometry.
-4. **Hex Loop** — large hexagonal corkscrew/loop with ring paths and changing camera orientation. *Inspired by documented Sonic X-treme footage*; the pictured scale and position are new design.
-5. **Canyon Basin / Goal** — multi-level checkerboard canyon, streams, cascades, walkways and final climb, followed by a distinct goal space.
+The Blender scene generator is an offline art blockout, with a five-sector topology, visual guide routes and recognizable landmarks. It does not yet implement the gameplay, gravity camera, collision or runtime sector streaming.
 
 The intended gameplay is **exploration + speed + platforming**, with a readable main route, optional risk/reward shortcuts, increasing elevation, and room for the fisheye camera's gravity transitions. No fixed duration, world dimensions or measured speed are inferred from this painting. Segment lengths, collision geometry, LOD and target completion time must be specified and tested as game data.
 
@@ -28,6 +29,6 @@ The intended gameplay is **exploration + speed + platforming**, with a readable 
 
 ## Asset and implementation status
 
-The full-resolution generated concept PNG belongs at **`docs/concepts/jade-gully-act1-concept.png`**. The PNG is *not source geometry*, is not an asset derived automatically from Sega's extracted mesh, and must not be used for collision or for texture generation. Use the included `scripts/publish-jade-gully-map-mac.sh` to publish the image from the Mac's Downloads folder to `main` without modifying the developer's working branch.
+The approved full-resolution concept PNG is published at **[`docs/concepts/jade-gully-act1-concept.png`](jade-gully-act1-concept.png)**. The PNG is *not source geometry* and is not an asset derived automatically from Sega's extracted mesh. The authored 3D scene is generated from [`assets/levels/jade_gully_concept_v1.json`](../../assets/levels/jade_gully_concept_v1.json) with [`tools/create_jade_gully_concept.py`](../../tools/create_jade_gully_concept.py). No image-to-collision conversion is implied.
 
 Do **not** merge the experimental [Jade Gully PR #2](https://github.com/celsowm/sonic-xtreme-saturn/pull/2) as part of concept-art publication: performance and visual acceptance gates remain open. The `main` baseline and build reproducibility should be preserved.
