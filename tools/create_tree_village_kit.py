@@ -128,6 +128,8 @@ images = {
     "palm": create_image("foliage-palms-64", palm_pixel),
     "facade": create_image("village-facade-64", facade_pixel),
     "canopy": create_image("village-canopy-64", canopy_pixel),
+    "meadow": create_image("ground-meadow-64", lambda x, y:
+        (.19 + .03 * ((x * 3 + y) % 7) / 7., .46 + .06 * ((x + y * 5) % 9) / 9., .15, 1.)),
     "spring": create_image("spring-red-64", lambda x, y:
         ((.95, .18, .12, 1.) if 5 < x < 59 and 5 < y < 59 else
          (.97, .83, .16, 1.) if x % 9 < 3 or y % 9 < 3 else
@@ -286,6 +288,16 @@ def trunk(item):
                 item["collection"],item["role"])
     mesh_object(item["id"]+"_COLL",verts,faces,None,"JG_COLLISION",
                 "blocking",collision=True)
+    # Three crossed leafy crowns use six alpha-textured triangles.
+    # The old bare trunk read as a spike; the crown is non-collidable decor.
+    crown = []
+    for angle in (0., math.pi / 3., 2. * math.pi / 3.):
+        dx, dy = 5.3 * math.cos(angle), 5.3 * math.sin(angle)
+        crown.extend([(x-dx,y-dy,z+h-1.2), (x+dx,y+dy,z+h-1.2),
+                      (x+dx,y+dy,z+h+4.7), (x-dx,y-dy,z+h+4.7)])
+    faces_crown = [(q,q+1,q+2) for q in (0,4,8)] + [(q,q+2,q+3) for q in (0,4,8)]
+    mesh_object(item["id"]+"_canopy",crown,faces_crown,"canopy",
+                "JG_TREE_VILLAGE_DECOR","decoration",sprite_uv=True)
 
 
 def hut(item):
@@ -321,7 +333,8 @@ def cross_planes(item):
         v.extend([(x-dx,y-dy,z),(x+dx,y+dy,z),
                   (x+dx,y+dy,z+height),(x-dx,y-dy,z+height)])
     triangles=[(0,1,2),(0,2,3),(4,5,6),(4,6,7)]
-    mesh_object(item["id"],v,triangles,"palm",item["collection"],
+    mesh_object(item["id"],v,triangles,
+                "canopy" if item["kind"] == "foliage_x" else "palm",item["collection"],
                 item["role"],sprite_uv=True)
 
 
@@ -359,6 +372,53 @@ def branch(item):
     mesh_object(item["id"],v,faces,item["material"],item["collection"],item["role"])
 
 
+
+def valley_landmass():
+    """Scenic, collision-enabled ground beneath the bridges so the village isn't
+    floating in blue emptiness. This is the 50x70m authoring cell only."""
+    xs=(-24.,-12.,0.,12.,24.)
+    ys=(18.,32.,46.,58.,70.)
+    vertices=[]
+    for iy,y in enumerate(ys):
+        for ix,x in enumerate(xs):
+            # Under the playable decks. Smooth edge rises frame the middle route.
+            edge = max(0., (abs(x)-8.) / 16.)
+            z = -.8 + 2.8*edge*edge + .20*math.sin(iy*.9 + ix*.6)
+            vertices.append((x,y,z))
+    top=[]
+    for row in range(len(ys)-1):
+        for col in range(len(xs)-1):
+            a=row*len(xs)+col
+            b=a+1
+            c=a+len(xs)
+            d=c+1
+            top.extend(((a,b,d),(a,d,c)))
+    mesh_object("jg_village_connected_terrain",vertices,top,
+                "meadow","JG_TERRAIN","walkable")
+    mesh_object("jg_village_connected_terrain_COLL",vertices,top,
+                None,"JG_COLLISION","walkable",collision=True)
+
+
+def hut_supports():
+    """Ultra-cheap non-colliding timber struts joining facade silhouettes
+    to the core tree. No free-floating squares in the overview render."""
+    tree=(7.5,37.5)
+    for item in data["objects"]:
+        if item["kind"]!="facade":
+            continue
+        x,y,z=item["center"]
+        bottom=z-item["size"][2]/2.
+        x0,y0=tree
+        dx,dy=x-x0,y-y0
+        length=math.hypot(dx,dy)
+        if length<.01:
+            continue
+        nx,ny=-dy/length*.45,dx/length*.45
+        v=[(x0-nx,y0-ny,bottom-.7),(x0+nx,y0+ny,bottom-.7),
+           (x+nx,y+ny,bottom-.7),(x-nx,y-ny,bottom-.7)]
+        mesh_object(item["id"]+"_support",v,[(0,1,2),(0,2,3)],
+                    "bark","JG_TREE_VILLAGE_DECOR","decoration")
+
 BUILDERS={"ground":lambda x: box(x["id"],(x["center"][0],x["center"][1],
                                           x["center"][2]-x["size"][2]/2),
                                   x["size"],x["material"],x["collection"],
@@ -368,7 +428,8 @@ BUILDERS={"ground":lambda x: box(x["id"],(x["center"][0],x["center"][1],
           "spring":spring,"branch":branch}
 for item in data["objects"]:
     BUILDERS[item["kind"]](item)
-
+valley_landmass()
+hut_supports()
 
 for marker in data["entities"]:
     obj=bpy.data.objects.new("JG_ENTITY_"+marker["id"],None)
@@ -383,11 +444,11 @@ for marker in data["entities"]:
 cam_data=bpy.data.cameras.new("TreeVillage_Overview")
 camera=bpy.data.objects.new("TreeVillage_Overview",cam_data)
 COLLECTIONS["JG_REFERENCE"].objects.link(camera)
-camera.location=(76,-94,75)
+camera.location=(64,-67,56)
 look=Vector((0,35,7))-camera.location
 camera.rotation_euler=look.to_track_quat("-Z","Y").to_euler()
 cam_data.type="ORTHO"
-cam_data.ortho_scale=97
+cam_data.ortho_scale=85
 scene.camera=camera
 light_data=bpy.data.lights.new("VillageSun","SUN")
 sun=bpy.data.objects.new("VillageSun",light_data)
@@ -397,7 +458,7 @@ light_data.energy=2.2
 world=bpy.data.worlds.new("Jade Gully Sky")
 scene.world=world
 world.use_nodes=True
-world.node_tree.nodes.get("Background").inputs["Color"].default_value=(.18,.38,.54,1)
+world.node_tree.nodes.get("Background").inputs["Color"].default_value=(.14,.33,.51,1)
 world.node_tree.nodes.get("Background").inputs["Strength"].default_value=.8
 
 bpy.context.view_layer.update()
