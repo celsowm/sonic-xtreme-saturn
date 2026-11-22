@@ -462,12 +462,27 @@ def setup_camera_and_lighting(data, materials):
     bpy.context.scene.world=world
     world.use_nodes=True
     bg=world.node_tree.nodes.get('Background')
+    # Soft sunset-to-blue background: actual world rays, not a flat gray
+    # ambient that makes the render look like an unlit geometry screenshot.
     bg.inputs['Color'].default_value=(.42,.56,.72,1)
-    bg.inputs['Strength'].default_value=.75
+    bg.inputs['Strength'].default_value=.80
+    nodes=world.node_tree.nodes
+    links=world.node_tree.links
+    direction=nodes.new('ShaderNodeTexCoord')
+    vertical=nodes.new('ShaderNodeSeparateXYZ')
+    sky_ramp=nodes.new('ShaderNodeValToRGB')
+    sky_ramp.color_ramp.elements[0].position=0.0
+    sky_ramp.color_ramp.elements[0].color=(.80,.56,.51,1)
+    sky_ramp.color_ramp.elements[1].position=0.90
+    sky_ramp.color_ramp.elements[1].color=(.26,.46,.72,1)
+    sky_ramp.color_ramp.elements.new(.40).color=(.56,.65,.78,1)
+    links.new(direction.outputs['Normal'],vertical.inputs[0])
+    links.new(vertical.outputs['Z'],sky_ramp.inputs[0])
+    links.new(sky_ramp.outputs['Color'],bg.inputs['Color'])
     bpy.ops.object.light_add(type='SUN',location=(0,120,220))
     sun=bpy.context.object
     sun.name='ART_Sun'
-    sun.data.energy=2.5
+    sun.data.energy=3.1
     sun.rotation_euler=(math.radians(30),math.radians(-28),math.radians(20))
     # View from the side of progression, so +Y spans the panoramic frame.
     bpy.ops.object.camera_add(location=(445,98,340))
@@ -494,6 +509,10 @@ def setup_camera_and_lighting(data, materials):
     scene.cycles.samples=data['render']['samples']
     scene.cycles.device='CPU'
     scene.view_settings.view_transform='Standard'
+    try:
+        scene.view_settings.look='Medium High Contrast'
+    except (TypeError,ValueError):
+        pass
     scene.render.film_transparent=False
     return camera, top
 
