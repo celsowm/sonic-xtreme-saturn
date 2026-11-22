@@ -142,10 +142,27 @@ def leafy(name, dark, light, scale=.35):
 def cloud_material(name):
     """Soft painted cloud banks: white tops with blue-lilac shading, billowy
     bump, and silhouettes that fade out instead of ending as hard blobs."""
-    m = flat(name, (.92, .95, 1.0), 1.0, emission=.12)
+    m = flat(name, (.92, .95, 1.0), 1.0, emission=.03)
     nodes, links = _nodes(m)
     b = nodes.get('Principled BSDF')
     out = next(n for n in nodes if n.type == 'OUTPUT_MATERIAL')
+    # V4 comparison: white cloud banks hide the canyon and sky islands.
+    # Shade by upward-facing normals, preserving bright cumulus tops but
+    # making the banks read as blue-lilac atmosphere rather than white foam.
+    geometry = nodes.new('ShaderNodeNewGeometry')
+    facing_up = nodes.new('ShaderNodeVectorMath')
+    facing_up.operation = 'DOT_PRODUCT'
+    facing_up.inputs[1].default_value = (0.0, 0.0, 1.0)
+    cloud_shade = nodes.new('ShaderNodeValToRGB')
+    cloud_shade.color_ramp.elements[0].position = 0.05
+    cloud_shade.color_ramp.elements[0].color = (0.13, 0.24, 0.53, 1.0)
+    middle = cloud_shade.color_ramp.elements.new(0.48)
+    middle.color = (0.38, 0.55, 0.80, 1.0)
+    cloud_shade.color_ramp.elements[1].position = 0.90
+    cloud_shade.color_ramp.elements[1].color = (0.90, 0.94, 1.0, 1.0)
+    links.new(geometry.outputs['Normal'], facing_up.inputs[0])
+    links.new(facing_up.outputs['Value'], cloud_shade.inputs['Fac'])
+    links.new(cloud_shade.outputs['Color'], b.inputs['Base Color'])
     coord = nodes.new('ShaderNodeTexCoord')
     noise = nodes.new('ShaderNodeTexNoise')
     noise.inputs['Scale'].default_value = .18
@@ -788,8 +805,8 @@ def build_vegetation(data, pal):
     for gx in range(-44, 130, 8):
         for gy in range(58, 256, 8):
             j = rnd('sea', gx * 997 + gy)
-            if j < .7:
-                continue          # blue gaps between cloud banks
+            if j < .76:
+                continue          # retain open blue channels between the cloud banks
             x, y = gx + (j - .5) * 5, gy + (rnd('sy', gx + gy) - .5) * 5
             sea.append((x, y, CLOUD_SEA_Z + j * 7, 5 + j * 4, 1.6, 1.3, .6, 0))
             # Billowing cumulus puffs on top of each bank, as painted.
