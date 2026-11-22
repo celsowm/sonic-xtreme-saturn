@@ -32,11 +32,12 @@ jobs:
       - name: Install Blender
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq blender
+          sudo apt-get install -y -qq blender libegl1 libgl1-mesa-dri libglx-mesa0 xvfb
           blender --version | head -3
       - name: Generate actual editable Blender art and two review views
         run: |
-          blender --background --factory-startup --python-exit-code 1 \
+          LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s '-screen 0 1280x720x24' \
+            blender --background --factory-startup --python-exit-code 1 \
             --python tools/create_tree_village_kit.py -- \
             assets/jade-gully/tree-village/kit-manifest.json \
             build/tree-village --preview
