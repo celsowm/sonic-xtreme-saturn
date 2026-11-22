@@ -1,0 +1,32 @@
+{
+  "sectors": 5,
+  "routes": 6,
+  "landmarks": 12,
+  "main_stations": 25,
+  "mode": "offline-art-concept-only",
+  "visual_pass": "tropical-setpieces-v2",
+  "key_art_objects": [
+    "ridge_hex_loop_angular_checker_loop",
+    "bamboo_village_1_canopy_platform",
+    "bamboo_suspension_bridge_12_structural_deck",
+    "bamboo_halfpipe_main_gutter",
+    "gully_current_broad_river",
+    "current_falls_right_water_curtain_0",
+    "jade_summit_emerald"
+  ],
+  "mesh_object_count": 638,
+  "mesh_polygon_count": 9824,
+  "note": "Offline render scene; NOT Saturn-exported triangles or gameplay",
+  "blender_art_gate": {
+    "checker_faces_per_sector": {
+      "base": 540,
+      "ridges": 540,
+      "bamboo": 540,
+      "current": 540,
+      "summit": 540
+    },
+    "terrain_faces_total": 2700,
+    "required_landmarks": 4,
+    "visual_only": true
+  }
+}
