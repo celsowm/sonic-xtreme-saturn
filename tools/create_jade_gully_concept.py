@@ -643,16 +643,36 @@ def main():
         'required_landmarks': len(required),
         'visual_only': True,
     }
+    region_cameras=jade_concept_presentation.create_region_cameras(
+        data,sys.modules[__name__])
+    report['preview_files']=[
+        'jade-gully-concept-isometric.png',
+        'jade-gully-concept-top.png',
+    ]+['jade-gully-concept-'+sec['id']+'.png' for sec in data['sectors']]
     (out/'concept-contract.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
-    bpy.ops.wm.save_as_mainfile(filepath=str(out/'jade_gully_act1_concept.blend'))
     scene=bpy.context.scene
+    bpy.ops.wm.save_as_mainfile(filepath=str(out/'jade_gully_act1_concept.blend'))
     for key,cam in (('isometric',camera),('top',top)):
         scene.camera=cam
         scene.render.filepath=str(out/('jade-gully-concept-'+key+'.png'))
         bpy.ops.render.render(write_still=True)
+    # Five lightweight close-ups make the loops, huts and waterfalls
+    # inspectable without the wide view compressing them to tiny shapes.
+    original=(scene.render.resolution_x,scene.render.resolution_y,
+              scene.render.resolution_percentage,scene.cycles.samples)
+    scene.render.resolution_x=1600
+    scene.render.resolution_y=900
+    scene.render.resolution_percentage=70
+    scene.cycles.samples=min(18,original[3])
+    for name,cam in region_cameras.items():
+        scene.camera=cam
+        scene.render.filepath=str(out/('jade-gully-concept-'+name+'.png'))
+        bpy.ops.render.render(write_still=True)
+    (scene.render.resolution_x,scene.render.resolution_y,
+     scene.render.resolution_percentage,scene.cycles.samples)=original
     scene.camera=camera
     bpy.ops.wm.save_as_mainfile(filepath=str(out/'jade_gully_act1_concept.blend'))
-    print('[jade concept] 5-sectors; offline editable Blender + 2 previews:',out)
+    print('[jade concept] 5 regions, editable Blender + 7 actual rendered previews:',out)
     print('[jade concept] DOES NOT export to Saturn; gameplay/collision and sector LOD pending')
 
 if __name__=='__main__':
