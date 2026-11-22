@@ -77,6 +77,25 @@ def validate(data):
     if any(x < 210 or x > 238 for x, y, z in rim_points):
         raise ValueError('canyon rim must stay on the far bank')
 
+    # The canyon's blue water must be a narrow continuous stream, not the
+    # old full-size blue rectangle concealing all of the terraced landings.
+    river = data.get('canyon_river')
+    if not isinstance(river, dict):
+        raise ValueError('missing winding canyon river')
+    river_points = [point(p, 2) for p in river.get('stations', [])]
+    widths = river.get('widths', [])
+    if len(river_points) < 5 or len(widths) != len(river_points):
+        raise ValueError('canyon river stations and widths must match')
+    if any(type(w) not in (int, float) or not math.isfinite(w) or
+           not 6 <= w <= 28 for w in widths):
+        raise ValueError('canyon river is too wide or invalid')
+    if any(b[1] <= a[1] or math.dist(a, b) > 35
+           for a, b in zip(river_points, river_points[1:])):
+        raise ValueError('canyon river must be continuous and progress along Y')
+    if any(x < 140 or x > 210 or y < 120 or y > 290
+           for x, y in river_points):
+        raise ValueError('canyon river must stay within the basin')
+
     routes = data['routes']
     if not routes or routes[0]['id'] != 'main' or routes[0]['kind'] != 'main' or \
             len({r['id'] for r in routes}) != len(routes):
