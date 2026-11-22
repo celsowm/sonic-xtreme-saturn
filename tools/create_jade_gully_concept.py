@@ -395,11 +395,11 @@ def setup_camera_and_lighting(data, materials):
     scene.render.resolution_y=data['render']['height']
     scene.render.resolution_percentage=65
     scene.render.image_settings.file_format='PNG'
-    try:
-        scene.render.engine='BLENDER_EEVEE_NEXT'
-    except (TypeError, ValueError):
-        try: scene.render.engine='BLENDER_EEVEE'
-        except (TypeError, ValueError): scene.render.engine='BLENDER_WORKBENCH'
+    # CI runs without a physical GPU: CPU Cycles renders node textures
+    # reliably in background mode, rather than requiring a GL/Eevee context.
+    scene.render.engine='CYCLES'
+    scene.cycles.samples=data['render']['samples']
+    scene.cycles.device='CPU'
     scene.view_settings.view_transform='Standard'
     scene.render.film_transparent=False
     return camera, top
