@@ -96,6 +96,27 @@ def validate(data):
            for x, y in river_points):
         raise ValueError('canyon river must stay within the basin')
 
+    # Staggered ledges in the canyon must stay inside the painted valley
+    # and must not become full-width flat slabs that conceal the river.
+    ledges = data.get('canyon_shelves')
+    if not isinstance(ledges, list) or len(ledges) < 6:
+        raise ValueError('canyon needs at least six authored shelf ledges')
+    ledge_ids = set()
+    for ledge in ledges:
+        name = ledge.get('id')
+        if not name or name in ledge_ids:
+            raise ValueError('canyon ledge IDs must be unique')
+        ledge_ids.add(name)
+        x, y = point(ledge['center'], 2)
+        if not (134 <= x <= 219 and 130 <= y <= 276):
+            raise ValueError('canyon ledge outside painted valley')
+        if len(ledge['size']) != 2 or not all(
+                type(v) in (int, float) and math.isfinite(v)
+                and 12 <= v <= 30 for v in ledge['size']):
+            raise ValueError('canyon ledges must be narrow')
+        if type(ledge['top']) not in (int, float) or not 18 <= ledge['top'] <= 75:
+            raise ValueError('canyon ledges must be stepped above the river')
+
     routes = data['routes']
     if not routes or routes[0]['id'] != 'main' or routes[0]['kind'] != 'main' or \
             len({r['id'] for r in routes}) != len(routes):
