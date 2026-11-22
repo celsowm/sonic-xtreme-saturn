@@ -34,6 +34,68 @@ def rounded_rect(cx, cy, width, depth, corner, segments=3):
     return points
 
 
+
+def organic_footprint(cx, cy, width, depth, seed=0, segments=28, roughness=.12):
+    """CCW irregular superellipse for scenic cliffs, with bounded authored size.
+
+    Unlike rounded_rect this varies outline at multiple frequencies and uses
+    different phases per terrace. It stays star-shaped (no self intersection),
+    centred and inside the specified XY bounding rectangle. ART geometry only.
+    """
+    if width <= 0 or depth <= 0 or segments < 12 or not 0 <= roughness <= .24:
+        raise ValueError('bad organic footprint')
+    phase = (int(seed) % 997) * (math.tau / 997)
+    power = 2.0 / (2.8 + (int(seed) % 5) * .18)
+    points = []
+    for k in range(segments):
+        a = math.tau * k / segments
+        # Small-scale coastline irregularity, not random spikes.
+        wobble = 1 - roughness * (.48 + .28 * math.sin(3 * a + phase)
+                                    + .24 * math.sin(5 * a - 1.3 * phase))
+        wobble = min(1.0, max(.75, wobble))
+        c, sn = math.cos(a), math.sin(a)
+        x = cx + width * .5 * math.copysign(abs(c) ** power, c) * wobble
+        y = cy + depth * .5 * math.copysign(abs(sn) ** power, sn) * wobble
+        points.append((x, y))
+    return points
+
+
+def stratified_plateau(polygon, top, bottom, lip=1.4):
+    """Organic grass ledge with overhang, sloping ochre wall and rocky foot.
+
+    Ring levels are not extruded vertical copies: an offset lip, narrowing
+    midsection and tapered foot break the shoebox silhouette. Materials:
+    0 grass, 1 checker wall, 2 rocky lower wall/cap. All faces point outward.
+    """
+    if len(polygon) < 12 or polygon_area(polygon) <= 0 or top - bottom <= 10:
+        raise ValueError('bad plateau footprint/height')
+    if lip <= 0 or lip >= (top - bottom) * .25:
+        raise ValueError('bad ledge lip')
+    cx = sum(x for x, _ in polygon) / len(polygon)
+    cy = sum(y for _, y in polygon) / len(polygon)
+    height = top - bottom
+    levels = (
+        (top, 1.0),
+        (top - lip, 1.045),
+        (top - min(height * .32, 17.0), .90),
+        (bottom, .62),
+    )
+    verts = []
+    for z, scale in levels:
+        verts.extend((cx + (x - cx) * scale, cy + (y - cy) * scale, z)
+                     for x, y in polygon)
+    n = len(polygon)
+    faces = [tuple(range(n)), tuple(range(4*n-1, 3*n-1, -1))]
+    mats = [TOP, BOTTOM]
+    for band in range(3):
+        up, low = band * n, (band + 1) * n
+        for i in range(n):
+            j = (i + 1) % n
+            faces.append((low + i, low + j, up + j, up + i))
+            mats.append(SIDE if band < 2 else BOTTOM)
+    return verts, faces, mats
+
+
 def polygon_area(polygon):
     return 0.5 * sum(a[0] * b[1] - b[0] * a[1]
                      for a, b in zip(polygon, polygon[1:] + polygon[:1]))
