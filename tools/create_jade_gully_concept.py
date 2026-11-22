@@ -20,6 +20,7 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.validate_jade_concept import DEFAULT, validate
+from tools import jade_concept_dressing
 
 PI = math.pi
 
@@ -455,13 +456,13 @@ def setup_camera_and_lighting(data, materials):
     sun.data.energy=2.5
     sun.rotation_euler=(math.radians(30),math.radians(-28),math.radians(20))
     # View from the side of progression, so +Y spans the panoramic frame.
-    bpy.ops.object.camera_add(location=(315,255,280))
+    bpy.ops.object.camera_add(location=(445,98,340))
     camera=bpy.context.object
     camera.name='Concept_Perspective'
     target=Vector((0,258,60))
     camera.rotation_euler=(target-camera.location).to_track_quat('-Z','Y').to_euler()
     camera.data.type='ORTHO'
-    camera.data.ortho_scale=650
+    camera.data.ortho_scale=615
     bpy.context.scene.camera=camera
     bpy.ops.object.camera_add(location=(0,258,520))
     top=bpy.context.object
@@ -503,6 +504,8 @@ def main():
         'water':mat('canyon stream cyan',(.025,.52,.68)),
         'foam':mat('mist and signage',(.90,.96,.92)),
         'gold':mat('rings and main route',(.98,.68,.06),.35),
+        'spring_red':mat('springs — ruby red',(.89,.08,.07),.19),
+        'emerald':mat('Summit emerald reward',(.05,.82,.36),.30),
         'purple':mat('hazard shortcuts',(.62,.18,.75)),
         'cyan':mat('exploration routes',(.08,.68,.88)),
         'route_grass':mat('main path terrain',(.33,.53,.15)),
@@ -540,13 +543,14 @@ def main():
             x,y,z=route['points'][i]
             ring('ring_'+route['id']+'_'+str(i),x,y,z+4,palette)
     build_landmarks(data,palette)
+    jade_concept_dressing.decorate(data,palette,sys.modules[__name__])
     # Canyon river current and a clearer water path between the waterfalls.
     water_route=[(39,336,30),(38,354,24),(23,373,22),(33,389,27),(16,402,38)]
     line('gully_current_river',water_route,palette['water'],2.6)
     for sector in data['sectors']:
         y=(sector['y_range'][0]+sector['y_range'][1])*.5
         label('sector_tag_'+sector['id'],sector['title'],
-              (-sector['width']*.93,y,at_z(-sector['width']*.93,y,data)+25),palette,4.7)
+              (sector['width']*.90,y,at_z(sector['width']*.90,y,data)+72),palette,9.0)
     camera, top=setup_camera_and_lighting(data,palette)
     for obj in bpy.data.objects:
         if obj.get('stage_role')=='concept_editor_annotation':
