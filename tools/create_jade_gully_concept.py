@@ -337,7 +337,8 @@ def build_landmarks(data, materials):
 
 
 def setup_camera_and_lighting(data, materials):
-    world=bpy.context.scene.world
+    world=bpy.data.worlds.new('Jade Gully Sky')
+    bpy.context.scene.world=world
     world.use_nodes=True
     bg=world.node_tree.nodes.get('Background')
     bg.inputs['Color'].default_value=(.42,.56,.72,1)
@@ -368,9 +369,9 @@ def setup_camera_and_lighting(data, materials):
     scene.render.image_settings.file_format='PNG'
     try:
         scene.render.engine='BLENDER_EEVEE_NEXT'
-    except TypeError:
+    except (TypeError, ValueError):
         try: scene.render.engine='BLENDER_EEVEE'
-        except TypeError: scene.render.engine='BLENDER_WORKBENCH'
+        except (TypeError, ValueError): scene.render.engine='BLENDER_WORKBENCH'
     scene.view_settings.view_transform='Standard'
     scene.render.film_transparent=False
     return camera, top
