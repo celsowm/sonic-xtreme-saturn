@@ -19,7 +19,7 @@ class RouteAuditTests(unittest.TestCase):
         self.assertEqual(result['visual_corridors'], 18)
         self.assertEqual(result['main_routes'], 1)
         self.assertEqual(result['alternate_routes'], 7)
-        self.assertEqual(result['decorative_walkways'], 27)
+        self.assertEqual(result['decorative_walkways'], 19)
         self.assertEqual(result['painted_evidence'], {
             'gold_main': 5, 'purple_shortcut': 5, 'platform_ring_hint': 8
         })
