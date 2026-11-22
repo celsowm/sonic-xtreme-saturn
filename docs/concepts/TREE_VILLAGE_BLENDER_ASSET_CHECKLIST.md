@@ -117,3 +117,23 @@ open -a Blender build/jade-gully-adventure/jade_gully.blend
 ```
 
 This opens the *existing* small adventure test scene **without** producing Tree Village. Once Sprint 1 assets and the sector-aware builder are implemented, the new Tree Village Blender scene can be generated on the Mac. Neither this plan nor the concept image is proof that new 3D source models already exist.
+
+## Implemented source generator (2026-11-21)
+
+The **first authored 50×70 m Blender test cell** is now defined as code, not merely specified in this checklist:
+
+- [`kit-manifest.json`](../../assets/jade-gully/tree-village/kit-manifest.json): **28 authored pieces**, five static X-plane palms, five decorative 2D house facades, main and spring-required upper paths, and seven editor/entity markers.
+- [`tools/create_tree_village_kit.py`](../../tools/create_tree_village_kit.py): creates geometry with independent collision meshes, UVs, seven **original procedural pixel-art source textures** (checker, timber, bark, hut, roof, palm silhouette, spring) packed into a source .blend, camera, lighting and optional overview PNG. **No Blender add-on, network asset, third-party ripped textures or Sega material is used in the generator.**
+- [`tools/validate_tree_village_kit.py`](../../tools/validate_tree_village_kit.py) plus host unit tests: verify the manuscript's typed objects, coordinates, IDs, route joins and runtime honesty.
+- [`scripts/build-tree-village-mac.sh`](../../scripts/build-tree-village-mac.sh): after `git pull --ff-only`, runs validation and Blender in a clean **origin/main worktree**, checks the actual generated face/vertex totals and **commits the .blend, seven PNGs, report and optional preview to main**. It preserves the currently checked-out experimental branch.
+
+**Current code-only estimate:** 308 render triangles across 28 authored definitions, plus separate collision geometry (verified against build limits by the Mac generator before publishing). This is **a standalone test cell**, not 308 faces inserted into the existing 442/448-face adventure build. **Neither the new .blend nor its preview has been run on the user's Blender until the Mac generator finishes.** No in-game Tree Village, camera-following billboards, collision qualification, spring impulses or sector streaming is implied.
+
+Single Mac command after pulling the current branch:
+
+```bash
+cd ~/dev/sonic-xtreme-saturn && git pull --ff-only && bash scripts/build-tree-village-mac.sh
+```
+
+The **first-time output on success** will be `assets/jade-gully/tree-village/tree_village_source.blend` in `main`; this local generation is intentionally needed because the authoring runner currently has no Blender binary. Do not describe an unbuilt .blend as already committed.
+
