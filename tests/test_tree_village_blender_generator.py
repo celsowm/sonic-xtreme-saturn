@@ -23,7 +23,7 @@ class TreeVillageGeneratorTests(unittest.TestCase):
         self.assertTrue({"valley_landmass","hut_supports","trunk","facade","cross_planes"}<=funcs)
         self.assertIn('valley_landmass()\n',self.source)
         self.assertIn('hut_supports()\n',self.source)
-        self.assertIn('"JG_COLLISION","walkable",collision=True',self.source)
+        self.assertIn('"JG_COLLISION", "walkable", collision=True',self.source)
 
     def test_house_and_canopy_textures_are_alpha_cutouts(self):
         for token in ('"facade": create_image(', '"canopy": create_image(',
