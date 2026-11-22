@@ -1,0 +1,68 @@
+name: Jade Gully V5 Blender visual proof
+
+on:
+  push:
+    branches: [work/jade-v5-art-direction]
+    paths:
+      - '.github/workflows/jade-gully-v5-render.yml'
+      - 'tools/create_jade_gully_concept_v4.py'
+      - 'tools/jade_concept_v4_geometry.py'
+      - 'tools/validate_jade_concept_v4.py'
+      - 'assets/levels/jade_gully_concept_v4.json'
+      - 'tests/test_jade_concept_v4.py'
+      - 'tests/test_jade_concept_v5.py'
+      - 'scripts/build-jade-concept-v4-mac.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-review:
+    name: Render actual V5 compare in Blender
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      CI: '1'
+      JADE_V4_QUICK: '1'
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install background Blender for visual evidence
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender
+          blender --version | head -1
+      - name: Render V5 painting comparison, with source tests
+        run: |
+          bash scripts/build-jade-concept-v4-mac.sh
+      - name: Verify actual images and reproducible scene
+        run: |
+          set -euo pipefail
+          DIR=build/jade-gully-concept-v4
+          test -s "$DIR/jade-gully-v4-map.png"
+          test -s "$DIR/jade-gully-v4-compare.png"
+          test -s "$DIR/jade_gully_act1_concept_v4.blend"
+          test -s "$DIR/concept-v4-contract.json"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('build/jade-gully-concept-v4/concept-v4-contract.json')
+          data=json.loads(p.read_text())
+          assert data.get('regions') == 5
+          assert 'review' in data
+          print('Verified actual Blender render:',data.get('blender_version'),
+                'polygons:',data.get('mesh_polygon_count'))
+          PY
+      - name: Upload reference/actual comparison for human review
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: jade-v5-real-blender-review
+          path: |
+            build/jade-gully-concept-v4/jade-gully-v4-map.png
+            build/jade-gully-concept-v4/jade-gully-v4-compare.png
+            build/jade-gully-concept-v4/concept-v4-contract.json
+            build/jade-gully-concept-v4/jade_gully_act1_concept_v4.blend
+          retention-days: 14
