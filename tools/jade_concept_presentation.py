@@ -31,7 +31,7 @@ def apply_presentation(data, materials, artist):
     # Move the *visual art* group toward the positive-X camera, leaving the
     # manifest's gameplay-independent source layout unchanged.
     relocations = {
-        "ridge_hex_loop": (46.0, 0.0),
+        "ridge_hex_loop": (63.0, 0.0),
         "ridge_lower_loop": (10.0, 5.0),
         "summit_loop_1": (38.0, 4.0),
         "summit_loop_2": (9.0, 5.0),
@@ -89,9 +89,9 @@ def apply_presentation(data, materials, artist):
     # Make three wide, bright near-bank curtains (YZ plane) visible on the
     # nearer canyon wall, with foam and a splash pool at the base.
     for n, (x, y, top_z, fall_height, width) in enumerate((
-            (77, 343, 54, 37, 18),
-            (82, 376, 48, 46, 22),
-            (76, 402, 61, 43, 15))):
+            (94, 343, 54, 37, 18),
+            (95, 376, 48, 46, 22),
+            (94, 402, 61, 43, 15))):
         vertices = (
             (x, y - width / 2, top_z),
             (x, y + width / 2, top_z),
