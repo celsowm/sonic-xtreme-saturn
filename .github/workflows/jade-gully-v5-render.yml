@@ -54,6 +54,7 @@ jobs:
           test -s "$DIR/jade-gully-v4-map.png"
           test -s "$DIR/jade-gully-v4-routes.png"
           test -s "$DIR/jade-gully-v4-sky_bridges.png"
+          test -s "$DIR/jade-gully-v4-canyon_basin.png"
           test -s "$DIR/jade-gully-v5-navigation.json"
           test -s "$DIR/jade-gully-v4-clean.png"
           test -s "$DIR/jade-gully-v4-compare.png"
@@ -87,6 +88,7 @@ jobs:
             build/jade-gully-concept-v4/jade-gully-v4-map.png
             build/jade-gully-concept-v4/jade-gully-v4-routes.png
             build/jade-gully-concept-v4/jade-gully-v4-sky_bridges.png
+            build/jade-gully-concept-v4/jade-gully-v4-canyon_basin.png
             build/jade-gully-concept-v4/jade-gully-v5-navigation.json
             build/jade-gully-concept-v4/jade-gully-v4-clean.png
             build/jade-gully-concept-v4/jade-gully-v4-compare.png
