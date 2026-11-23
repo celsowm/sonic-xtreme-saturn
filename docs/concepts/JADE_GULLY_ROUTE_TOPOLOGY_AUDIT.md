@@ -4,6 +4,35 @@
 
 **Conclusão:** a geometria é mais detalhada, porém o mundo ainda NÃO reproduz as escolhas de navegação da pintura. A rota amarela é só o esqueleto; tracejados roxos são atalhos e anéis/plataformas sugerem outros percursos. **Não confundir uma passarela modelada, um efeito visual ou uma curva pintada com um caminho fisicamente transitável.**
 
+## Correção P4 — eliminar rampas quase verticais no Canyon
+
+A inspeção do render de Canyon Basin do GitHub Actions
+`45175062245` identificou um problema que os 61 testes anteriores não
+detectavam: as três ligações `canyon_stairs_mid`,
+`canyon_stairs_high` e `canyon_stairs_goal` eram subidas em linha
+reta de aproximadamente **59°, 48° e 42°**, respectivamente.
+
+Na V5, cada uma ganhou **dois pontos de retorno `via`**, totalizando
+três trechos de deck com plataformas nos cotovelos. Os trechos têm:
+
+| Subida | Inclinação direta anterior | Inclinações dos três trechos novos |
+|---|---:|---|
+| Canyon intermediário | 59° | 15,4° / 10,5° / 18,3° |
+| Canyon alto | 48,2° | 14,9° / 7,9° / 19,3° |
+| Subida até o GOAL | 42° | 12,7° / 15,9° / 22,6° |
+
+O gerador `cliff_switchback_segments` rejeita qualquer trecho acima
+de **32°** e produz malhas separadas nos cotovelos, evitando uma única
+faixa de geometria distorcida. O validador exige esses pontos de retorno
+no manifesto e impede remover inadvertidamente o desvio e voltar à
+parede de 59°.
+
+**Isso é uma restrição geométrica de protótipo, NÃO uma medição de
+aceleração, aderência, controles, físicas ou colisão do Sonic/Saturn.**
+Os novos segmentos só serão aceitos como caminhos de jogo após teste
+de movimentação e inspeção visual do close-up, sem ocultação por cascatas
+ou paredões.
+
 ## Implementação P3 — rede inferior do Hex + Canyon Basin
 
 **Estado da branch V5 (prévia artística; colisão e física ainda NÃO verificadas):**
