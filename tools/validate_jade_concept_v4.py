@@ -181,12 +181,25 @@ def validate(data):
     unique(tree); check_region(tree, tree['base'])
     for item in data['huts']:
         unique(item); check_region(item, item['deck']); point(item['deck'])
+    canyon_steep = {'canyon_stairs_mid', 'canyon_stairs_high',
+                    'canyon_stairs_goal'}
     for item in data['walkways']:
         unique(item)
         if item['kind'] not in WALKWAY_KINDS:
             raise ValueError('unknown walkway kind')
         if math.dist(point(item['from']), point(item['to'])) < 4:
             raise ValueError('walkway too short')
+        via = item.get('via', [])
+        if item['id'] in canyon_steep and len(via) < 2:
+            raise ValueError('canyon ascent needs switchback landings')
+        if via and item['kind'] != 'stairs':
+            raise ValueError('switchback requires stair walkway')
+        stations = [point(item['from'])] + [point(v) for v in via] + [point(item['to'])]
+        for a, b in zip(stations, stations[1:]):
+            planar = math.hypot(b[0]-a[0], b[1]-a[1])
+            angle = math.degrees(math.atan2(abs(b[2]-a[2]),planar))
+            if item['kind'] == 'stairs' and (planar < 5 or angle > 32):
+                raise ValueError('stair flight too steep or short: ' + item['id'])
     for item in data['clouds']:
         unique(item); check_region(item, item['center'])
     for spring in data['springs']:
