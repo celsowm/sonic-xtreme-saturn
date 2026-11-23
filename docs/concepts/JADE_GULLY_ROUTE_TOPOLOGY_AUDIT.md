@@ -27,6 +27,13 @@ faixa de geometria distorcida. O validador exige esses pontos de retorno
 no manifesto e impede remover inadvertidamente o desvio e voltar à
 parede de 59°.
 
+**Correção do grafo**: `canyon_mid_stairs` também passou a conter os
+DOIS nós intermediários (elevados +0,6 acima do deck) e
+`matching_walkway` compara as arestas com **cada trecho** de `via`.
+Assim, o grafo de rotas não volta a representar a subida de 59° enquanto
+a malha Blender percorre o zigue-zague. Teste de regressão remove
+`via` e exige falha de compilação, não um falso caminho suportado.
+
 **Isso é uma restrição geométrica de protótipo, NÃO uma medição de
 aceleração, aderência, controles, físicas ou colisão do Sonic/Saturn.**
 Os novos segmentos só serão aceitos como caminhos de jogo após teste
