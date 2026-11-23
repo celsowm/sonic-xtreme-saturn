@@ -129,6 +129,25 @@ class OrganicTerrainTests(unittest.TestCase):
         self.assertEqual(faces[0][1], faces[1][0])
         self.assertAlmostEqual(min(p[2] for p in verts), -52)
 
+    def test_far_bank_does_not_occlude_canyon_switchbacks_as_giant_checker_wall(self):
+        stations = [(222,132,31),(224,153,38),(228,176,51),
+                    (231,196,62),(230,216,68)]
+        verts, faces, mats = canyon_rim_wall(stations)
+        n = len(stations)
+        # Old band reached 38 world units in front of its rim and hid
+        # route switchbacks in real rendered proof. V5 keeps it < 20.
+        for band in range(7):
+            for i, station in enumerate(stations):
+                intrusion = station[0] - verts[band*n+i][0]
+                self.assertLess(intrusion, 20.0)
+                self.assertGreater(intrusion, -1.0)
+        # Keep continuous shared faces and foliage seams rather than
+        # eliminating the bank entirely or painting it one flat material.
+        self.assertEqual(faces[0][1],faces[1][0])
+        self.assertEqual(len(verts),9*n)
+        self.assertGreater(mats.count(0),n-1)
+        self.assertIn(2,mats)
+
     def test_canyon_wall_rejects_disconnected_or_invalid_profiles(self):
         with self.assertRaisesRegex(ValueError, 'three'):
             canyon_rim_wall([(220, 130, 31), (220, 150, 32)])
