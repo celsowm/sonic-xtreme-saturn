@@ -835,6 +835,22 @@ def build_props(data, pal):
              major_radius=1.15, minor_radius=.22,
              rotation=(math.pi/2, 0, 0),
              major_segments=14, minor_segments=5)
+    # Collectible-looking ring arcs communicate intended travel and tier
+    # changes much better than drawing railings between airborne islands.
+    # These are only art cues; NO ballistic/Saturn physics is asserted.
+    for transfer in data.get('navigation_transfers', []):
+        a, b = transfer['from'], transfer['to']
+        mode = transfer['mode']
+        count = 1 if mode == 'drop' else 2
+        lift = {'spring': 8.0, 'jump': 4.0, 'drop': 1.5}[mode]
+        for k in range(count):
+            t = (k + 1) / (count + 1)
+            x, y = (a[i] + (b[i] - a[i]) * t for i in (0, 1))
+            z = a[2] + (b[2] - a[2])*t + 3.2 + lift * math.sin(math.pi*t)
+            prim('torus', transfer['id'] + '_air_ring_%d' % k,
+                 (x, y, z), pal['gold'], major_radius=1.05,
+                 minor_radius=.23, rotation=(math.pi/2, 0, 0),
+                 major_segments=14, minor_segments=5)
     for k, (x, y, z) in enumerate(data['springs']):
         prim('cylinder', 'spring_%d_base' % k, (x, y, z + .5), pal['spring_base'], vertices=12, radius=1.8, depth=1.0)
         prim('cylinder', 'spring_%d_pad' % k, (x, y, z + 1.2), pal['spring_top'], vertices=12, radius=1.9, depth=.5)
