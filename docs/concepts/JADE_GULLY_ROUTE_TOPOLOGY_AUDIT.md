@@ -4,6 +4,39 @@
 
 **Conclusão:** a geometria é mais detalhada, porém o mundo ainda NÃO reproduz as escolhas de navegação da pintura. A rota amarela é só o esqueleto; tracejados roxos são atalhos e anéis/plataformas sugerem outros percursos. **Não confundir uma passarela modelada, um efeito visual ou uma curva pintada com um caminho fisicamente transitável.**
 
+## Implementação P3 — rede inferior do Hex + Canyon Basin
+
+**Estado da branch V5 (prévia artística; colisão e física ainda NÃO verificadas):**
+
+- **11 rotas declaradas no total:** 1 principal + 10 alternativas.
+- **20 passarelas com geometria explícita:** os quatro tablados/escadas
+  anteriormente distantes das linhas agora têm trechos correspondentes no
+  grafo; nenhuma das 20 passarelas termina a mais de 6 unidades da linha
+  de alguma rota de apresentação.
+- **11 novos apoios físicos de modelo**, sendo 4 tablados de madeira, 4
+  patamares de rocha sob Hex/entrada de Canyon e 3 apoios rochosos para
+  a transição intermediária.
+- **26 transferências aéreas tipadas** (salto, queda ou mola), cada uma
+  com um nome de pouso e `physics_verified: false`. As novas rotas
+  `hex_lower_underpass`, `canyon_mid_stairs` e `canyon_lower_docks`
+  possuem início e fim em nós da rota principal.
+- **Vista fechada do Canyon Basin obrigatória no Blender CI**, além da
+  vista Sky Bridges, porque o mapa geral esconde erros de ligação entre
+  tablados, degraus e cachoeiras.
+
+**Cuidado: correspondência entre pontes e linhas de rota NÃO comprova
+que Sonic consegue percorrê-las.** Especialmente a escadaria intermediária
+pode ser inclinada demais, as molas ascendentes precisam ser testadas com
+a física real e parte do desvio inferior do Hex cruza a área transformada
+do loop. Esses itens são bloqueadores de jogabilidade, mesmo se o
+Blender produzir uma imagem atraente.
+
+A auditoria de 18 elementos foi registrada sobre a pintura original e
+não se recalcula automaticamente a partir de novas propostas. Portanto,
+não atualizar o histórico para 18/18 apenas porque há mais linhas no
+JSON. A prioridade seguinte é avaliar o close-up do Canyon, revisar
+inclinações, distâncias de salto e superfícies de aterrissagem no Saturn.
+
 ## Correção P2 — revisão visual das travessias (após rejeição do render)
 
 A comparação da pintura original com o render `jade-gully-v4-routes.png`
