@@ -416,6 +416,39 @@ def layered_leaf_canopies(blobs, segments=9):
     return vertices, faces, mats
 
 
+def cumulus_landing_mesh(cx, cy, top, radius, seed=0, segments=20):
+    """Layered cloud landing with a *flat* traversable-looking top silhouette.
+
+    The old cloud stage was an extruded round puck. Five connected contours
+    give cloud banks a low uneven rim, visible blue underside and distinct
+    solid landing surface. This remains concept art, not Saturn collision.
+    Material 0: top, 1: lit rim, 2: blue body, 3: underside.
+    """
+    if not all(math.isfinite(v) for v in (cx, cy, top, radius)):
+        raise ValueError('cloud landing coordinates must be finite')
+    if not 4.5 <= radius <= 9 or segments < 16 or segments > 48:
+        raise ValueError('cloud landing radius or segments out of range')
+    poly = organic_footprint(cx, cy, radius*2, radius*1.86,
+                             seed=seed, segments=segments, roughness=.16)
+    levels = ((top, .94), (top-.62, 1.06), (top-1.70, 1.20),
+              (top-3.22, .98), (top-5.30, .54))
+    verts = []
+    for z, scale in levels:
+        verts.extend((cx + (x-cx)*scale, cy + (y-cy)*scale, z)
+                     for x, y in poly)
+    n = len(poly)
+    faces = [tuple(range(n)), tuple(range(len(levels)*n-1, (len(levels)-1)*n-1, -1))]
+    mats = [0, 3]
+    for band in range(len(levels)-1):
+        hi = band*n
+        low = (band+1)*n
+        for j in range(n):
+            k = (j+1) % n
+            faces.append((low+j, low+k, hi+k, hi+j))
+            mats.append(1 if band==0 else (2 if band < 3 else 3))
+    return verts, faces, mats
+
+
 def village_branch_paths(tree_base, hut_decks):
     """Deterministic woody supports connecting each treehouse to the trunk.
 
