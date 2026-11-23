@@ -15,6 +15,7 @@ MANIFEST = ROOT / "assets/levels/jade_gully_concept_v4.json"
 NEW_BRANCHES = (
     "village_north_decks", "village_lookout_decks",
     "sky_high_e", "sky_middle_d",
+    "hex_lower_underpass", "canyon_mid_stairs", "canyon_lower_docks",
 )
 LOWER_ISLANDS = "lower_islands"
 SUPPORT_TOLERANCE = 1.4
@@ -56,8 +57,32 @@ def validate_transfers(data):
     routes = {r["id"]: r for r in data["routes"]}
     islands = {i["id"]: i for i in data["islands"]}
     cloud_stages = {i["id"]: i for i in data.get("sky_cloud_landings", [])}
+    canyon_pads = {i["id"]: i for i in data.get("canyon_route_landings", [])}
+    canyon_decks = {i["id"]: i for i in data.get("platforms", [])}
     if len(cloud_stages) != len(data.get("sky_cloud_landings", [])):
         raise ValueError("duplicate cloud landing IDs")
+    if len(canyon_pads) != len(data.get("canyon_route_landings", [])):
+        raise ValueError("duplicate canyon landing IDs")
+    if (set(canyon_pads) & (set(cloud_stages) | set(islands) | set(canyon_decks))):
+        raise ValueError("landing identifiers may not overlap")
+    for pad in canyon_pads.values():
+        x, y, z = pad["center"]
+        if not all(math.isfinite(p) for p in (x, y, z)):
+            raise ValueError("nonfinite canyon landing")
+        if not 5 <= pad["radius"] <= 9:
+            raise ValueError("canyon landing must have visible landing radius")
+        if pad.get("material") not in ("wood", "checker_rock"):
+            raise ValueError("invalid canyon landing material")
+        if pad.get("collision_verified") is not False:
+            raise ValueError("canyon landing is unverified for Saturn collision")
+        if pad.get("region") == "hex_loop":
+            if not (56 <= x <= 111 and 152 <= y <= 212):
+                raise ValueError("hex lower landing outside hex footprint")
+        elif pad.get("region") == "canyon_basin":
+            if not (134 <= x <= 219 and 116 <= y <= 286):
+                raise ValueError("canyon landing outside basin")
+        else:
+            raise ValueError("canyon landing in unsupported region")
     for stage in cloud_stages.values():
         if stage.get("structure") != "cloud_landing" or stage.get("tier") not in ("high", "middle", "low"):
             raise ValueError("invalid cloud landing structure/tier")
@@ -86,18 +111,28 @@ def validate_transfers(data):
         else:
             island = islands.get(transfer["landing"])
             cloud = cloud_stages.get(transfer["landing"])
-            if island is None and cloud is None:
-                raise ValueError("aerial transfer has no landing island/cloud stage")
+            pad = canyon_pads.get(transfer["landing"])
+            deck = canyon_decks.get(transfer["landing"])
+            if island is None and cloud is None and pad is None and deck is None:
+                raise ValueError("aerial transfer has no named solid landing surface")
             x, y, z = transfer["to"]
             if island:
                 cx, cy = island["center"]
                 sx, sy = island["size"]
                 if abs(x-cx) > sx*.35 or abs(y-cy) > sy*.35 or abs(z-island["top"]-.6) > 1e-3:
                     raise ValueError("aerial transfer misses its landing island")
-            else:
+            elif cloud:
                 cx, cy, top = cloud["center"]
                 if math.hypot(x-cx, y-cy) > cloud["radius"]*.35 or abs(z-top-.6) > 1e-3:
                     raise ValueError("aerial transfer misses its landing cloud platform")
+            elif pad:
+                cx, cy, top = pad["center"]
+                if math.hypot(x-cx, y-cy) > pad["radius"]*.35 or abs(z-top-.6) > 1e-3:
+                    raise ValueError("aerial transfer misses its landing canyon platform")
+            else:
+                cx, cy, top = deck["deck"]
+                if math.hypot(x-cx, y-cy) > deck["size"]*.5 or abs(z-top-.6) > 1e-3:
+                    raise ValueError("aerial transfer misses its wooden canyon deck")
         # These are design envelopes, deliberately NOT a verified ballistic
         # solution. The source painting shows short hop/spring sequences.
         dx = math.hypot(transfer["to"][0]-transfer["from"][0],
@@ -115,6 +150,7 @@ def compile_navigation(data):
     routes, walkways = data["routes"], data["walkways"]
     transfers = validate_transfers(data)
     cloud_stages = {stage["id"]: stage for stage in data.get("sky_cloud_landings", [])}
+    canyon_pads = {pad["id"]: pad for pad in data.get("canyon_route_landings", [])}
     names = {route["id"] for route in routes}
     required = set(NEW_BRANCHES) | {LOWER_ISLANDS}
     if not required <= names:
@@ -202,6 +238,10 @@ def compile_navigation(data):
             "walkway_count": len(walkways),
             "aerial_transfer_definitions": len(transfers),
             "cloud_landing_platforms": len(cloud_stages),
+            "canyon_landing_platforms": len(canyon_pads),
+            "lower_canyon_branches": sum(r["id"] in (
+                "hex_lower_underpass", "canyon_mid_stairs", "canyon_lower_docks"
+            ) for r in routes),
             "long_unverified_drop_edges": sum(
                 e["mode"] == "drop"
                 and distance(vertices[e["from"]]["position"], vertices[e["to"]]["position"]) > 36
