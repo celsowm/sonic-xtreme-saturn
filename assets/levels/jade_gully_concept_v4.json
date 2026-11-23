@@ -511,6 +511,128 @@
           51.1
         ]
       ]
+    },
+    {
+      "id": "hex_lower_underpass",
+      "kind": "alternate",
+      "visual_only": true,
+      "render_style": "candidate",
+      "evidence": "platform_ring_hint",
+      "points": [
+        [
+          63,
+          180,
+          39
+        ],
+        [
+          81,
+          198,
+          31.6
+        ],
+        [
+          97,
+          184,
+          33.6
+        ],
+        [
+          111,
+          194,
+          40.6
+        ],
+        [
+          135,
+          186,
+          38.6
+        ],
+        [
+          159,
+          178,
+          40.6
+        ]
+      ]
+    },
+    {
+      "id": "canyon_mid_stairs",
+      "kind": "alternate",
+      "visual_only": true,
+      "render_style": "candidate",
+      "evidence": "platform_ring_hint",
+      "points": [
+        [
+          159,
+          178,
+          40.6
+        ],
+        [
+          164,
+          190,
+          40.6
+        ],
+        [
+          168,
+          196,
+          52.6
+        ],
+        [
+          166,
+          200,
+          52.6
+        ]
+      ]
+    },
+    {
+      "id": "canyon_lower_docks",
+      "kind": "alternate",
+      "visual_only": true,
+      "render_style": "candidate",
+      "evidence": "platform_ring_hint",
+      "points": [
+        [
+          159,
+          178,
+          40.6
+        ],
+        [
+          160,
+          187,
+          16.6
+        ],
+        [
+          155,
+          160,
+          13.6
+        ],
+        [
+          168,
+          138,
+          18.6
+        ],
+        [
+          182,
+          166,
+          22.6
+        ],
+        [
+          165,
+          192,
+          16.6
+        ],
+        [
+          178,
+          222,
+          19.6
+        ],
+        [
+          166,
+          210,
+          37.6
+        ],
+        [
+          158,
+          224,
+          62.6
+        ]
+      ]
     }
   ],
   "canyon_shelves": [
@@ -1688,6 +1810,20 @@
       ],
       "curvature": -3,
       "structure": "root_supported"
+    },
+    {
+      "id": "canyon_mid_stairs_exit",
+      "kind": "plank",
+      "from": [
+        168,
+        196,
+        52
+      ],
+      "to": [
+        166,
+        200,
+        52
+      ]
     }
   ],
   "navigation_transfers": [
@@ -1943,6 +2079,193 @@
         39
       ],
       "mode": "jump",
+      "landing": "main",
+      "physics_verified": false
+    },
+    {
+      "id": "hex_under_entry_drop",
+      "route": "hex_lower_underpass",
+      "from": [
+        63,
+        180,
+        39
+      ],
+      "to": [
+        81,
+        198,
+        31.6
+      ],
+      "mode": "drop",
+      "landing": "hex_lower_step_a",
+      "physics_verified": false
+    },
+    {
+      "id": "hex_under_first_jump",
+      "route": "hex_lower_underpass",
+      "from": [
+        81,
+        198,
+        31.6
+      ],
+      "to": [
+        97,
+        184,
+        33.6
+      ],
+      "mode": "jump",
+      "landing": "hex_lower_step_b",
+      "physics_verified": false
+    },
+    {
+      "id": "hex_under_canyon_jump",
+      "route": "hex_lower_underpass",
+      "from": [
+        111,
+        194,
+        40.6
+      ],
+      "to": [
+        135,
+        186,
+        38.6
+      ],
+      "mode": "jump",
+      "landing": "hex_lower_step_d",
+      "physics_verified": false
+    },
+    {
+      "id": "hex_under_rejoin",
+      "route": "hex_lower_underpass",
+      "from": [
+        135,
+        186,
+        38.6
+      ],
+      "to": [
+        159,
+        178,
+        40.6
+      ],
+      "mode": "jump",
+      "landing": "main",
+      "physics_verified": false
+    },
+    {
+      "id": "canyon_mid_side_entry",
+      "route": "canyon_mid_stairs",
+      "from": [
+        159,
+        178,
+        40.6
+      ],
+      "to": [
+        164,
+        190,
+        40.6
+      ],
+      "mode": "jump",
+      "landing": "canyon_middle_stair_start",
+      "physics_verified": false
+    },
+    {
+      "id": "canyon_low_drop",
+      "route": "canyon_lower_docks",
+      "from": [
+        159,
+        178,
+        40.6
+      ],
+      "to": [
+        160,
+        187,
+        16.6
+      ],
+      "mode": "drop",
+      "landing": "canyon_low_dock_south",
+      "physics_verified": false
+    },
+    {
+      "id": "canyon_low_to_deck_c",
+      "route": "canyon_lower_docks",
+      "from": [
+        155,
+        160,
+        13.6
+      ],
+      "to": [
+        168,
+        138,
+        18.6
+      ],
+      "mode": "jump",
+      "landing": "canyon_deck_c",
+      "physics_verified": false
+    },
+    {
+      "id": "canyon_low_c_to_a",
+      "route": "canyon_lower_docks",
+      "from": [
+        168,
+        138,
+        18.6
+      ],
+      "to": [
+        182,
+        166,
+        22.6
+      ],
+      "mode": "jump",
+      "landing": "canyon_deck_a",
+      "physics_verified": false
+    },
+    {
+      "id": "canyon_low_a_to_dock",
+      "route": "canyon_lower_docks",
+      "from": [
+        182,
+        166,
+        22.6
+      ],
+      "to": [
+        165,
+        192,
+        16.6
+      ],
+      "mode": "drop",
+      "landing": "canyon_low_dock_north",
+      "physics_verified": false
+    },
+    {
+      "id": "canyon_low_spring_step",
+      "route": "canyon_lower_docks",
+      "from": [
+        178,
+        222,
+        19.6
+      ],
+      "to": [
+        166,
+        210,
+        37.6
+      ],
+      "mode": "spring",
+      "landing": "canyon_middle_step",
+      "physics_verified": false
+    },
+    {
+      "id": "canyon_low_step_rejoin",
+      "route": "canyon_lower_docks",
+      "from": [
+        166,
+        210,
+        37.6
+      ],
+      "to": [
+        158,
+        224,
+        62.6
+      ],
+      "mode": "spring",
       "landing": "main",
       "physics_verified": false
     }
@@ -2428,6 +2751,140 @@
       "radius": 5.6,
       "tier": "low",
       "structure": "cloud_landing"
+    }
+  ],
+  "canyon_route_landings": [
+    {
+      "id": "hex_lower_step_a",
+      "region": "hex_loop",
+      "center": [
+        81,
+        198,
+        31
+      ],
+      "radius": 6.5,
+      "material": "checker_rock",
+      "collision_verified": false
+    },
+    {
+      "id": "hex_lower_step_b",
+      "region": "hex_loop",
+      "center": [
+        97,
+        184,
+        33
+      ],
+      "radius": 6,
+      "material": "checker_rock",
+      "collision_verified": false
+    },
+    {
+      "id": "hex_lower_step_c",
+      "region": "hex_loop",
+      "center": [
+        111,
+        194,
+        40
+      ],
+      "radius": 6,
+      "material": "checker_rock",
+      "collision_verified": false
+    },
+    {
+      "id": "hex_lower_step_d",
+      "region": "canyon_basin",
+      "center": [
+        135,
+        186,
+        38
+      ],
+      "radius": 7,
+      "material": "checker_rock",
+      "collision_verified": false
+    },
+    {
+      "id": "canyon_low_dock_south",
+      "region": "canyon_basin",
+      "center": [
+        160,
+        187,
+        16
+      ],
+      "radius": 5.8,
+      "material": "wood",
+      "collision_verified": false
+    },
+    {
+      "id": "canyon_low_dock_west",
+      "region": "canyon_basin",
+      "center": [
+        155,
+        160,
+        13
+      ],
+      "radius": 5.8,
+      "material": "wood",
+      "collision_verified": false
+    },
+    {
+      "id": "canyon_low_dock_north",
+      "region": "canyon_basin",
+      "center": [
+        165,
+        192,
+        16
+      ],
+      "radius": 5.8,
+      "material": "wood",
+      "collision_verified": false
+    },
+    {
+      "id": "canyon_low_dock_east",
+      "region": "canyon_basin",
+      "center": [
+        178,
+        222,
+        19
+      ],
+      "radius": 5.8,
+      "material": "wood",
+      "collision_verified": false
+    },
+    {
+      "id": "canyon_middle_step",
+      "region": "canyon_basin",
+      "center": [
+        166,
+        210,
+        37
+      ],
+      "radius": 7,
+      "material": "checker_rock",
+      "collision_verified": false
+    },
+    {
+      "id": "canyon_middle_stair_start",
+      "region": "canyon_basin",
+      "center": [
+        164,
+        190,
+        40
+      ],
+      "radius": 5.5,
+      "material": "checker_rock",
+      "collision_verified": false
+    },
+    {
+      "id": "canyon_middle_stair_exit",
+      "region": "canyon_basin",
+      "center": [
+        168,
+        196,
+        52
+      ],
+      "radius": 5.5,
+      "material": "checker_rock",
+      "collision_verified": false
     }
   ]
 }
