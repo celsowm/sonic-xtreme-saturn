@@ -1,6 +1,7 @@
 """Presentation graph checks: 3D anchors and explicit alternate branches."""
 import copy
 import json
+import math
 import unittest
 
 from tools.compile_jade_navigation_v5 import (MANIFEST, NEW_BRANCHES,
@@ -176,6 +177,34 @@ class NavigationV5Tests(unittest.TestCase):
                    if p["id"] == "hex_lower_step_a")
         pad["center"][0] += 8
         with self.assertRaisesRegex(ValueError, "misses its landing canyon"):
+            compile_navigation(bad)
+
+    def test_canyon_mid_graph_follows_all_three_hairpin_flights(self):
+        route = next(r for r in self.manifest["routes"]
+                     if r["id"] == "canyon_mid_stairs")
+        stairs = next(w for w in self.manifest["walkways"]
+                      if w["id"] == "canyon_stairs_mid")
+        self.assertEqual(len(route["points"]), 6)
+        via = stairs["via"]
+        self.assertEqual(route["points"][2:4],
+                         [[x,y,z+.6] for x,y,z in via])
+        stair_edges = [(a,b) for a,b in zip(route["points"],route["points"][1:])
+                       if matching_walkway(a,b,[stairs]) is not None]
+        self.assertEqual(len(stair_edges), 3)
+        for a,b in stair_edges:
+            planar=((a[0]-b[0])**2+(a[1]-b[1])**2)**.5
+            deg=math.degrees(math.atan2(abs(b[2]-a[2]),planar))
+            self.assertLessEqual(deg,32)
+        nav=compile_navigation(self.manifest)
+        stair_ids=[x["walkway_id"] for x in nav["edges"]
+                   if x["route"]=="canyon_mid_stairs"]
+        self.assertEqual(stair_ids.count("canyon_stairs_mid"),3)
+
+    def test_canyon_graph_rejects_shortcut_through_switchback_landing(self):
+        bad=copy.deepcopy(self.manifest)
+        w=next(w for w in bad["walkways"] if w["id"]=="canyon_stairs_mid")
+        w["via"]=[]
+        with self.assertRaisesRegex(ValueError,"unsupported segment"):
             compile_navigation(bad)
 
     def test_mid_stair_branch_rejects_missing_exit_plank(self):
