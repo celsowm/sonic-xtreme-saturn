@@ -240,9 +240,10 @@ def build_palette():
         'falls': waterfall_material('waterfall streaks'),
         'foam': flat('foam and mist', (.90, .96, 1.0), .9, emission=.15),
         'cloud': cloud_material('soft cloud bank'),
-        'cloud_step_top': flat('cloud landing sunlit surface', (.66, .84, .96), .86, emission=.11),
-        'cloud_step_edge': flat('cloud landing layered blue shadow', (.25, .45, .76), .93),
-        'cloud_step_underside': flat('cloud landing deep underside', (.14, .26, .55), .99),
+        'cloud_step_top': flat('cloud landing pale periwinkle surface', (.71, .85, .98), .87, emission=.06),
+        'cloud_step_lip': flat('cloud landing sunlit lip', (.85, .93, 1.0), .87),
+        'cloud_step_edge': flat('cloud landing layered blue shadow', (.26, .48, .75), .93),
+        'cloud_step_underside': flat('cloud landing deep underside', (.14, .26, .50), .99),
         'monitor': flat('item monitor casing', (.70, .72, .78), .35, metallic=.4),
         'screen': flat('item monitor screen', (.10, .45, 1.0), .2, emission=1.2),
         'star': flat('bonus star', (1.0, .80, .10), .3, emission=.8, metallic=.3),
@@ -811,12 +812,11 @@ def build_props(data, pal):
         x, y, z = stage['center']
         radius = stage['radius']
         seed = sum((k+1)*ord(ch) for k,ch in enumerate(stage['id']))
-        outline = geo.organic_footprint(x, y, radius*2.0, radius*1.8,
-                                         seed=seed, segments=20, roughness=.13)
-        verts, faces, mats = geo.prism(outline, z, z-3.4)
+        verts, faces, mats = geo.cumulus_landing_mesh(
+            x, y, z, radius, seed=seed, segments=20)
         mesh(stage['id'] + '_solid_cloud_landing', verts, faces,
-             [pal['cloud_step_top'], pal['cloud_step_edge'],
-              pal['cloud_step_underside']], mats)
+             [pal['cloud_step_top'], pal['cloud_step_lip'],
+              pal['cloud_step_edge'], pal['cloud_step_underside']], mats)
         # Slender lateral wisps soften the cloud edge WITHOUT covering the
         # landing plane. Their centers remain well under the platform rim.
         lower_puffs = []
@@ -828,15 +828,13 @@ def build_props(data, pal):
                                 1.25, 1.20, .28, 0))
         blob_field(stage['id'] + '_mist_fringe', lower_puffs,
                    [pal['cloud']], 1)
-        # A few suspended rings show the tiny playable-looking patch,
-        # without an opaque navigation line between cloud platforms.
-        for k in range(2):
-            px = x + (k-.5)*radius*.40
-            prim('torus', stage['id'] + '_ring_' + str(k),
-                 (px, y, z + 3.0), pal['gold'],
-                 major_radius=.9, minor_radius=.19,
-                 rotation=(math.pi/2, 0, 0),
-                 major_segments=12, minor_segments=5)
+        # A single conspicuous ring marks the centre of the landing
+        # instead of two tiny circles that disappear among white puffs.
+        prim('torus', stage['id'] + '_landing_ring',
+             (x, y, z + 3.0), pal['gold'],
+             major_radius=1.15, minor_radius=.22,
+             rotation=(math.pi/2, 0, 0),
+             major_segments=14, minor_segments=5)
     for k, (x, y, z) in enumerate(data['springs']):
         prim('cylinder', 'spring_%d_base' % k, (x, y, z + .5), pal['spring_base'], vertices=12, radius=1.8, depth=1.0)
         prim('cylinder', 'spring_%d_pad' % k, (x, y, z + 1.2), pal['spring_top'], vertices=12, radius=1.9, depth=.5)
@@ -1062,8 +1060,16 @@ def build_vegetation(data, pal):
     leafy_field('underbridge_jungle_canopy', understorey,
                 [pal['jungle'], pal['jungle_light']])
     # Small intermittent blue-grey mist banks on top of the dark valley.
-    # Shrinking their footprint makes waterfalls and island undersides
-    # readable; they MUST NOT fill the entire painted canyon as white foam.
+    # Clear visible breathing space around each named aerial touchdown;
+    # otherwise extra random foam hides the actual jump chain.
+    sky_landing_clearance = [
+        (p['center'][0], p['center'][1], p['radius'] + 9.0)
+        for p in data.get('sky_cloud_landings', [])
+    ]
+    sky_landing_clearance += [
+        (i['center'][0], i['center'][1], 10.0)
+        for i in data['islands'] if i['region'] == 'sky_bridges'
+    ]
     sea = []
     for gx in range(-44, 130, 8):
         for gy in range(58, 256, 8):
@@ -1071,6 +1077,8 @@ def build_vegetation(data, pal):
             if j < .91:
                 continue
             x, y = gx + (j - .5) * 5, gy + (rnd('sy', gx + gy) - .5) * 5
+            if any(math.hypot(x-a, y-b) < rad for a,b,rad in sky_landing_clearance):
+                continue
             sea.append((x, y, CLOUD_SEA_Z + j * 4,
                         4.5 + j * 1.0, 1.7, 1.5, .23, 0))
             if rnd('sea_puff', gx * 31 + gy * 17) > .91:
