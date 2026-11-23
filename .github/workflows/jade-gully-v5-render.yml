@@ -67,9 +67,11 @@ jobs:
           assert data.get('regions') == 5
           assert 'review' in data
           nav=json.loads(Path('build/jade-gully-concept-v4/jade-gully-v5-navigation.json').read_text())
-          assert nav['summary']['alternate_count'] >= 7
-          assert nav['summary']['supported_edges'] >= 7
-          assert nav['summary']['aerial_transfer_edges'] == 15
+          assert nav['summary']['alternate_count'] == 10
+          assert nav['summary']['canyon_landing_platforms'] == 11
+          assert nav['summary']['lower_canyon_branches'] == 3
+          assert nav['summary']['supported_edges'] >= 10
+          assert nav['summary']['aerial_transfer_edges'] == 26
           assert nav['summary']['cloud_landing_platforms'] == 6
           assert all(not edge['physics_verified'] for edge in nav['edges'])
           assert all(not edge['collision_verified'] for edge in nav['edges'])
