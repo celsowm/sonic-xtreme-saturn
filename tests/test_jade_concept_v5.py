@@ -8,7 +8,7 @@ from tools.validate_jade_concept_v4 import DEFAULT, validate
 
 from tools.jade_concept_v4_geometry import (
     bridge_deck, canyon_rim_wall, organic_footprint, polygon_area, river_ribbon,
-    layered_leaf_canopies, scenic_walkway_stations, stratified_plateau, treehouse_thatch_roof,
+    cumulus_landing_mesh, layered_leaf_canopies, scenic_walkway_stations, stratified_plateau, treehouse_thatch_roof,
     village_branch_paths,
 )
 
@@ -255,6 +255,36 @@ class OrganicTerrainTests(unittest.TestCase):
             scenic_walkway_stations((0,0,0),(10,0,2),'jump')
         with self.assertRaisesRegex(ValueError, 'too close'):
             scenic_walkway_stations((0,0,0),(0,0,20),'stairs')
+
+
+    def test_cumulus_landing_has_broad_flat_top_and_stratified_soft_lip(self):
+        v, f, m = cumulus_landing_mesh(-7, 164, 46, 6.3, seed=123)
+        n = 20
+        self.assertEqual(len(v), n*5)
+        self.assertEqual(len(f), 2 + 4*n)
+        self.assertEqual(len(m), len(f))
+        self.assertEqual(set(m), {0, 1, 2, 3})
+        self.assertEqual(len(f[0]), n)
+        self.assertTrue(all(p[2] == 46 for p in v[:n]))
+        self.assertEqual({round(p[2], 2) for p in v}, {46, 45.38, 44.3, 42.78, 40.7})
+        # Sky cloud stages now have a readable overhang, not a rigid puck.
+        def avg_radius(ring):
+            return sum(math.hypot(p[0]+7, p[1]-164)
+                       for p in v[ring*n:(ring+1)*n])/n
+        self.assertGreater(avg_radius(2), avg_radius(0))
+        self.assertLess(avg_radius(4), avg_radius(0))
+        self.assertGreater(self._normal_z(v, f[0]), 0)
+        self.assertLess(self._normal_z(v, f[1]), 0)
+        self.assertEqual((v, f, m), cumulus_landing_mesh(-7, 164, 46, 6.3, seed=123))
+        self.assertNotEqual(v, cumulus_landing_mesh(-7, 164, 46, 6.3, seed=124)[0])
+
+    def test_cumulus_landing_rejects_invalid_footprints(self):
+        with self.assertRaisesRegex(ValueError, 'radius'):
+            cumulus_landing_mesh(0, 0, 10, 1)
+        with self.assertRaisesRegex(ValueError, 'radius'):
+            cumulus_landing_mesh(0, 0, 10, 6, segments=7)
+        with self.assertRaisesRegex(ValueError, 'finite'):
+            cumulus_landing_mesh(float('nan'), 0, 10, 6)
 
 
 if __name__ == '__main__':
