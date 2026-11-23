@@ -246,6 +246,35 @@ def scenic_walkway_stations(start, end, kind, curvature=0.0, segments=12):
     return stations
 
 
+def cliff_switchback_segments(stations, kind='stairs', maximum_angle=32.0):
+    """Return individual continuous gentle-grade runs between cliff landings.
+
+    A line linking z=40 to z=52 in a 7m horizontal span is a 59-degree
+    wall, not a Sonic run. This builder requires authored switchback stations
+    that make EVERY stair run <= maximum_angle, then leaves each run as a
+    separate meshed ribbon with a real landing pad at a change of direction.
+    It is not a Saturn collision or acceleration model.
+    """
+    if kind != 'stairs' or len(stations) < 4:
+        raise ValueError('switchback requires stairs with two or more intermediate landings')
+    if not 12 <= maximum_angle <= 35:
+        raise ValueError('unsupported switchback angle limit')
+    if any(len(p) != 3 or not all(math.isfinite(v) for v in p) for p in stations):
+        raise ValueError('nonfinite switchback station')
+    legs = []
+    for k, (a, b) in enumerate(zip(stations, stations[1:])):
+        planar = math.hypot(b[0]-a[0], b[1]-a[1])
+        angle = math.degrees(math.atan2(abs(b[2]-a[2]), planar))
+        if planar < 5 or angle > maximum_angle:
+            raise ValueError('cliff switchback leg too steep or too short')
+        length = min(1.4, planar*.035)
+        bend = length * (1 if k%2 else -1)
+        legs.append(scenic_walkway_stations(
+            a, b, kind, curvature=bend,
+            segments=max(8, min(22, int(planar/1.8)))))
+    return legs
+
+
 def bridge_deck(stations, width=7.0, thickness=3.0):
     """Solid, visibly connected approach deck following authored route points.
 
