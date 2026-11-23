@@ -1548,9 +1548,11 @@ def main():
         shoot('top', cams['top'], True)
     scene.render.resolution_x, scene.render.resolution_y = 1280, 720
     scene.cycles.samples = min(32, data['render']['samples'])
-    # The Sky Bridges close-up is a mandatory gate even in CI quick mode:
-    # a whole-map render hides landing gaps and cloud platform silhouettes.
-    regions_to_shoot = ([next(r for r in data['regions'] if r['id'] == 'sky_bridges')]
+    # Mandate close-ups for both navigation bottlenecks in CI quick mode.
+    # The overview cannot show whether canyon docks and lower Hex steps
+    # actually touch landings, just as it hides gaps among sky clouds.
+    regions_to_shoot = ([r for r in data['regions']
+                         if r['id'] in ('sky_bridges', 'canyon_basin')]
                         if quick else data['regions'])
     for region in regions_to_shoot:
         shoot(region['id'], cams[region['id']], False)
@@ -1563,11 +1565,12 @@ def main():
     report['preview_files'] = (['jade-gully-v4-map.png', 'jade-gully-v4-routes.png',
                                 'jade-gully-v4-clean.png', 'jade-gully-v4-compare.png',
                                 'jade-gully-v4-sky_bridges.png',
+                                'jade-gully-v4-canyon_basin.png',
                                 'jade-gully-v5-navigation.json'] +
                                ([] if quick else
                                 ['jade-gully-v4-top.png'] +
                                 ['jade-gully-v4-%s.png' % r['id'] for r in data['regions']
-                                 if r['id'] != 'sky_bridges']))
+                                 if r['id'] not in ('sky_bridges','canyon_basin')]))
     (out / 'concept-v4-contract.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     bpy.ops.wm.save_as_mainfile(filepath=str(out / 'jade_gully_act1_concept_v4.blend'))
     print('[jade v4] painting-faithful concept written to', out)
