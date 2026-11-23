@@ -18,8 +18,8 @@ class RouteAuditTests(unittest.TestCase):
         result = audit(self.manifest, self.inventory)
         self.assertEqual(result['visual_corridors'], 18)
         self.assertEqual(result['main_routes'], 1)
-        self.assertEqual(result['alternate_routes'], 7)
-        self.assertEqual(result['decorative_walkways'], 19)
+        self.assertEqual(result['alternate_routes'], 10)
+        self.assertEqual(result['decorative_walkways'], 20)
         self.assertEqual(result['painted_evidence'], {
             'gold_main': 5, 'purple_shortcut': 5, 'platform_ring_hint': 8
         })
@@ -38,16 +38,12 @@ class RouteAuditTests(unittest.TestCase):
     def test_decorative_walkways_do_not_count_as_route_graph(self):
         result = audit(self.manifest, self.inventory)
         far = result['walkway_endpoints_over_6_world_units_from_any_route_centerline']
-        self.assertEqual(len(far), 4)
-        missing = {x['id'] for x in far}
-        self.assertNotIn('village_rope_north', missing)
-        self.assertNotIn('village_rope_lookout', missing)
-        self.assertIn('canyon_dock_walk', missing)
-        self.assertIn('canyon_stairs_mid', missing)
-        self.assertIn('canyon_dock_a', missing)
-        self.assertIn('canyon_dock_b', missing)
-        for x in far:
-            self.assertTrue(x['from_distance'] > 6 or x['to_distance'] > 6)
+        # All bridge endpoints are now within six world units of SOME
+        # authored presentation route segment, including Canyon Basin.
+        # This does NOT certify physical transitions or Saturn collision.
+        self.assertEqual(far, [])
+        self.assertEqual(result['alternate_routes'], 10)
+        self.assertEqual(result['decorative_walkways'], 20)
 
     def test_segment_projection_is_true_distance_not_nearest_station(self):
         self.assertAlmostEqual(
