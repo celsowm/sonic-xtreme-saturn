@@ -207,6 +207,27 @@ class NavigationV5Tests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"unsupported segment"):
             compile_navigation(bad)
 
+    def test_gold_main_route_follows_both_upper_rock_switchbacks(self):
+        # Main previously jumped diagonally past the high and goal
+        # stairs even though the Blender meshes had proper hairpins.
+        nav = compile_navigation(self.manifest)
+        main_edges = [e for e in nav["edges"] if e["route"] == "main"]
+        self.assertEqual(len(self.manifest["routes"][0]["points"]), 40)
+        for stair_name in ("canyon_stairs_high", "canyon_stairs_goal"):
+            legs = [e for e in main_edges if e["walkway_id"] == stair_name]
+            self.assertEqual(len(legs), 3, stair_name)
+            self.assertTrue(all(e["mode"] == "stairs" for e in legs))
+            self.assertTrue(all(not e["collision_verified"] for e in legs))
+
+    def test_gold_main_route_cannot_cut_switchback_corner(self):
+        bad = copy.deepcopy(self.manifest)
+        stair = next(w for w in bad["walkways"]
+                     if w["id"] == "canyon_stairs_high")
+        point = [x if i < 2 else x+.6 for i,x in enumerate(stair["via"][0])]
+        bad["routes"][0]["points"].remove(point)
+        with self.assertRaisesRegex(ValueError, "bypasses physical canyon switchback"):
+            compile_navigation(bad)
+
     def test_mid_stair_branch_rejects_missing_exit_plank(self):
         bad = copy.deepcopy(self.manifest)
         bad["walkways"] = [
