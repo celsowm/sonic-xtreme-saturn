@@ -29,11 +29,16 @@ def matching_walkway(a, b, walkways, tolerance=SUPPORT_TOLERANCE):
     """Match a route edge to TWO walkway endpoints, in either direction."""
     matches = []
     for walkway in walkways:
-        p, q = walkway["from"], walkway["to"]
-        error = min(max(distance(a, p), distance(b, q)),
-                    max(distance(a, q), distance(b, p)))
-        if error <= tolerance:
-            matches.append((error, walkway))
+        # Authored hairpin staircases are multiple real runs, NOT one
+        # straight line from first to last landing. Match each run
+        # independently against the route graph, including the via points.
+        stations = [walkway["from"], *walkway.get("via", []),
+                    walkway["to"]]
+        for p, q in zip(stations, stations[1:]):
+            error = min(max(distance(a, p), distance(b, q)),
+                        max(distance(a, q), distance(b, p)))
+            if error <= tolerance:
+                matches.append((error, walkway))
     return min(matches, key=lambda pair: pair[0])[1] if matches else None
 
 
