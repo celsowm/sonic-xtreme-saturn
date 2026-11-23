@@ -8,7 +8,7 @@ from tools.validate_jade_concept_v4 import DEFAULT, validate
 
 from tools.jade_concept_v4_geometry import (
     bridge_deck, canyon_rim_wall, organic_footprint, polygon_area, river_ribbon,
-    cumulus_landing_mesh, layered_leaf_canopies, scenic_walkway_stations, stratified_plateau, treehouse_thatch_roof,
+    cliff_switchback_segments, cumulus_landing_mesh, layered_leaf_canopies, scenic_walkway_stations, stratified_plateau, treehouse_thatch_roof,
     village_branch_paths,
 )
 
@@ -285,6 +285,45 @@ class OrganicTerrainTests(unittest.TestCase):
             cumulus_landing_mesh(0, 0, 10, 6, segments=7)
         with self.assertRaisesRegex(ValueError, 'finite'):
             cumulus_landing_mesh(float('nan'), 0, 10, 6)
+
+
+    def test_canyon_switchbacks_replace_impossible_straight_stairs(self):
+        manifest = json.loads(DEFAULT.read_text(encoding='utf-8'))
+        names = ('canyon_stairs_mid','canyon_stairs_high','canyon_stairs_goal')
+        for name in names:
+            w = next(w for w in manifest['walkways'] if w['id'] == name)
+            direct = [w['from'], w['to']]
+            rise = abs(direct[1][2]-direct[0][2])
+            length = math.dist(direct[0][:2], direct[1][:2])
+            self.assertGreater(math.degrees(math.atan2(rise,length)), 32)
+            stations = [w['from'], *w['via'], w['to']]
+            legs = cliff_switchback_segments(stations)
+            self.assertEqual(len(legs), 3)
+            self.assertEqual(legs[0][0], tuple(w['from']))
+            self.assertEqual(legs[-1][-1], tuple(w['to']))
+            for i, leg in enumerate(legs):
+                self.assertEqual(leg[0], tuple(stations[i]))
+                self.assertEqual(leg[-1], tuple(stations[i+1]))
+                planar = math.dist(stations[i][:2],stations[i+1][:2])
+                angle = math.degrees(math.atan2(
+                    abs(stations[i+1][2]-stations[i][2]),planar))
+                self.assertLessEqual(angle, 32)
+
+    def test_canyon_grade_gate_rejects_straight_wall_or_broken_via(self):
+        manifest = json.loads(DEFAULT.read_text(encoding='utf-8'))
+        bad = copy.deepcopy(manifest)
+        item = next(w for w in bad['walkways'] if w['id'] == 'canyon_stairs_mid')
+        item.pop('via')
+        with self.assertRaisesRegex(ValueError, 'switchback landings'):
+            validate(bad)
+        bad = copy.deepcopy(manifest)
+        item = next(w for w in bad['walkways'] if w['id'] == 'canyon_stairs_mid')
+        item['via'][0][2] = 62
+        with self.assertRaisesRegex(ValueError, 'too steep'):
+            validate(bad)
+        with self.assertRaisesRegex(ValueError, 'too steep'):
+            cliff_switchback_segments([[164,190,40],[168,196,52],
+                                       [175,200,55],[180,220,60]])
 
 
 if __name__ == '__main__':
