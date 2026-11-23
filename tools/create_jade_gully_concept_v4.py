@@ -911,6 +911,44 @@ def build_canyon_details(data, pal):
         palm('canyon_shelf_palm_' + ledge['id'], x+width*.13,
              y+depth*.12, top, 8.5+3*rnd(ledge['id']), pal)
     basin = next(p['z'] for p in data['pools'] if p['id'] == 'canyon_basin_water')
+    # Lower route junctions are actual modelled landing surfaces, NOT
+    # glowing path overlays. The old Canyon had docks with empty ends
+    # and no stone steps between the levels. These pads form a visible
+    # staging chain under Hex and through the lower river basin.
+    for pad in data.get('canyon_route_landings', []):
+        x, y, z = pad['center']
+        radius = pad['radius']
+        seed = sum((k+1)*ord(ch) for k,ch in enumerate(pad['id']))
+        if pad['material'] == 'wood':
+            prim('cylinder', pad['id'] + '_timber_platform',
+                 (x,y,z-.45), pal['wood'],
+                 vertices=12, radius=radius, depth=1.05)
+            supports = []
+            for k in range(4):
+                a = math.tau*(k+.5)/4
+                px, py = x + math.cos(a)*radius*.57, y + math.sin(a)*radius*.57
+                height = max(1.0,z-basin-1.0)
+                supports.append(((px,py,z-1.0-height/2),
+                                 (0,0,1), .58, height, .58, 0))
+            boxes(pad['id'] + '_wood_supports', supports, [pal['wood']])
+        else:
+            footprint = geo.organic_footprint(
+                x, y, radius*2.1, radius*1.75,
+                seed=seed, segments=20, roughness=.17)
+            if pad['region'] == 'hex_loop':
+                verts, faces, mats = geo.floating_island(
+                    footprint, z, 2.0, 12.0)
+                materials = [pal['grass'],pal['cliff'],
+                             pal['underside'],pal['underside']]
+                if in_hex(data, (x,y,z)):
+                    transform,_ = hex_tilt_matrix(data)
+                    verts = [tuple(transform @ Vector(v)) for v in verts]
+            else:
+                verts, faces, mats = geo.stratified_plateau(
+                    footprint, z, z-14, lip=1.0)
+                materials = [pal['grass'],pal['cliff'],pal['underside']]
+            mesh(pad['id'] + '_solid_rock_landing', verts, faces,
+                 materials, mats)
     for d in data['platforms']:
         x, y, z = d['deck']
         s = d['size']
