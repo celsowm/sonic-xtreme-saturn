@@ -734,7 +734,10 @@ def build_walkways(data, pal):
         default_bend = min(3.0, chord * .048) * sign
         bend = w.get('curvature', default_bend)
         width = {'rope':4.5, 'plank':4.5, 'checker':5.2, 'stairs':5.4}[kind]
-        height = 1.4 if kind in ('rope', 'plank', 'stairs') else 2.6
+        rock_climb = (kind == 'stairs' and bool(w.get('via'))
+                      and w['id'].startswith('canyon_stairs_'))
+        height = 2.8 if rock_climb else (
+            1.4 if kind in ('rope', 'plank', 'stairs') else 2.6)
         if w.get('via'):
             stations = tilt_hex_points(data, [w['from']] + w['via'] + [w['to']])
             legs = geo.cliff_switchback_segments(stations, kind)
@@ -744,7 +747,9 @@ def build_walkways(data, pal):
                 segments=max(9, min(28, int(chord/2.6))))]
         path = [p for leg_idx, leg in enumerate(legs)
                 for p in (leg if leg_idx == 0 else leg[1:])]
-        if kind == 'checker':
+        if kind == 'checker' or rock_climb:
+            # Canyon's ascents are grassy checker-cliff trails, not
+            # wooden ladders floating across the waterfall.
             materials = [pal['grass'], pal['underside'], pal['cliff']]
         else:
             materials = [pal['wood'], pal['bark'], pal['plank']]
@@ -757,16 +762,28 @@ def build_walkways(data, pal):
                  verts, faces, materials, mats)
         if w.get('via'):
             for landing_idx, p in enumerate(stations[1:-1]):
-                prim('cylinder', w['id'] + '_turnout_%d' % landing_idx,
-                     (p[0],p[1],p[2]-.45), pal['plank'],
-                     vertices=12, radius=width*.85, depth=1.1)
-                # Short anchorage into the adjacent rock stratum. This is
-                # art support; never use it as exported Saturn collision.
-                tube(w['id'] + '_rock_brace_%d' % landing_idx,
-                     [(p[0]-1.4,p[1]+1.2,p[2]-8),
-                      (p[0],p[1],p[2]-.7)],pal['bark'],.48)
+                if rock_climb:
+                    # Broad grassy switchback shelf with an eroded
+                    # checker-cliff underside: the running surface
+                    # becomes part of the canyon's terraced silhouette.
+                    footprint = geo.organic_footprint(
+                        p[0],p[1],width*2.8,width*2.5,
+                        seed=seed+landing_idx*31,
+                        segments=20,roughness=.14)
+                    v,f,m = geo.stratified_plateau(
+                        footprint,p[2]-.10,p[2]-21,lip=1.2)
+                    mesh(w['id'] + '_stone_turnout_%d' % landing_idx,
+                         v,f,[pal['grass'],pal['cliff'],
+                              pal['underside']],m)
+                else:
+                    prim('cylinder', w['id'] + '_turnout_%d' % landing_idx,
+                         (p[0],p[1],p[2]-.45), pal['plank'],
+                         vertices=12, radius=width*.85, depth=1.1)
+                    tube(w['id'] + '_rock_brace_%d' % landing_idx,
+                         [(p[0]-1.4,p[1]+1.2,p[2]-8),
+                          (p[0],p[1],p[2]-.7)],pal['bark'],.48)
 
-        if kind in ('rope', 'stairs', 'plank'):
+        if kind in ('rope', 'stairs', 'plank') and not rock_climb:
             # Discrete wood grain / non-slip risers on the solid deck, not a
             # disconnected cloud of narrow bars masquerading as stairs.
             cross = []
