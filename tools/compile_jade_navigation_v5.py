@@ -165,6 +165,18 @@ def compile_navigation(data):
         raise ValueError("primary line must lead the navigation graph")
     main_points = [tuple(x) for x in main["points"]]
     main_index = {p: i for i, p in enumerate(main_points)}
+    # The gold START-to-GOAL line must physically follow BOTH upper
+    # canyon stair switchbacks. Merely rendering switchback meshes while
+    # the main graph still draws a straight climb is a false positive.
+    for stair_id in ("canyon_stairs_high", "canyon_stairs_goal"):
+        climb = next((w for w in walkways if w["id"] == stair_id), None)
+        if climb is None or len(climb.get("via", [])) < 2:
+            raise ValueError("missing main canyon switchback geometry: " + stair_id)
+        stations = [climb["from"], *climb["via"], climb["to"]]
+        raised = [tuple(p[:2]) + (p[2] + .6,) for p in stations]
+        starts = [i for i, p in enumerate(main_points) if p == raised[0]]
+        if len(starts) != 1 or main_points[starts[0]:starts[0]+len(raised)] != raised:
+            raise ValueError("main gold route bypasses physical canyon switchback: " + stair_id)
     all_walkway_names = [w["id"] for w in walkways]
     if len(all_walkway_names) != len(set(all_walkway_names)):
         raise ValueError("duplicate walkway ID")
