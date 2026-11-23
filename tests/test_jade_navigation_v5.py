@@ -13,16 +13,18 @@ class NavigationV5Tests(unittest.TestCase):
     def setUpClass(cls):
         cls.manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
 
-    def test_main_and_seven_alternates_in_one_reachable_graph(self):
+    def test_main_and_ten_alternates_in_one_reachable_graph(self):
         result = compile_navigation(self.manifest)
-        self.assertEqual(result["summary"]["route_count"], 8)
-        self.assertEqual(result["summary"]["alternate_count"], 7)
-        self.assertEqual(result["summary"]["walkway_count"], 19)
-        self.assertEqual(result["summary"]["aerial_transfer_definitions"], 15)
+        self.assertEqual(result["summary"]["route_count"], 11)
+        self.assertEqual(result["summary"]["alternate_count"], 10)
+        self.assertEqual(result["summary"]["walkway_count"], 20)
+        self.assertEqual(result["summary"]["aerial_transfer_definitions"], 26)
+        self.assertEqual(result["summary"]["canyon_landing_platforms"], 11)
+        self.assertEqual(result["summary"]["lower_canyon_branches"], 3)
         self.assertEqual(result["summary"]["cloud_landing_platforms"], 6)
         self.assertGreaterEqual(result["summary"]["long_unverified_drop_edges"], 1)
-        self.assertEqual(result["summary"]["aerial_transfer_edges"], 15)
-        self.assertEqual(len(result["summary"]["new_supported_branches"]), 5)
+        self.assertEqual(result["summary"]["aerial_transfer_edges"], 26)
+        self.assertEqual(len(result["summary"]["new_supported_branches"]), 8)
         self.assertIn(result["goal"],
                       {e["to"] for e in result["edges"]})
         self.assertTrue(all(not node["collision_verified"]
@@ -48,10 +50,17 @@ class NavigationV5Tests(unittest.TestCase):
                 if route["id"].startswith("village_"):
                     self.assertIsNotNone(support)
                     self.assertIn(support["kind"], {"rope","stairs"})
-                else:
+                elif route["id"] in ("sky_high_e", "sky_middle_d", "lower_islands"):
                     self.assertIsNotNone(transfer)
                     self.assertIn(transfer["mode"], {"spring","drop","jump"})
                     self.assertFalse(transfer["physics_verified"])
+                else:
+                    # Canyon and lower-Hex routes mix short structural
+                    # walkways with named one-way aerial transitions.
+                    if support is not None:
+                        self.assertIn(support["kind"], {"plank", "stairs"})
+                    else:
+                        self.assertIn(transfer["mode"], {"jump", "spring", "drop"})
 
     def test_forks_rejoin_main_forward_with_real_off_main_waypoint(self):
         main = self.manifest["routes"][0]["points"]
@@ -131,12 +140,58 @@ class NavigationV5Tests(unittest.TestCase):
         self.assertEqual({p["id"] for p in self.manifest["sky_cloud_landings"]}, (
             used_stages & {p["id"] for p in self.manifest["sky_cloud_landings"]}))
 
+    def test_lower_hex_and_canyon_routes_rejoin_main_with_every_edge_supported(self):
+        compiled = compile_navigation(self.manifest)
+        for name in ("hex_lower_underpass", "canyon_mid_stairs", "canyon_lower_docks"):
+            edges = [edge for edge in compiled["edges"] if edge["route"] == name]
+            self.assertGreaterEqual(len(edges), 3)
+            self.assertTrue(all((edge["walkway_id"] is not None) !=
+                                (edge["transfer_id"] is not None) for edge in edges))
+            self.assertTrue(all(not edge["physics_verified"] and
+                                not edge["collision_verified"] for edge in edges))
+        ids = {e["walkway_id"] for e in compiled["edges"] if e["walkway_id"]}
+        self.assertTrue({"canyon_dock_walk", "canyon_dock_a", "canyon_dock_b",
+                         "canyon_stairs_mid", "canyon_mid_stairs_exit"} <= ids)
+
+    def test_canyon_dock_landings_are_named_and_not_floating_route_lines(self):
+        pads = {p["id"]: p for p in self.manifest["canyon_route_landings"]}
+        self.assertEqual(len(pads), 11)
+        self.assertEqual(sum(p["material"] == "wood" for p in pads.values()), 4)
+        for pad in pads.values():
+            self.assertFalse(pad["collision_verified"])
+            self.assertGreaterEqual(pad["radius"], 5)
+        arrival_ids = {t["landing"] for t in self.manifest["navigation_transfers"]}
+        self.assertTrue({"hex_lower_step_a", "hex_lower_step_b",
+                         "hex_lower_step_d", "canyon_low_dock_south",
+                         "canyon_middle_stair_start", "canyon_middle_step"} <= arrival_ids)
+
+    def test_canyon_jump_needs_actual_named_landing_pad(self):
+        bad = copy.deepcopy(self.manifest)
+        bad["canyon_route_landings"] = [
+            x for x in bad["canyon_route_landings"] if x["id"] != "canyon_low_dock_north"]
+        with self.assertRaisesRegex(ValueError, "no named solid landing"):
+            compile_navigation(bad)
+        bad = copy.deepcopy(self.manifest)
+        pad = next(p for p in bad["canyon_route_landings"]
+                   if p["id"] == "hex_lower_step_a")
+        pad["center"][0] += 8
+        with self.assertRaisesRegex(ValueError, "misses its landing canyon"):
+            compile_navigation(bad)
+
+    def test_mid_stair_branch_rejects_missing_exit_plank(self):
+        bad = copy.deepcopy(self.manifest)
+        bad["walkways"] = [
+            w for w in bad["walkways"] if w["id"] != "canyon_mid_stairs_exit"
+        ]
+        with self.assertRaisesRegex(ValueError, "unsupported segment"):
+            compile_navigation(bad)
+
     def test_no_fabricated_walkways_over_lower_cloud_islands(self):
         self.assertFalse(any(w["id"].startswith("sky_lower_")
                              or w["id"].startswith("sky_high_")
                              or w["id"].startswith("sky_mid_")
                              for w in self.manifest["walkways"]))
-        self.assertEqual(len(self.manifest["navigation_transfers"]), 15)
+        self.assertEqual(len(self.manifest["navigation_transfers"]), 26)
 
 
 if __name__ == "__main__":
